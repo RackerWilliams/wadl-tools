@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<auth xmlns="http://docs.rackspacecloud.com/auth/api/v1.1">
+    <token id="asdasdasd-adsasdads-asdasdasd-adsadsasd"
+           expires="2010-11-01T03:32:15-05:00"/>
+    <serviceCatalog>
+        <service name="cloudFiles">
+            <endpoint
+                    region="DFW"
+                    v1Default="true"
+                    publicURL="https://storage.clouddrive.com/v1/MossoCloudFS_blah-blah"
+                    internalURL="https://storage-snet.clouddrive.com/v1/MossoCloudFS_blah-blah"/>
+            <endpoint
+                    region="ORD"
+                    publicURL="https://otherstorage.clouddrive.com/v1/MossoCloudFS_blah-blah"
+                    internalURL="https://otherstorage-snet.clouddrive.com/v1/MossoCloudFS_blah-blah"/>
+        </service>
+        <service name="cloudFilesCDN">
+            <endpoint
+                    region="DFW"
+                    v1Default="true"
+                    publicURL="https://cdn.clouddrive.com/v1/MossoCloudFS_blah-blah"/>
+            <endpoint
+                    region="ORD"
+                    publicURL="https://othercdn.clouddrive.com/v1/MossoCloudFS_blah-blah"/>
+        </service>
+        <!-- example of a global (non region-specific) service endpoint, it just lacks the region property -->
+        <service name="cloudServers">
+            <endpoint
+                    v1Default="true"
+                    publicURL="https://servers.api.rackspacecloud.com/v1.0/322781"/>
+        </service>
+    </serviceCatalog>
+</auth>

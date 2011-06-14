@@ -1,0 +1,8 @@
+<user xmlns="http://docs.rackspacecloud.com/auth/api/v1.1"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:type="UserWithId"
+
+      id="hub_cap"
+      key="asdasdasd-adsasdads-asdasdasd-adsadsasd"
+      mossoId="323676"
+      enabled="false" />

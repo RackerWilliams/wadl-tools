@@ -1,0 +1,7 @@
+{
+    "forbidden" : {
+        "code" : 403,
+        "message" : "Forbidden!",
+        "details" : "Error Details..."
+    }
+}

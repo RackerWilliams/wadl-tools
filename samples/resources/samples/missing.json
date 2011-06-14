@@ -1,0 +1,7 @@
+{
+    "missingUsername" : {
+        "code" : 400,
+        "message" : "What username?",
+        "details" : "Error Details..."
+    }
+}

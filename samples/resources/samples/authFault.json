@@ -1,0 +1,7 @@
+{
+    "authFault" : {
+        "code" : 500,
+        "message" : "Fault",
+        "details" : "Error Details..."
+    }
+}

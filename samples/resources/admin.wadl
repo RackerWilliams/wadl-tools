@@ -1,0 +1,672 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<application xmlns="http://wadl.dev.java.net/2009/02"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+             xmlns:auth="http://docs.rackspacecloud.com/auth/api/v1.1"
+             xsi:schemaLocation="http://docs.rackspacecloud.com/auth/api/v1.1
+                                 admin-api.xsd"
+        >
+
+    <grammars>
+        <include href="xsd/admin-api.xsd"/>
+    </grammars>
+
+    <resources base="https://auth.api.rackspacecloud.com">
+        <resource id="version" path="v1.1">
+            <method href="auth.wadl#getVersionInfo"/>
+            <resource id="auth" path="auth">
+                <method href="#authenticate"/>
+            </resource>
+            <resource id="token" path="token">
+                <resource id="tokenId" path="{tokenId}">
+                    <param name="tokenId" style="template" type="xsd:string"/>
+                    <method href="#validateToken"/>
+                    <method href="#revokeToken"/>
+                </resource>
+            </resource>
+            <resource id="users" path="users">
+                <method href="#createUser"/>
+                <resource id="user" path="{userId}">
+                    <param name="userId" style="template" type="xsd:string"/>
+                    <method href="#getUser"/>
+                    <method href="#deleteUser"/>
+                    <method href="#updateUser"/>
+                    <resource id="enabled" path="enabled">
+                        <method href="#getUserEnabled"/>
+                        <method href="#setUserEnabled"/>
+                    </resource>
+                    <resource id="key" path="key">
+                        <method href="#getUserKey"/>
+                        <method href="#setUserKey"/>
+                    </resource>
+                    <resource id="serviceCatalog" path="serviceCatalog">
+                        <method href="#getServiceCatalog"/>
+                    </resource>
+                    <resource id="baseURLRefs" path="baseURLRefs">
+                        <method href="#getBaseURLRefs"/>
+                        <method href="#addBaseURLRef"/>
+                        <resource id="baseURLRef" path="{baseURLId}">
+                            <param name="baseURLId" style="template" type="xsd:int"/>
+                            <method href="#getBaseURLRef"/>
+                            <method href="#deleteBaseURLRef"/>
+                        </resource>
+                    </resource>
+                </resource>
+            </resource>
+            <resource id="nastUsers" path="nast/{nastId}">
+                <param name="nastId" style="template" type="xsd:string"/>
+                <method href="#userRedirect"/>
+            </resource>
+            <resource id="mossoUsers" path="mosso/{mossoId}">
+                <param name="mossoId" style="template" type="xsd:int"/>
+                <method href="#userRedirect"/>
+            </resource>
+            <resource id="baseURLs" path="baseURLs">
+                <method href="#getBaseURLs"/>
+                <resource id="baseURLId" path="{baseURLId}">
+                    <param name="baseURLId" style="template" type="xsd:int"/>
+                    <method href="#getBaseURL"/>
+                </resource>
+            </resource>
+        </resource>
+    </resources>
+
+    <!--
+        Token Methods...
+    -->
+    <method name="POST" id="authenticate">
+        <request>
+            <representation mediaType="application/xml" element="auth:credentials"/>
+            <representation mediaType="application/xml" element="auth:nastCredentials"/>
+            <representation mediaType="application/xml" element="auth:mossoCredentials"/>
+            <representation mediaType="application/json"/>
+        </request>
+        <response status="200 203">
+            <representation mediaType="application/xml" element="auth:auth"/>
+            <representation mediaType="application/json"/>
+        </response>
+        <response status="401">
+            <representation mediaType="application/xml" element="auth:unauthorized"/>
+        </response>
+        <response status="403">
+            <representation mediaType="application/xml" element="auth:userDisabled"/>
+        </response>
+        <response status="400">
+            <representation mediaType="application/xml" element="auth:badRequest"/>
+        </response>
+        <response status="500">
+            <representation mediaType="application/xml" element="auth:authFault"/>
+        </response>
+        <response status="503">
+            <representation mediaType="applicaiton/xml" element="auth:serviceUnavailable"/>
+        </response>
+        <response status="401 403 400 500 503">
+            <representation mediaType="applicaiton/json"/>
+        </response>
+    </method>
+
+    <method name="GET" id="validateToken">
+        <request>
+            <param name="belongsTo" style="query"
+                   required="false" type="xsd:string"/>
+            <!-- Stupid SOAPUI, here's what I mean to say:  -->
+            <!--
+                <param name="type"      style="query"
+                required="false" type="auth:UserType"
+                default="CLOUD" />
+            -->
+            <!-- Here's what I have to say: -->
+            <param name="type" style="query" required="false"
+                   type="xsd:string" default="CLOUD">
+                <option value="CLOUD"/>
+                <option value="NAST"/>
+                <option value="MOSSO"/>
+            </param>
+            <!-- Achives the same thing, but makes SOAPUI Happy, need to
+                 keep this consistent with UserType -->
+        </request>
+        <response status="200 203">
+            <representation mediaType="application/xml" element="auth:token"/>
+            <representation mediaType="applicaiton/json"/>
+        </response>
+        <response status="401">
+            <representation mediaType="application/xml" element="auth:unauthorized"/>
+        </response>
+        <response status="403">
+            <representation mediaType="application/xml" element="auth:forbidden"/>
+            <representation mediaType="application/xml" element="auth:userDisabled"/>
+        </response>
+        <response status="400">
+            <representation mediaType="application/xml" element="auth:badRequest"/>
+        </response>
+        <response status="404">
+            <representation mediaType="application/xml" element="auth:itemNotFound"/>
+        </response>
+        <response status="500">
+            <representation mediaType="application/xml" element="auth:authFault"/>
+        </response>
+        <response status="503">
+            <representation mediaType="applicaiton/xml" element="auth:serviceUnavailable"/>
+        </response>
+        <response status="400 401 403 404 500 503">
+            <representation mediaType="applicaiton/json"/>
+        </response>
+    </method>
+
+    <method name="DELETE" id="revokeToken">
+        <response status="204"/>
+        <response status="401">
+            <representation mediaType="application/xml" element="auth:unauthorized"/>
+        </response>
+        <response status="403">
+            <representation mediaType="application/xml" element="auth:forbidden"/>
+        </response>
+        <response status="400">
+            <representation mediaType="application/xml" element="auth:badRequest"/>
+        </response>
+        <response status="404">
+            <representation mediaType="application/xml" element="auth:itemNotFound"/>
+        </response>
+        <response status="500">
+            <representation mediaType="application/xml" element="auth:authFault"/>
+        </response>
+        <response status="503">
+            <representation mediaType="applicaiton/xml" element="auth:serviceUnavailable"/>
+        </response>
+        <response status="400 401 403 404 500 503">
+            <representation mediaType="applicaiton/json"/>
+        </response>
+    </method>
+
+    <!--
+        User Methods...
+    -->
+    <method name="POST" id="createUser">
+        <request>
+            <representation mediaType="application/xml" element="auth:user">
+                <param name="user" style="plain"
+                       path="/" type="auth:UserWithId"/>
+            </representation>
+            <representation mediaType="application/json"/>
+        </request>
+        <response status="201">
+            <representation mediaType="application/xml" element="auth:user">
+                <param name="Location" type="xsd:anyURI" style="header"/>
+            </representation>
+            <representation mediaType="application/json">
+                <param name="Location" type="xsd:anyURI" style="header"/>
+            </representation>
+        </response>
+        <response status="400">
+            <representation mediaType="application/xml" element="auth:badRequest"/>
+        </response>
+        <response status="401">
+            <representation mediaType="application/xml" element="auth:unauthorized"/>
+        </response>
+        <response status="403">
+            <representation mediaType="application/xml" element="auth:forbidden"/>
+        </response>
+        <response status="409">
+            <representation mediaType="application/xml" element="auth:usernameConflict"/>
+        </response>
+        <response status="500">
+            <representation mediaType="application/xml" element="auth:authFault"/>
+        </response>
+        <response status="503">
+            <representation mediaType="applicaiton/xml" element="auth:serviceUnavailable"/>
+        </response>
+        <response status="400 401 403 409 500 503">
+            <representation mediaType="applicaiton/json"/>
+        </response>
+    </method>
+
+    <method name="GET" id="getUser">
+        <response status="200 203">
+            <representation mediaType="application/xml" element="auth:user"/>
+            <representation mediaType="application/json"/>
+        </response>
+        <response status="400">
+            <representation mediaType="application/xml" element="auth:badRequest"/>
+        </response>
+        <response status="401">
+            <representation mediaType="application/xml" element="auth:unauthorized"/>
+        </response>
+        <response status="403">
+            <representation mediaType="application/xml" element="auth:forbidden"/>
+        </response>
+        <response status="404">
+            <representation mediaType="application/xml" element="auth:itemNotFound"/>
+        </response>
+        <response status="500">
+            <representation mediaType="application/xml" element="auth:authFault"/>
+        </response>
+        <response status="503">
+            <representation mediaType="applicaiton/xml" element="auth:serviceUnavailable"/>
+        </response>
+        <response status="400 401 403 404 500 503">
+            <representation mediaType="applicaiton/json"/>
+        </response>
+    </method>
+
+    <method name="GET" id="getUserEnabled">
+        <response status="200 203">
+            <representation mediaType="application/xml" element="auth:user">
+                <param name="user" style="plain"
+                       path="/" type="auth:UserWithOnlyEnabled"/>
+            </representation>
+            <representation mediaType="application/json"/>
+        </response>
+        <response status="400">
+            <representation mediaType="application/xml" element="auth:badRequest"/>
+        </response>
+        <response status="401">
+            <representation mediaType="application/xml" element="auth:unauthorized"/>
+        </response>
+        <response status="403">
+            <representation mediaType="application/xml" element="auth:forbidden"/>
+        </response>
+        <response status="404">
+            <representation mediaType="application/xml" element="auth:itemNotFound"/>
+        </response>
+        <response status="500">
+            <representation mediaType="application/xml" element="auth:authFault"/>
+        </response>
+        <response status="503">
+            <representation mediaType="applicaiton/xml" element="auth:serviceUnavailable"/>
+        </response>
+        <response status="400 401 403 404 500 503">
+            <representation mediaType="applicaiton/json"/>
+        </response>
+    </method>
+
+    <method name="PUT" id="setUserEnabled">
+        <request>
+            <representation mediaType="application/xml" element="auth:user">
+                <param name="user" style="plain"
+                       path="/" type="auth:UserWithOnlyEnabled"/>
+            </representation>
+            <representation mediaType="application/json"/>
+        </request>
+        <response status="200 203">
+            <representation mediaType="application/xml" element="auth:user">
+                <param name="user" style="plain"
+                       path="/" type="auth:UserWithOnlyEnabled"/>
+            </representation>
+            <representation mediaType="application/json"/>
+        </response>
+        <response status="400">
+            <representation mediaType="application/xml" element="auth:badRequest"/>
+        </response>
+        <response status="401">
+            <representation mediaType="application/xml" element="auth:unauthorized"/>
+        </response>
+        <response status="403">
+            <representation mediaType="application/xml" element="auth:forbidden"/>
+        </response>
+        <response status="404">
+            <representation mediaType="application/xml" element="auth:itemNotFound"/>
+        </response>
+        <response status="500">
+            <representation mediaType="application/xml" element="auth:authFault"/>
+        </response>
+        <response status="503">
+            <representation mediaType="applicaiton/xml" element="auth:serviceUnavailable"/>
+        </response>
+        <response status="400 401 403 404 500 503">
+            <representation mediaType="applicaiton/json"/>
+        </response>
+    </method>
+
+    <method name="GET" id="getUserKey">
+        <response status="200 203">
+            <representation mediaType="application/xml" element="auth:user">
+                <param name="user" style="plain"
+                       path="/" type="auth:UserWithOnlyKey"/>
+            </representation>
+            <representation mediaType="application/json"/>
+        </response>
+        <response status="400">
+            <representation mediaType="application/xml" element="auth:badRequest"/>
+        </response>
+        <response status="401">
+            <representation mediaType="application/xml" element="auth:unauthorized"/>
+        </response>
+        <response status="403">
+            <representation mediaType="application/xml" element="auth:forbidden"/>
+        </response>
+        <response status="404">
+            <representation mediaType="application/xml" element="auth:itemNotFound"/>
+        </response>
+        <response status="500">
+            <representation mediaType="application/xml" element="auth:authFault"/>
+        </response>
+        <response status="503">
+            <representation mediaType="applicaiton/xml" element="auth:serviceUnavailable"/>
+        </response>
+        <response status="400 401 403 404 500 503">
+            <representation mediaType="applicaiton/json"/>
+        </response>
+    </method>
+
+    <method name="PUT" id="setUserKey">
+        <request>
+            <representation mediaType="application/xml" element="auth:user">
+                <param name="user" style="plain"
+                       path="/" type="auth:UserWithOnlyKey"/>
+            </representation>
+            <representation mediaType="application/json"/>
+        </request>
+        <response status="200 203">
+            <representation mediaType="application/xml" element="auth:user">
+                <param name="user" style="plain"
+                       path="/" type="auth:UserWithOnlyKey"/>
+            </representation>
+            <representation mediaType="application/json"/>
+        </response>
+        <response status="400">
+            <representation mediaType="application/xml" element="auth:badRequest"/>
+        </response>
+        <response status="401">
+            <representation mediaType="application/xml" element="auth:unauthorized"/>
+        </response>
+        <response status="403">
+            <representation mediaType="application/xml" element="auth:forbidden"/>
+        </response>
+        <response status="404">
+            <representation mediaType="application/xml" element="auth:itemNotFound"/>
+        </response>
+        <response status="500">
+            <representation mediaType="application/xml" element="auth:authFault"/>
+        </response>
+        <response status="503">
+            <representation mediaType="applicaiton/xml" element="auth:serviceUnavailable"/>
+        </response>
+        <response status="400 401 403 404 500 503">
+            <representation mediaType="applicaiton/json"/>
+        </response>
+    </method>
+
+    <method name="DELETE" id="deleteUser">
+        <response status="204"/>
+        <response status="400">
+            <representation mediaType="application/xml" element="auth:badRequest"/>
+        </response>
+        <response status="401">
+            <representation mediaType="application/xml" element="auth:unauthorized"/>
+        </response>
+        <response status="403">
+            <representation mediaType="application/xml" element="auth:forbidden"/>
+        </response>
+        <response status="404">
+            <representation mediaType="application/xml" element="auth:itemNotFound"/>
+        </response>
+        <response status="500">
+            <representation mediaType="application/xml" element="auth:authFault"/>
+        </response>
+        <response status="503">
+            <representation mediaType="applicaiton/xml" element="auth:serviceUnavailable"/>
+        </response>
+        <response status="400 401 403 404 500 503">
+            <representation mediaType="applicaiton/json"/>
+        </response>
+    </method>
+
+    <method name="PUT" id="updateUser">
+        <request>
+            <representation mediaType="application/xml" element="auth:user"/>
+            <representation mediaType="application/json"/>
+        </request>
+        <response status="200 203">
+            <representation mediaType="application/xml" element="auth:user"/>
+            <representation mediaType="application/json"/>
+        </response>
+        <response status="400">
+            <representation mediaType="application/xml" element="auth:badRequest"/>
+        </response>
+        <response status="401">
+            <representation mediaType="application/xml" element="auth:unauthorized"/>
+        </response>
+        <response status="403">
+            <representation mediaType="application/xml" element="auth:forbidden"/>
+        </response>
+        <response status="404">
+            <representation mediaType="application/xml" element="auth:itemNotFound"/>
+        </response>
+        <response status="500">
+            <representation mediaType="application/xml" element="auth:authFault"/>
+        </response>
+        <response status="503">
+            <representation mediaType="applicaiton/xml" element="auth:serviceUnavailable"/>
+        </response>
+        <response status="400 401 403 404 500 503">
+            <representation mediaType="applicaiton/json"/>
+        </response>
+    </method>
+
+    <method name="GET" id="getBaseURLs">
+        <request>
+            <param name="serviceName" style="query"
+                   required="false" type="xsd:string"/>
+        </request>
+        <response status="200 203">
+            <representation mediaType="application/xml" element="auth:baseURLs"/>
+            <representation mediaType="application/json"/>
+        </response>
+        <response status="400">
+            <representation mediaType="application/xml" element="auth:badRequest"/>
+        </response>
+        <response status="401">
+            <representation mediaType="application/xml" element="auth:unauthorized"/>
+        </response>
+        <response status="403">
+            <representation mediaType="application/xml" element="auth:forbidden"/>
+        </response>
+        <response status="500">
+            <representation mediaType="application/xml" element="auth:authFault"/>
+        </response>
+        <response status="503">
+            <representation mediaType="applicaiton/xml" element="auth:serviceUnavailable"/>
+        </response>
+        <response status="400 401 403 500 503">
+            <representation mediaType="applicaiton/json"/>
+        </response>
+    </method>
+
+    <method name="GET" id="getBaseURL">
+        <response status="200 203">
+            <representation mediaType="application/xml" element="auth:baseURL"/>
+            <representation mediaType="application/json"/>
+        </response>
+        <response status="400">
+            <representation mediaType="application/xml" element="auth:badRequest"/>
+        </response>
+        <response status="401">
+            <representation mediaType="application/xml" element="auth:unauthorized"/>
+        </response>
+        <response status="403">
+            <representation mediaType="application/xml" element="auth:forbidden"/>
+        </response>
+        <response status="404">
+            <representation mediaType="application/xml" element="auth:itemNotFound"/>
+        </response>
+        <response status="500">
+            <representation mediaType="application/xml" element="auth:authFault"/>
+        </response>
+        <response status="503">
+            <representation mediaType="applicaiton/xml" element="auth:serviceUnavailable"/>
+        </response>
+        <response status="400 401 403 404 500 503">
+            <representation mediaType="applicaiton/json"/>
+        </response>
+    </method>
+
+    <method name="GET" id="getBaseURLRefs">
+        <response status="200 203">
+            <representation mediaType="application/xml" element="auth:baseURLRefs"/>
+            <representation mediaType="application/json"/>
+        </response>
+        <response status="400">
+            <representation mediaType="application/xml" element="auth:badRequest"/>
+        </response>
+        <response status="401">
+            <representation mediaType="application/xml" element="auth:unauthorized"/>
+        </response>
+        <response status="403">
+            <representation mediaType="application/xml" element="auth:forbidden"/>
+        </response>
+        <response status="500">
+            <representation mediaType="application/xml" element="auth:authFault"/>
+        </response>
+        <response status="503">
+            <representation mediaType="applicaiton/xml" element="auth:serviceUnavailable"/>
+        </response>
+        <response status="400 401 403 500 503">
+            <representation mediaType="applicaiton/json"/>
+        </response>
+    </method>
+
+    <method name="POST" id="addBaseURLRef">
+        <request>
+            <representation mediaType="application/xml" element="auth:baseURLRef"/>
+            <representation mediaType="application/json"/>
+        </request>
+        <response status="201">
+            <representation mediaType="application/xml" element="auth:baseURLRef">
+                <param name="Location" type="xsd:anyURI" style="header"/>
+            </representation>
+            <representation mediaType="application/json">
+                <param name="Location" type="xsd:anyURI" style="header"/>
+            </representation>
+        </response>
+        <response status="400">
+            <representation mediaType="application/xml" element="auth:badRequest"/>
+        </response>
+        <response status="401">
+            <representation mediaType="application/xml" element="auth:unauthorized"/>
+        </response>
+        <response status="403">
+            <representation mediaType="application/xml" element="auth:forbidden"/>
+        </response>
+        <response status="404">
+            <representation mediaType="application/xml" element="auth:itemNotFound"/>
+        </response>
+        <response status="500">
+            <representation mediaType="application/xml" element="auth:authFault"/>
+        </response>
+        <response status="503">
+            <representation mediaType="applicaiton/xml" element="auth:serviceUnavailable"/>
+        </response>
+        <response status="400 401 403 404 500 503">
+            <representation mediaType="applicaiton/json"/>
+        </response>
+    </method>
+
+    <method name="GET" id="getBaseURLRef">
+        <response status="200 203">
+            <representation mediaType="application/xml" element="auth:baseURLRef"/>
+            <representation mediaType="application/json"/>
+        </response>
+        <response status="400">
+            <representation mediaType="application/xml" element="auth:badRequest"/>
+        </response>
+        <response status="401">
+            <representation mediaType="application/xml" element="auth:unauthorized"/>
+        </response>
+        <response status="403">
+            <representation mediaType="application/xml" element="auth:forbidden"/>
+        </response>
+        <response status="404">
+            <representation mediaType="application/xml" element="auth:itemNotFound"/>
+        </response>
+        <response status="500">
+            <representation mediaType="application/xml" element="auth:authFault"/>
+        </response>
+        <response status="503">
+            <representation mediaType="applicaiton/xml" element="auth:serviceUnavailable"/>
+        </response>
+        <response status="400 401 403 404 500 503">
+            <representation mediaType="applicaiton/json"/>
+        </response>
+    </method>
+
+    <method name="DELETE" id="deleteBaseURLRef">
+        <response status="204"/>
+        <response status="400">
+            <representation mediaType="application/xml" element="auth:badRequest"/>
+        </response>
+        <response status="401">
+            <representation mediaType="application/xml" element="auth:unauthorized"/>
+        </response>
+        <response status="403">
+            <representation mediaType="application/xml" element="auth:forbidden"/>
+        </response>
+        <response status="404">
+            <representation mediaType="application/xml" element="auth:itemNotFound"/>
+        </response>
+        <response status="500">
+            <representation mediaType="application/xml" element="auth:authFault"/>
+        </response>
+        <response status="503">
+            <representation mediaType="applicaiton/xml" element="auth:serviceUnavailable"/>
+        </response>
+        <response status="400 401 403 404 500 503">
+            <representation mediaType="applicaiton/json"/>
+        </response>
+    </method>
+
+    <method name="GET" id="getServiceCatalog">
+        <response status="200 203">
+            <representation mediaType="application/xml" element="auth:serviceCatalog"/>
+            <representation mediaType="application/json"/>
+        </response>
+        <response status="400">
+            <representation mediaType="application/xml" element="auth:badRequest"/>
+        </response>
+        <response status="401">
+            <representation mediaType="application/xml" element="auth:unauthorized"/>
+        </response>
+        <response status="403">
+            <representation mediaType="application/xml" element="auth:forbidden"/>
+        </response>
+        <response status="500">
+            <representation mediaType="application/xml" element="auth:authFault"/>
+        </response>
+        <response status="503">
+            <representation mediaType="applicaiton/xml" element="auth:serviceUnavailable"/>
+        </response>
+        <response status="400 401 403 500 503">
+            <representation mediaType="applicaiton/json"/>
+        </response>
+    </method>
+
+    <method name="GET" id="userRedirect">
+        <response status="303">
+            <representation>
+                <param name="Location" type="xsd:anyURI" style="header"/>
+            </representation>
+        </response>
+        <response status="400">
+            <representation mediaType="application/xml" element="auth:badRequest"/>
+        </response>
+        <response status="401">
+            <representation mediaType="application/xml" element="auth:unauthorized"/>
+        </response>
+        <response status="403">
+            <representation mediaType="application/xml" element="auth:forbidden"/>
+        </response>
+        <response status="404">
+            <representation mediaType="application/xml" element="auth:itemNotFound"/>
+        </response>
+        <response status="500">
+            <representation mediaType="application/xml" element="auth:authFault"/>
+        </response>
+        <response status="503">
+            <representation mediaType="applicaiton/xml" element="auth:serviceUnavailable"/>
+        </response>
+        <response status="400 401 403 404 500 503">
+            <representation mediaType="applicaiton/json"/>
+        </response>
+    </method>
+
+</application>

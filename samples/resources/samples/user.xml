@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<user xmlns="http://docs.rackspacecloud.com/auth/api/v1.1"
+      id="hub_cap"
+      mossoId="323676"
+      nastId="MossoCloudFS_bf571533-d113-4249-962d-178648338863"
+      key="asdasdasd-adsasdads-asdasdasd-adsadsasd"
+      enabled="true"
+      created="2009-11-01T03:32:15-05:00"
+      updated="2010-10-02T02:22:22-05:00">
+  <baseURLRefs>
+    <baseURLRef
+        href="https://auth.api.rackspacecloud.com/v1.1/baseURLs/1"
+        id="1"  v1Default="true" />
+    <baseURLRef
+        href="https://auth.api.rackspacecloud.com/v1.1/baseURLs/2"
+        id="2" />
+    <baseURLRef
+        href="https://auth.api.rackspacecloud.com/v1.1/baseURLs/3"
+        id="3" v1Default="true" />
+    <baseURLRef
+        href="https://auth.api.rackspacecloud.com/v1.1/baseURLs/4"
+        id="4" />
+    <baseURLRef
+        href="https://auth.api.rackspacecloud.com/v1.1/baseURLs/5"
+        id="5" v1Default="true" />
+  </baseURLRefs>
+</user>
