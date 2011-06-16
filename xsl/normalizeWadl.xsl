@@ -25,16 +25,28 @@
 
     <xsl:template match="wadl:include">
         <xsl:param name="stack"/>
-        <xsl:comment>Source (wadl:include): <xsl:value-of select="base-uri(document(@href))"/></xsl:comment>
-        <xsl:apply-templates select="document(@href)/*">
-            <xsl:with-param name="stack">
-                <xsl:value-of select="concat($stack, ' ', base-uri(document(@href)))"/>
-            </xsl:with-param>
-        </xsl:apply-templates>
-        <xsl:comment>End source: <xsl:value-of select="base-uri(document(@href))"/></xsl:comment><xsl:text>            
-        </xsl:text>        
-    </xsl:template>
+        <xsl:message>Writing out xsd: <xsl:value-of select="concat(replace(base-uri(.),'(.*/).*\.wadl', '$1'), generate-id(),'.xsd')"/></xsl:message>
+        <xsl:result-document href="{concat(replace(base-uri(.),'(.*/).*\.wadl', '$1'),generate-id(),'.xsd')}">
+            <xsl:comment>Source (wadl:include): <xsl:value-of select="base-uri(document(@href))"/></xsl:comment>
+            <xsl:apply-templates select="document(@href)/*">
+                <xsl:with-param name="stack">
+                    <xsl:value-of select="concat($stack, ' ', base-uri(document(@href)))"/>
+                </xsl:with-param>
+            </xsl:apply-templates>
+            <xsl:comment>End source: <xsl:value-of select="base-uri(document(@href))"/></xsl:comment>
+            <xsl:text>            
+            </xsl:text>
+        </xsl:result-document>        
 
+        <xsl:copy>
+            <xsl:apply-templates select="node() | @*"/>
+            <xsl:attribute name="id">
+                <xsl:value-of select="concat(generate-id(),'.xsd')"/>
+            </xsl:attribute>    
+        </xsl:copy>
+        
+    </xsl:template>
+    
     <xsl:template match="xsd:include">
         <xsl:param name="stack"/>
         <xsl:choose>
@@ -55,13 +67,13 @@
         </xsl:choose>
     </xsl:template>
     
-    <xsl:template match="xsd:import">
+<!--    <xsl:template match="xsd:import">
         <xsl:param name="stack"/>
         <xsl:apply-templates select="document(@schemaLocation,.)/xsd:schema">
             <xsl:with-param name="stack">
                 <xsl:value-of select="concat($stack, ' ', base-uri(document(@schemaLocation)))"/>
             </xsl:with-param>
         </xsl:apply-templates>
-    </xsl:template>
+    </xsl:template>-->
 
 </xsl:stylesheet>
