@@ -34,9 +34,12 @@ function saxonize {
 
 if [[ -f "$1" && ( ! -n $2 || $2 = "path" || $2 = "tree") ]]
 then 
+    [ -d "$(dirname $1)/normalized" ] || mkdir $(dirname $1)/normalized
     saxonize $1 normalizeWadl.xsl /tmp/wadl2norm1.xml
+    xmllint --noout --schema "$DIR/../xsd/wadl.xsd"  /tmp/wadl2norm1.xml 
+    [ $? -eq 0 ] || exit 1
     saxonize /tmp/wadl2norm1.xml normalizeWadl2.xsl /tmp/wadl2norm2.xml
-    saxonize /tmp/wadl2norm2.xml normalizeWadl3.xsl ${1%%.wadl}-normalized.wadl $2
+    saxonize /tmp/wadl2norm2.xml normalizeWadl3.xsl $(dirname $1)/normalized/${1%%.wadl}.wadl $2
 
     # Clean up temp files:
     # rm /tmp/wadl2norm1.xml /tmp/wadl2norm2.xml
