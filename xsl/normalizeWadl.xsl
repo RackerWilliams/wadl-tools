@@ -39,10 +39,7 @@
         </xsl:result-document>        
 
         <xsl:copy>
-            <xsl:apply-templates select="node() | @*"/>
-            <xsl:attribute name="id">
-                <xsl:value-of select="concat(generate-id(),'.xsd')"/>
-            </xsl:attribute>    
+            <xsl:apply-templates select="node() | @*"/>   
         </xsl:copy>
         
     </xsl:template>
