@@ -34,7 +34,7 @@
         <xsl:copy>
             <xsl:copy-of select="@*"/>
             <xsl:attribute name="id">
-                <xsl:value-of select="concat($generated-id,'-',@id)"/>
+                <xsl:value-of select="concat(@id, '-', $generated-id)"/>
             </xsl:attribute>
             <xsl:apply-templates select="node()"/>
         </xsl:copy>
