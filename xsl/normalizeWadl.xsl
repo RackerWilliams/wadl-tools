@@ -26,7 +26,7 @@
     <xsl:template match="wadl:include">
         <xsl:param name="stack"/>
         <xsl:message>Writing out xsd: <xsl:value-of select="concat(replace(base-uri(.),'(.*/).*\.wadl', '$1'), generate-id(),'.xsd')"/></xsl:message>
-        <xsl:result-document href="{concat(replace(base-uri(.),'(.*/).*\.wadl', '$1'),generate-id(),'.xsd')}">
+        <xsl:result-document href="{concat(replace(base-uri(.),'(.*/).*\.wadl', '$1'),'normalized/',generate-id(),'.xsd')}">
             <xsl:comment>Source (wadl:include): <xsl:value-of select="base-uri(document(@href))"/></xsl:comment>
             <xsl:apply-templates select="document(@href)/*">
                 <xsl:with-param name="stack">
