@@ -47,15 +47,8 @@
 
 
     <xsl:template match="node() | @*" mode="copy">
-        <xsl:param name="id"/>
         <xsl:copy>
-            <xsl:apply-templates select="@*" mode="copy"/>
-            <xsl:if test="self::wadl:method">
-                    <xsl:attribute name="id">
-                        <xsl:value-of select="concat($id,'_',@id)"/>
-                    </xsl:attribute>
-            </xsl:if>
-            <xsl:apply-templates select="node()" mode="copy"/>
+            <xsl:apply-templates select="node()|@*" mode="copy"/>
         </xsl:copy>
     </xsl:template>
 
@@ -74,10 +67,8 @@
                     <xsl:value-of select="@path"/><xsl:if test="not(position() = last())">/</xsl:if>
                 </xsl:for-each>
             </xsl:attribute>
-            <xsl:apply-templates select="ancestor-or-self::wadl:resource/wadl:param" mode="copy"/>       
-            <xsl:apply-templates select="ancestor-or-self::wadl:resource/wadl:method" mode="copy">
-                <xsl:with-param name="id"><xsl:value-of select="generate-id(.)"/></xsl:with-param>
-            </xsl:apply-templates> 
+            <xsl:apply-templates select="wadl:param" mode="copy"/>       
+            <xsl:apply-templates select="wadl:method" mode="copy"/>
         </resource>
     </xsl:template>
 
