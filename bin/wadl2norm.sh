@@ -32,21 +32,33 @@ function saxonize {
 	format="$4-format"
 }
 
+# If they passed in a file to process and if the optional
+# second argument is "path" or "tree", then 
+# "do the needful". Otherwise, quit with a usage statement.
 if [[ -f "$1" && ( ! -n $2 || $2 = "path" || $2 = "tree") ]]
 then 
     [ -d "$(dirname $1)/normalized" ] || mkdir $(dirname $1)/normalized
+
     saxonize $1 normalizeWadl.xsl /tmp/wadl2norm1.xml
     xmllint --noout --schema "$DIR/../xsd/wadl.xsd"  /tmp/wadl2norm1.xml 
     [ $? -eq 0 ] || exit 1
+
     saxonize /tmp/wadl2norm1.xml normalizeWadl2.xsl /tmp/wadl2norm2.xml
-    saxonize /tmp/wadl2norm2.xml normalizeWadl3.xsl $(dirname $1)/normalized/${1%%.wadl}.wadl $2
+    xmllint --noout --schema "$DIR/../xsd/wadl.xsd"  /tmp/wadl2norm2.xml 
+    [ $? -eq 0 ] || exit 1
+
+    saxonize /tmp/wadl2norm2.xml normalizeWadl3.xsl  /tmp/wadl2norm3.xml $2
+    xmllint --noout --schema "$DIR/../xsd/wadl.xsd"  /tmp/wadl2norm3.xml
+    [ $? -eq 0 ] || exit 1
+
+    cp /tmp/wadl2norm3.xml $(dirname $1)/normalized/$(basename ${1%%.wadl}.wadl)
 
     # Clean up temp files:
     # rm /tmp/wadl2norm1.xml /tmp/wadl2norm2.xml
 else 
     echo ""
     echo "Usage: $(basename $0) wadl-file <path|tree>"
-    echo "       path: TODO, explain, say which is default"
-    echo "       tree: TODO, explain"
+    echo "       path: Format resources in path format. TODO: Explain better"
+    echo "       tree: Format resources in tree format. TODO: Explain better"
     exit 1
 fi
