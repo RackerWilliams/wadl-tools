@@ -56,8 +56,8 @@
     <xsl:template name="group">
         <xsl:param name="token-number"/>
         <xsl:param name="resources"/>
-
         <xsl:for-each-group select="$resources" group-by="wadl:tokens/wadl:token[$token-number]">
+
             <resource path="{current-grouping-key()}">
                 <xsl:attribute name="id">
                     <xsl:choose>
@@ -65,20 +65,25 @@
                             <xsl:value-of select="@id"/>
                         </xsl:when>
                         <xsl:otherwise>
-                            <xsl:value-of select="concat(@id,'-',generate-id(.))"/>
+                            <xsl:value-of select="concat(replace(current-grouping-key(),'[{}]',''),'-',generate-id(.))"/>
                         </xsl:otherwise>
                     </xsl:choose>
                 </xsl:attribute>
                 <xsl:if test="count(wadl:tokens/wadl:token) = $token-number">
-                    <xsl:apply-templates select="node()" mode="tree-format"/>
-                </xsl:if>
+                    <xsl:apply-templates select="*[not(self::wadl:resource)]" mode="tree-format"/>
+                    </xsl:if>
+                <!--
                 <xsl:call-template name="group">
                     <xsl:with-param name="token-number" select="$token-number + 1"/>
-                    <xsl:with-param name="resources" select="."/>
-                </xsl:call-template>
+                    <xsl:with-param name="resources" select="wadl:resource"/>
+                </xsl:call-template>-->
                 <xsl:call-template name="group">
                     <xsl:with-param name="token-number" select="1"/>
                     <xsl:with-param name="resources" select="wadl:resource"/>
+                </xsl:call-template>
+                <xsl:call-template name="group">
+                    <xsl:with-param name="token-number" select="$token-number + 1"/>
+                    <xsl:with-param name="resources" select="current-group()"/>
                 </xsl:call-template>
             </resource>
         </xsl:for-each-group>
