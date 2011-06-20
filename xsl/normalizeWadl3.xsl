@@ -52,22 +52,23 @@
         </xsl:copy>
     </xsl:template>
 
-    <xsl:template match="wadl:method" mode="path-format"/> 
-        
-    <xsl:template match="wadl:resource[child::wadl:resource]" mode="path-format"> 
+    <xsl:template match="wadl:method" mode="path-format"/>
+
+    <xsl:template match="wadl:resource[child::wadl:resource]" mode="path-format">
         <xsl:apply-templates select="wadl:resource" mode="path-format"/>
     </xsl:template>
 
-    <xsl:template match="wadl:resource[not(child::wadl:resource)]" mode="path-format">         
+    <xsl:template match="wadl:resource[not(child::wadl:resource)]" mode="path-format">
         <resource>
             <xsl:copy-of select="@*"/>
             <xsl:attribute name="path">
                 <xsl:for-each select="ancestor-or-self::wadl:resource">
                     <xsl:sort order="ascending" select="position()"/>
-                    <xsl:value-of select="@path"/><xsl:if test="not(position() = last())">/</xsl:if>
+                    <xsl:value-of select="@path"/>
+                    <xsl:if test="not(position() = last())">/</xsl:if>
                 </xsl:for-each>
             </xsl:attribute>
-            <xsl:apply-templates select="wadl:param" mode="copy"/>       
+            <xsl:apply-templates select="wadl:param" mode="copy"/>
             <xsl:apply-templates select="wadl:method" mode="copy"/>
         </resource>
     </xsl:template>
