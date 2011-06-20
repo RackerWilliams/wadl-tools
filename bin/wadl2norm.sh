@@ -39,26 +39,31 @@ if [[ -f "$1" && ( ! -n $2 || $2 = "path" || $2 = "tree") ]]
 then 
     [ -d "$(dirname $1)/normalized" ] || mkdir $(dirname $1)/normalized
 
-    saxonize $1 normalizeWadl.xsl /tmp/wadl2norm1.xml
-    xmllint --noout --schema "$DIR/../xsd/wadl.xsd"  /tmp/wadl2norm1.xml 
+    saxonize $1 normalizeWadl.xsl /tmp/wadl2norm1.wadl
+    xmllint --noout --schema "$DIR/../xsd/wadl.xsd"  /tmp/wadl2norm1.wadl 
     [ $? -eq 0 ] || exit 1
 
-    saxonize /tmp/wadl2norm1.xml normalizeWadl2.xsl /tmp/wadl2norm2.xml
-    xmllint --noout --schema "$DIR/../xsd/wadl.xsd"  /tmp/wadl2norm2.xml 
+    saxonize /tmp/wadl2norm1.wadl normalizeWadl2.xsl /tmp/wadl2norm2.wadl
+    xmllint --noout --schema "$DIR/../xsd/wadl.xsd"  /tmp/wadl2norm2.wadl 
     [ $? -eq 0 ] || exit 1
 
-    saxonize /tmp/wadl2norm2.xml normalizeWadl3.xsl  /tmp/wadl2norm3.xml $2
-    xmllint --noout --schema "$DIR/../xsd/wadl.xsd"  /tmp/wadl2norm3.xml
+    saxonize /tmp/wadl2norm2.wadl normalizeWadl3.xsl  /tmp/wadl2norm3.wadl $2
+    xmllint --noout --schema "$DIR/../xsd/wadl.xsd"  /tmp/wadl2norm3.wadl
     [ $? -eq 0 ] || exit 1
 
-    cp /tmp/wadl2norm3.xml $(dirname $1)/normalized/$(basename ${1%%.wadl}.wadl)
+    cp /tmp/wadl2norm3.wadl $(dirname $1)/normalized/$(basename ${1%%.wadl}.wadl)
 
     # Clean up temp files:
-    # rm /tmp/wadl2norm1.xml /tmp/wadl2norm2.xml
+    # rm /tmp/wadl2norm1.wadl /tmp/wadl2norm2.wadl
+    cp -r $(dirname $1)/xsd $(dirname $1)/normalized
+    cp -r /tmp/wadl2norm?.wadl $(dirname $1)/normalized 
+
 else 
     echo ""
     echo "Usage: $(basename $0) wadl-file <path|tree>"
-    echo "       path: Format resources in path format. TODO: Explain better"
-    echo "       tree: Format resources in tree format. TODO: Explain better"
+    echo "       path: Format resources in path format, "
+    echo "             e.g. <resource path='foo/bar'/>"
+    echo "       tree: Format resources in tree format, "
+    echo "             e.g. <resoruce path='foo'><resource path='bar'>..."
     exit 1
 fi
