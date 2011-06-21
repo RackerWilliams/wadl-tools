@@ -4,7 +4,7 @@
 
     <xsl:output indent="yes"/>
 
-    <xsl:param name="format">tree-format</xsl:param>
+    <xsl:param name="format">-format</xsl:param>
     <!-- path or tree -->
 
     <xsl:variable name="paths-tokenized">
@@ -13,14 +13,17 @@
 
     <xsl:template match="/">
         <xsl:choose>
-            <xsl:when test="$format = 'path-format' or $format = '-format'">
+            <xsl:when test="$format = 'path-format'">
+	      <xsl:message>Flattening resource paths</xsl:message>
                 <xsl:apply-templates mode="path-format"/>
             </xsl:when>
             <xsl:when test="$format = 'tree-format'">
+	      <xsl:message>Expanding resource paths to tree format</xsl:message>
                 <xsl:apply-templates select="$paths-tokenized/*" mode="tree-format"/>
             </xsl:when>
             <xsl:otherwise>
-                <xsl:apply-templates select="$paths-tokenized/*" mode="keep-format"/>
+	      <xsl:message>Leaving resource paths unchanged</xsl:message>
+                <xsl:apply-templates mode="keep-format"/>
             </xsl:otherwise>
         </xsl:choose>
         <!--
@@ -33,7 +36,6 @@
             <xsl:apply-templates select="node() | @*" mode="keep-format"/>
         </xsl:copy>
     </xsl:template>
-
 
     <!-- Begin tree-format templates   -->
 
