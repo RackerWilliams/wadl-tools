@@ -54,9 +54,9 @@ then
     cp /tmp/wadl2norm3.wadl $(dirname $1)/normalized/$(basename ${1%%.wadl}.wadl)
 
     # Clean up temp files:
-    # rm /tmp/wadl2norm1.wadl /tmp/wadl2norm2.wadl
-    cp -r $(dirname $1)/xsd $(dirname $1)/normalized
-    cp -r /tmp/wadl2norm?.wadl $(dirname $1)/normalized 
+    rm /tmp/wadl2norm1.wadl /tmp/wadl2norm2.wadl
+    #cp -r $(dirname $1)/xsd $(dirname $1)/normalized
+    #cp -r /tmp/wadl2norm?.wadl $(dirname $1)/normalized 
 
 else 
     echo ""
