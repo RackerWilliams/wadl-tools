@@ -120,20 +120,19 @@
         </xsl:copy>
     </xsl:template>
 
-
     <xsl:template match="node() | @*" mode="copy">
         <xsl:copy>
             <xsl:apply-templates select="node()|@*" mode="copy"/>
         </xsl:copy>
     </xsl:template>
 
-    <xsl:template match="wadl:method" mode="path-format"/>
+    <xsl:template match="wadl:method|wadl:param" mode="path-format"/>
 
-    <xsl:template match="wadl:resource[child::wadl:resource]" mode="path-format">
+    <xsl:template match="wadl:resource[not(child::wadl:method) and not(child::wadl:param)]" mode="path-format">
         <xsl:apply-templates select="wadl:resource" mode="path-format"/>
     </xsl:template>
 
-    <xsl:template match="wadl:resource[not(child::wadl:resource)]" mode="path-format">
+    <xsl:template match="wadl:resource[wadl:method or wadl:param]" mode="path-format">
         <resource>
             <xsl:copy-of select="@*"/>
             <xsl:attribute name="path">
@@ -146,6 +145,7 @@
             <xsl:apply-templates select="wadl:param" mode="copy"/>
             <xsl:apply-templates select="wadl:method" mode="copy"/>
         </resource>
+        <xsl:apply-templates mode="path-format"/>
     </xsl:template>
 
     <xsl:template match="processing-instruction('base-uri')" mode="path-format"/>
