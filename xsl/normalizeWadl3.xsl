@@ -142,7 +142,7 @@
                     <xsl:if test="not(position() = last())">/</xsl:if>
                 </xsl:for-each>
             </xsl:attribute>
-            <xsl:apply-templates select="wadl:param" mode="copy"/>
+            <xsl:apply-templates select="ancestor-or-self::wadl:resource/wadl:param" mode="copy"/>
             <xsl:apply-templates select="wadl:method" mode="copy"/>
         </resource>
         <xsl:apply-templates mode="path-format"/>
