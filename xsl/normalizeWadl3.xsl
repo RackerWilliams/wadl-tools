@@ -14,27 +14,49 @@
     <xsl:template match="/">
         <xsl:choose>
             <xsl:when test="$format = 'path-format'">
-	      <xsl:message>Flattening resource paths</xsl:message>
+                <xsl:message>Flattening resource paths</xsl:message>
                 <xsl:apply-templates mode="path-format"/>
             </xsl:when>
             <xsl:when test="$format = 'tree-format'">
-	      <xsl:message>Expanding resource paths to tree format</xsl:message>
-                <xsl:apply-templates select="$paths-tokenized/*" mode="tree-format"/>
+                <xsl:message>Expanding resource paths to tree format</xsl:message>
+                <xsl:variable name="tree-format">
+                    <xsl:apply-templates select="$paths-tokenized/*" mode="tree-format"/>
+                </xsl:variable>
+                <xsl:apply-templates select="$tree-format" mode="prune-params"/>
             </xsl:when>
             <xsl:otherwise>
-	      <xsl:message>Leaving resource paths unchanged</xsl:message>
+                <xsl:message>Leaving resource paths unchanged</xsl:message>
                 <xsl:apply-templates mode="keep-format"/>
             </xsl:otherwise>
         </xsl:choose>
-        <!--
-            <xsl:copy-of select="$paths-tokenized"/>-->
-
     </xsl:template>
 
+    <!-- keep-format mode means we don't touch the formatting -->
     <xsl:template match="node() | @*" mode="keep-format">
         <xsl:copy>
             <xsl:apply-templates select="node() | @*" mode="keep-format"/>
         </xsl:copy>
+    </xsl:template>
+
+    <!--  prune-params mode: one final pass in tree-format mode where we prune redundant params  -->
+    <xsl:template match="node() | @*" mode="prune-params">
+        <xsl:copy>
+            <xsl:apply-templates select="node() | @*" mode="prune-params"/>
+        </xsl:copy>
+    </xsl:template>
+
+    <xsl:template 
+        match="wadl:param" 
+        mode="prune-params">
+        <xsl:variable name="name" select="@name"/>
+        <xsl:choose>
+            <xsl:when test="parent::wadl:resource[ancestor::wadl:resource/wadl:param[(@style = 'template' or @style = 'header' or @style='matrix') and @name = $name]]"/>
+            <xsl:otherwise>
+                <xsl:copy>
+                    <xsl:apply-templates select="node() | @*" mode="prune-params"/>
+                </xsl:copy>
+            </xsl:otherwise>                
+        </xsl:choose>
     </xsl:template>
 
     <!-- Begin tree-format templates   -->
@@ -73,7 +95,7 @@
                 </xsl:attribute>
                 <xsl:if test="count(wadl:tokens/wadl:token) = $token-number">
                     <xsl:apply-templates select="*[not(self::wadl:resource)]" mode="tree-format"/>
-                    </xsl:if>
+                </xsl:if>
                 <!--
                 <xsl:call-template name="group">
                     <xsl:with-param name="token-number" select="$token-number + 1"/>
@@ -144,7 +166,7 @@
                     <xsl:if test="not(position() = last())">/</xsl:if>
                 </xsl:for-each>
             </xsl:attribute>
-            <xsl:apply-templates select="ancestor-or-self::wadl:resource/wadl:param" mode="copy"/>
+            <xsl:apply-templates select="ancestor-or-self::wadl:resource/wadl:param[@style = 'template' or @style = 'header' or @style='matrix']" mode="copy"/>
             <xsl:apply-templates select="wadl:method" mode="copy"/>
         </resource>
         <xsl:apply-templates mode="path-format"/>
