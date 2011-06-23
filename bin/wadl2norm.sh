@@ -39,6 +39,9 @@ if [[ -f "$1" && ( ! -n $2 || $2 = "path" || $2 = "tree") ]]
 then 
     [ -d "$(dirname $1)/normalized" ] || mkdir $(dirname $1)/normalized
 
+    rm -rf /tmp/normalized/xsd-*.xsd
+    rm -f /tmp/wadl2norm?.wadl
+
     saxonize $1 normalizeWadl.xsl /tmp/wadl2norm1.wadl
     xmllint --noout --schema "$DIR/../xsd/wadl.xsd"  /tmp/wadl2norm1.wadl 
     [ $? -eq 0 ] || exit 1
@@ -54,9 +57,10 @@ then
     cp /tmp/wadl2norm3.wadl $(dirname $1)/normalized/$(basename ${1%%.wadl}.wadl)
 
     # Clean up temp files:
-    rm /tmp/wadl2norm1.wadl /tmp/wadl2norm2.wadl
-    cp -r $(dirname $1)/xsd $(dirname $1)/normalized
-    #cp -r /tmp/wadl2norm?.wadl $(dirname $1)/normalized 
+    # rm /tmp/wadl2norm1.wadl /tmp/wadl2norm2.wadl
+    # cp -r $(dirname $1)/xsd $(dirname $1)/normalized
+    # cp -r /tmp/wadl2norm?.wadl  $(dirname $1)/normalized 
+    cp -r /tmp/normalized/*.xsd $(dirname $1)/normalized
 
 else 
     echo ""
@@ -65,5 +69,7 @@ else
     echo "             e.g. <resource path='foo/bar'/>"
     echo "       tree: Format resources in tree format, "
     echo "             e.g. <resoruce path='foo'><resource path='bar'>..."
+    echo "       If you omit the last parameter, the script makes no "
+    echo "       changes to the structure of the resources."
     exit 1
 fi
