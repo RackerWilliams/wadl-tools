@@ -8,7 +8,7 @@
 
     <xsl:output indent="yes"/>
 
-    <xsl:key name="methods" match="wadl:method[@id]" use="@id"/>
+    <xsl:key name="ids" match="wadl:*[@id]" use="@id"/>
 
     <xsl:template match="node() | @*">
         <xsl:copy>
@@ -16,10 +16,10 @@
         </xsl:copy>
     </xsl:template>
 
-    <xsl:template match="wadl:method[@href]|wadl:param[@href]">
+    <xsl:template match="wadl:method[@href]|wadl:param[@href]|wadl:representation[@href]">
         <xsl:choose>
             <xsl:when test="starts-with(@href,'#')">
-                <xsl:apply-templates select="key('methods',substring-after(@href,'#'))" mode="copy">
+                <xsl:apply-templates select="key('ids',substring-after(@href,'#'))" mode="copy">
                     <xsl:with-param name="generated-id" select="generate-id(.)"/>
                 </xsl:apply-templates>
             </xsl:when>
@@ -28,14 +28,14 @@
                 <xsl:variable name="included-wadl">
                     <xsl:apply-templates select="document(concat($base-uri, substring-before(@href,'#')))/*"/>
                 </xsl:variable>
-                <xsl:apply-templates select="$included-wadl//wadl:method[@id = substring-after(current()/@href,'#')]" mode="copy">
+                <xsl:apply-templates select="$included-wadl//wadl:*[@id = substring-after(current()/@href,'#')]" mode="copy">
                     <xsl:with-param name="generated-id" select="generate-id(.)"/>
                 </xsl:apply-templates>
             </xsl:otherwise>
         </xsl:choose>        
     </xsl:template>
 
-    <xsl:template match="wadl:method|wadl:param" mode="copy">
+    <xsl:template match="wadl:method|wadl:param|wadl:representation" mode="copy">
         <xsl:param name="generated-id"/>
         <xsl:copy>
             <xsl:copy-of select="@*"/>
@@ -46,7 +46,7 @@
         </xsl:copy>
     </xsl:template>
 
-    <xsl:template match="wadl:representation[@href[substring-before(.,'#') = '']]">
+<!--    <xsl:template match="wadl:representation[@href[substring-before(.,'#') = '']]">
         <xsl:apply-templates select="//wadl:representation[@id = substring-after(current()/@href,'#')]/*"/>
     </xsl:template>
 
@@ -55,7 +55,7 @@
             <xsl:apply-templates select="document(substring-before(@href,'#'))/*"/>
         </xsl:variable>    
         <xsl:apply-templates select="$included-wadl//wadl:representation[@id = substring-after(current()/@href,'#')]/*"/>
-    </xsl:template>
+    </xsl:template>-->
     
 <!--    <xsl:template match="wadl:representation[@id]|xsl:param[@id]|wadl:method[@id]"/>
 -->
