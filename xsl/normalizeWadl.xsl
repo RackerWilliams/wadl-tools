@@ -26,13 +26,19 @@
         <xsl:for-each select="$catalog/xsd">
             <xsl:message>[INFO] Writing: <xsl:value-of select="@location"/> as <xsl:value-of select="@name"/></xsl:message>
             <xsl:result-document href="{concat('normalized/',@name)}">
-                <xsl:comment>Original xsd: <xsl:value-of select="@location"/></xsl:comment>
-                <xsl:apply-templates select="document(@location,.)/*" mode="flatten-xsd"/>
+                <xsd:schema>
+                    <xsl:comment>Original xsd: <xsl:value-of select="@location"/></xsl:comment>
+                    <xsl:apply-templates select="document(@location,.)" mode="flatten-xsd">
+                        <xsl:with-param name="stack" select="@location"/>
+                    </xsl:apply-templates>
+                </xsd:schema>
             </xsl:result-document>
         </xsl:for-each>
 
         <!-- Here we store the base-uri of this file so we can use it to find files relative to this file later -->
-        <xsl:processing-instruction name="base-uri"><xsl:value-of select="replace(base-uri(.),'(.*/).*\.wadl', '$1')"/></xsl:processing-instruction>
+        <xsl:processing-instruction name="base-uri">
+            <xsl:value-of select="replace(base-uri(.),'(.*/).*\.wadl', '$1')"/>
+        </xsl:processing-instruction>
         <xsl:apply-templates mode="process-wadl"/>
     </xsl:template>
 
@@ -58,26 +64,61 @@
 
     <!-- Flatten xsds -->
 
-    <xsl:template match="* | text()|comment()|processing-instruction() | @*" mode="flatten-xsd">
+    <xsl:template match="/" mode="flatten-xsd">
+        <!-- First we create a list of all the schemas included in this schema      -->
+        <xsl:variable name="included-xsds">
+            <xsl:apply-templates mode="included-xsds"/>
+        </xsl:variable>
+        <xsl:for-each-group select="$included-xsds/*" group-by="@location">
+            <xsl:message>[INFO] Including <xsl:value-of select="current-grouping-key()"/></xsl:message>
+            <xsl:apply-templates select="document(current-grouping-key())" mode="process-xsd-contents"/>
+        </xsl:for-each-group>
+    </xsl:template>
+
+    <xsl:template match="xsd:include" mode="included-xsds">
+        <xsl:param name="stack"/>
+        <xsd location="{replace(concat(replace(base-uri(.),'(.*/).*\.xsd', '$1'),@schemaLocation),'/\./','/')}"/>
+        <xsl:if test="not(contains($stack, replace(concat(replace(base-uri(.),'(.*/).*\.xsd', '$1'),@schemaLocation),'/\./','/')))">
+        <xsl:apply-templates select="document(@schemaLocation)//xsd:include" mode="included-xsds">
+            <xsl:with-param name="stack" select="concat($stack,' ',base-uri(.))"/>
+        </xsl:apply-templates>
+        </xsl:if>
+    </xsl:template>
+
+    <xsl:template match="text()|comment()|processing-instruction()" mode="included-xsds"/>
+
+    <xsl:template match="*" mode="included-xsds">
+        <xsl:apply-templates mode="included-xsds"/>
+    </xsl:template>
+
+    <xsl:template match="* | text()|comment()|processing-instruction() | @*" mode="process-xsd-contents">
         <xsl:param name="stack"/>
         <xsl:copy>
-            <xsl:apply-templates select="* | text()|comment()|processing-instruction() | @*" mode="flatten-xsd">
+            <xsl:apply-templates select="* | text()|comment()|processing-instruction() | @*" mode="process-xsd-contents">
                 <xsl:with-param name="stack" select="$stack"/>
             </xsl:apply-templates>
         </xsl:copy>
     </xsl:template>
 
-    <xsl:template match="xsd:import" mode="flatten-xsd">
+    <xsl:template match="xsd:import" mode="process-xsd-contents">
         <xsl:variable name="schemaLocation" select="replace(concat(replace(base-uri(.),'(.*/).*\.xsd', '$1'),@schemaLocation),'/\./','/')"/>
         <xsl:copy>
             <xsl:copy-of select="@*"/>
             <xsl:attribute name="schemaLocation">
                 <xsl:value-of select="$catalog//xsd[@location = $schemaLocation]/@name"/>
-                <!-- todo: look up new schema name -->
             </xsl:attribute>
         </xsl:copy>
     </xsl:template>
 
+    <xsl:template match="xsd:schema" mode="process-xsd-contents">
+        <xsl:apply-templates mode="process-xsd-contents"/>
+    </xsl:template>
+
+    <xsl:template match="xsd:include" mode="process-xsd-contents"/>
+
+    <!--
+    This way ended up not working. There were two of certain elements in the resulting schema :-(
+    
     <xsl:template match="xsd:include" mode="flatten-xsd">
         <xsl:param name="stack"/>
         <xsl:choose>
@@ -85,7 +126,7 @@
                 <xsl:message>[INFO] Recursion detected, skipping: <xsl:value-of select="base-uri(document(@schemaLocation))"/></xsl:message>
             </xsl:when>
             <xsl:otherwise>
-                <!-- <xsl:message><xsl:value-of select="concat($stack, ' ', base-uri(document(@schemaLocation)))"/></xsl:message>-->
+                 <xsl:message><xsl:value-of select="concat($stack, ' ', base-uri(document(@schemaLocation)))"/></xsl:message>
                 <xsl:comment>Source (xsd:include): <xsl:value-of select="base-uri(document(@schemaLocation))"/></xsl:comment>
                 <xsl:apply-templates select="document(@schemaLocation,.)/xsd:schema/*" mode="flatten-xsd">
                     <xsl:with-param name="stack">
@@ -94,10 +135,11 @@
                 </xsl:apply-templates>
                 <xsl:comment>End source: <xsl:value-of select="base-uri(document(@schemaLocation))"/></xsl:comment>
                 <xsl:text>            
-        </xsl:text>
+                </xsl:text>
+                <xsl:message><xsl:value-of select="$stack"/></xsl:message>
             </xsl:otherwise>
         </xsl:choose>
-    </xsl:template>
+    </xsl:template>-->
 
     <!-- Collect list of xsds included in the main wadl or in any included wadls   -->
 
