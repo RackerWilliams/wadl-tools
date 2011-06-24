@@ -14,18 +14,18 @@
     <xsl:template match="/">
         <xsl:choose>
             <xsl:when test="$format = 'path-format'">
-                <xsl:message>Flattening resource paths</xsl:message>
+                <xsl:message>[INFO] Flattening resource paths</xsl:message>
                 <xsl:apply-templates mode="path-format"/>
             </xsl:when>
             <xsl:when test="$format = 'tree-format'">
-                <xsl:message>Expanding resource paths to tree format</xsl:message>
+                <xsl:message>[INFO] Expanding resource paths to tree format</xsl:message>
                 <xsl:variable name="tree-format">
                     <xsl:apply-templates select="$paths-tokenized/*" mode="tree-format"/>
                 </xsl:variable>
                 <xsl:apply-templates select="$tree-format" mode="prune-params"/>
             </xsl:when>
             <xsl:otherwise>
-                <xsl:message>Leaving resource paths unchanged</xsl:message>
+                <xsl:message>[INFO] Leaving resource paths unchanged</xsl:message>
                 <xsl:apply-templates mode="keep-format"/>
             </xsl:otherwise>
         </xsl:choose>
