@@ -26,7 +26,7 @@
             <xsl:otherwise>
                 <xsl:comment><xsl:value-of select="local-name(.)"/> included from external wadl: <xsl:value-of select="concat($base-uri, substring-before(@href,'#'))"/></xsl:comment>
                 <xsl:variable name="included-wadl">
-                    <xsl:apply-templates select="document(concat($base-uri, substring-before(@href,'#')))/*"/>
+                    <xsl:apply-templates select="document(concat($base-uri, substring-before(@href,'#')),.)/*"/>
                 </xsl:variable>
                 <xsl:apply-templates select="$included-wadl//wadl:*[@id = substring-after(current()/@href,'#')]" mode="copy">
                     <xsl:with-param name="generated-id" select="generate-id(.)"/>
