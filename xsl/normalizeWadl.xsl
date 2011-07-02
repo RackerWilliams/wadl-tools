@@ -1,7 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:wadl="http://wadl.dev.java.net/2009/02" xmlns:xsd="http://www.w3.org/2001/XMLSchema" version="2.0">
+<!-- This XSLT flattens the xsds associated with the wadl.  -->
+<xsl:stylesheet 
+    xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
+    xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+    xmlns:wadl="http://wadl.dev.java.net/2009/02" 
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+    exclude-result-prefixes="xs wadl xsd"
+    version="2.0">
 
     <xsl:output indent="yes"/>
+
+    <!-- Need this to re-establish context within for-each -->
+    <xsl:variable name="root" select="/"/>
 
     <xsl:variable name="wadl-uri" select="replace(base-uri(.),'(.*/).*\.wadl', '$1')"/>
 
@@ -155,6 +165,28 @@
         <xsl:apply-templates select="document(substring-before(.,'#'),.)/*" mode="wadl-xsds"/>
     </xsl:template>
 
+    <xsl:template match="wadl:resource[@type]"  mode="wadl-xsds">
+        <xsl:for-each select="tokenize(normalize-space(@type),' ')">
+            <xsl:variable name="doc">
+                <xsl:choose>
+                    <xsl:when test="starts-with(normalize-space(.),'http://') or starts-with(normalize-space(.),'file://')">
+                        <xsl:value-of select="substring-before(normalize-space(.),'#')"/>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <xsl:value-of select="substring-before(normalize-space(.),'#')"/>
+                    </xsl:otherwise>
+                </xsl:choose>
+            </xsl:variable>
+            <xsl:choose>
+                <xsl:when test="starts-with(normalize-space(.),'#')"/>
+                <xsl:otherwise>
+                    <xsl:message><xsl:value-of select="$doc"/></xsl:message>
+                    <xsl:apply-templates select="document($doc,$root)/*"  mode="wadl-xsds"/>
+                </xsl:otherwise>
+            </xsl:choose>
+        </xsl:for-each>
+    </xsl:template>
+
     <!-- End section -->
 
     <!--  Find xsds imported into xsd or into any included xsd  -->
@@ -172,14 +204,5 @@
             </xsl:apply-templates>
         </xsl:if>
     </xsl:template>
-
-    <!-- Doesn't work. Gives "The context item is undefined" error:   -->
-    <!--<xsl:function xmlns:f="http://www.rackspace.com/api" name="f:getImports" as="element(*)">
-        <xsl:param name="schemaDocument" as="element(xsd:schema)"/>
-        <xsl:sequence select="
-            xsd:import | 
-            (for $i in $schemaDocument//xsd:include return
-            f:getImports(document($i/@schemaLocation)/xsd:schema))"/>
-    </xsl:function>-->
 
 </xsl:stylesheet>
