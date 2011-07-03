@@ -39,8 +39,10 @@ if [[ -f "$1" && ( ! -n $2 || $2 = "path" || $2 = "tree") ]]
 then 
     [ -d "$(dirname $1)/normalized" ] || mkdir $(dirname $1)/normalized
 
-    rm -rf /tmp/normalized/xsd-*.xsd
+    # Cleanup output of the last run
+    rm -f /tmp/normalized/xsd-*.xsd
     rm -f /tmp/wadl2norm?.wadl
+    rm -f "$(dirname $1)/normalized/*"
 
     xmllint --noout --schema "$DIR/../xsd/wadl.xsd"  $1
     [ $? -eq 0 ] || exit 1
@@ -67,6 +69,7 @@ then
     cp -r /tmp/normalized/*.xsd $(dirname $1)/normalized
 
 else 
+
     echo ""
     echo "Usage: $(basename $0) wadl-file <path|tree>"
     echo "       path: Format resources in path format, "
