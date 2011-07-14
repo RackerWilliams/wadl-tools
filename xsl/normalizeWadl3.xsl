@@ -154,7 +154,7 @@ This XSLT flattens or expands the path in the path attributes of the resource el
         </xsl:copy>
     </xsl:template>
 
-    <xsl:template match="wadl:method|wadl:param" mode="path-format"/>
+    <xsl:template match="wadl:method[parent::wadl:resource]|wadl:param[ancestor::wadl:resource]" mode="path-format"/>
 
     <xsl:template match="wadl:resource[not(child::wadl:method) and not(child::wadl:param)]" mode="path-format">
         <xsl:apply-templates select="wadl:resource" mode="path-format"/>
@@ -170,7 +170,7 @@ This XSLT flattens or expands the path in the path attributes of the resource el
                     <xsl:if test="not(position() = last())">/</xsl:if>
                 </xsl:for-each>
             </xsl:attribute>
-            <xsl:apply-templates select="ancestor-or-self::wadl:resource/wadl:param[@style = 'template' or @style = 'header' or @style='matrix']" mode="copy"/>
+            <xsl:apply-templates select="ancestor-or-self::wadl:resource/wadl:param[@style = 'template' or @style = 'header' ]" mode="copy"/>
             <xsl:apply-templates select="wadl:method" mode="copy"/>
         </resource>
         <xsl:apply-templates mode="path-format"/>
