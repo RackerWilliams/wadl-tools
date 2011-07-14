@@ -7,6 +7,8 @@
     xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
     exclude-result-prefixes="xs wadl xsd"
     version="2.0">
+  
+  <!-- Here we list and flatten xsds -->
 
     <xsl:output indent="yes"/>
 
@@ -79,6 +81,7 @@
         <xsl:variable name="included-xsds">
             <xsl:apply-templates mode="included-xsds"/>
         </xsl:variable>
+	<xsl:apply-templates select="*" mode="process-xsd-contents"/>
         <xsl:for-each-group select="$included-xsds/*" group-by="@location">
             <xsl:message>[INFO] Including <xsl:value-of select="current-grouping-key()"/></xsl:message>
             <xsl:apply-templates select="document(current-grouping-key())" mode="process-xsd-contents"/>
