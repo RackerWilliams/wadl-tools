@@ -44,13 +44,13 @@ then
     rm -f /tmp/wadl2norm?.wadl
     rm -f "$(dirname $1)/normalized/*"
 
-    xmllint --noout --schema "$DIR/../xsd/wadl.xsd"  $1
+    xmllint --noent --noout --schema "$DIR/../xsd/wadl.xsd"  $1
     [ $? -eq 0 ] || exit 1
 
     saxonize $1 normalizeWadl.xsl /tmp/wadl2norm1.wadl
     xmllint --noout --schema "$DIR/../xsd/wadl.xsd"  /tmp/wadl2norm1.wadl 
     [ $? -eq 0 ] || exit 1
-    xmllint --noout --schema "$DIR/../xsd/XMLSchema.xsd"  /tmp/normalized/xsd-*.xsd 
+    xmllint --noout --schema "$DIR/../xsd/XMLSchema11.xsd"  /tmp/normalized/xsd-*.xsd 
 
     saxonize /tmp/wadl2norm1.wadl normalizeWadl2.xsl /tmp/wadl2norm2.wadl
     xmllint --noout --schema "$DIR/../xsd/wadl.xsd"  /tmp/wadl2norm2.wadl 
