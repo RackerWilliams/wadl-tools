@@ -37,13 +37,18 @@
 
         <xsl:for-each select="$catalog/xsd">
             <xsl:message>[INFO] Writing: <xsl:value-of select="@location"/> as <xsl:value-of select="@name"/></xsl:message>
-            <xsl:result-document href="{concat('normalized/',@name)}">
+
+	    <xsl:variable name="contents">
                 <xsd:schema>
                     <xsl:comment>Original xsd: <xsl:value-of select="@location"/></xsl:comment>
                     <xsl:apply-templates select="document(@location,.)" mode="flatten-xsd">
                         <xsl:with-param name="stack" select="@location"/>
                     </xsl:apply-templates>
                 </xsd:schema>
+	    </xsl:variable>
+
+            <xsl:result-document href="{concat('normalized/',@name)}">
+	      <xsl:apply-templates select="$contents" mode="prune-imports"/>
             </xsl:result-document>
         </xsl:for-each>
 
@@ -55,6 +60,27 @@
     </xsl:template>
 
 
+    <!-- Prune imports removes redundant import statements -->
+    <xsl:template match="xsd:schema" mode="prune-imports">
+      <xsl:copy>
+	<xsl:apply-templates select="@*" mode="prune-imports"/>
+	<xsl:for-each select="xsd:import[not(@schemaLocation = preceding::xsd:import/@schemaLocation)]">
+	  <xsl:copy-of select="."/>
+	</xsl:for-each>
+	<xsl:apply-templates select="node()" mode="prune-imports"/>
+      </xsl:copy>
+    </xsl:template>
+
+    <xsl:template match="xsd:import" mode="prune-imports"/>
+
+    <xsl:template match="@*|node()" mode="prune-imports">
+      <xsl:copy>
+	<xsl:apply-templates select="@*|node()" mode="prune-imports"/>
+      </xsl:copy>
+    </xsl:template>
+    
+    <!-- End prune-imports mode templates -->
+    
     <xsl:template match="node() | @*" mode="process-wadl">
         <xsl:copy>
             <xsl:apply-templates select="node() | @*" mode="process-wadl"/>
