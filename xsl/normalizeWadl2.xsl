@@ -23,9 +23,9 @@ Resolves hrefs on method and resource_type elements.
   </xsl:variable>
 
   <xsl:template match="/">
-    <!-- Now we prune the generated id that is appended to all ids where we can do it safely -->
     <xsl:choose>
       <xsl:when test="$strip-ids != 0">
+	<!-- Now we prune the generated id that is appended to all ids where we can do it safely -->
 	<xsl:apply-templates select="$processed" mode="strip-ids"/>
       </xsl:when>
       <xsl:otherwise>
@@ -102,46 +102,55 @@ Resolves hrefs on method and resource_type elements.
   <xsl:template match="wadl:method|wadl:param|wadl:representation" mode="copy">
     <xsl:param name="generated-id"/>
     <xsl:copy>
-      <xsl:copy-of select="@*"/>
+      <xsl:copy-of select="@*[not(local-name() = 'id')]"/>
       <xsl:attribute name="rax:id" select="@id"/>
-      <xsl:attribute name="id">
-	<xsl:value-of select="concat(@id, '-', $generated-id)"/>
-      </xsl:attribute>
+      <!-- <xsl:attribute name="id"> -->
+      <!-- 	<xsl:value-of select="concat(@id, '-', $generated-id)"/> -->
+      <!-- </xsl:attribute> -->
       <xsl:apply-templates select="*|comment()|processing-instruction()|text()"/>
     </xsl:copy>
   </xsl:template>
 
   <xsl:template match="wadl:resource[@type]">
-    <resource>
-      <xsl:copy-of select="@*[name() != 'type']"/>
-      <xsl:for-each select="tokenize(normalize-space(@type),' ')">
-	<xsl:variable name="id" select="substring-after(normalize-space(.),'#')"/>
-	<xsl:variable name="doc">
+      <xsl:variable name="content">
+	<xsl:for-each select="tokenize(normalize-space(@type),' ')">
+	  <xsl:variable name="id" select="substring-after(normalize-space(.),'#')"/>
+	  <xsl:variable name="doc">
+	    <xsl:choose>
+	      <xsl:when test="starts-with(normalize-space(.),'http://') or starts-with(normalize-space(.),'file://')">
+		<xsl:value-of select="substring-before(normalize-space(.),'#')"/>
+	      </xsl:when>
+	      <xsl:otherwise>
+		<xsl:value-of select="concat($base-uri, substring-before(normalize-space(.),'#'))"/>
+	      </xsl:otherwise>
+	    </xsl:choose>
+	  </xsl:variable>
 	  <xsl:choose>
-	    <xsl:when test="starts-with(normalize-space(.),'http://') or starts-with(normalize-space(.),'file://')">
-	      <xsl:value-of select="substring-before(normalize-space(.),'#')"/>
+	    <xsl:when test="starts-with(normalize-space(.),'#')">
+	      <xsl:for-each select="$root/*[1]">
+		<xsl:apply-templates select="key('ids',$id)/*"/>
+	      </xsl:for-each>
 	    </xsl:when>
 	    <xsl:otherwise>
-	      <xsl:value-of select="concat($base-uri, substring-before(normalize-space(.),'#'))"/>
+	      <xsl:variable name="included-wadl">
+		<xsl:apply-templates select="document($doc,$root)/*"/>
+	      </xsl:variable>
+	      <xsl:apply-templates select="$included-wadl//*[@id = $id]/*"/>
 	    </xsl:otherwise>
 	  </xsl:choose>
-	</xsl:variable>
-	<xsl:choose>
-	  <xsl:when test="starts-with(normalize-space(.),'#')">
-	    <xsl:for-each select="$root/*[1]">
-	      <xsl:apply-templates select="key('ids',$id)/*"/>
-	    </xsl:for-each>
-	  </xsl:when>
-	  <xsl:otherwise>
-	    <xsl:variable name="included-wadl">
-	      <xsl:apply-templates select="document($doc,$root)/*"/>
-	    </xsl:variable>
-	    <xsl:apply-templates select="$included-wadl//*[@id = $id]/*"/>
-	  </xsl:otherwise>
-	</xsl:choose>
-      </xsl:for-each>
-      <xsl:apply-templates/>
-    </resource>
+	</xsl:for-each>
+	<xsl:apply-templates/>
+      </xsl:variable>
+
+      <resource>
+	<xsl:copy-of select="@*[name() != 'type']"/>
+	<!-- Since we've combined resource types, we need to sort the
+	     elements to keep things valid against the schema -->
+	<xsl:copy-of select="$content/wadl:doc"/>
+	<xsl:copy-of select="$content/wadl:param"/>
+	<xsl:copy-of select="$content/wadl:method"/>
+	<xsl:copy-of select="$content/wadl:resource"/>
+      </resource>
   </xsl:template>
 
 </xsl:stylesheet>
