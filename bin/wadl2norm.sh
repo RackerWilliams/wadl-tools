@@ -40,7 +40,7 @@ then
     [ -d "$(dirname $1)/normalized" ] || mkdir $(dirname $1)/normalized
 
     # Cleanup output of the last run
-    rm -f /tmp/normalized/xsd-*.xsd
+    rm -f /tmp/normalized/*-xsd-*.xsd
     rm -f /tmp/wadl2norm?.wadl
     rm -f "$(dirname $1)/normalized/*"
 
@@ -50,7 +50,7 @@ then
     saxonize $1 normalizeWadl.xsl /tmp/wadl2norm1.wadl
     xmllint --noout --schema "$DIR/../xsd/wadl.xsd"  /tmp/wadl2norm1.wadl 
     [ $? -eq 0 ] || exit 1
-    xmllint --noout --schema "$DIR/../xsd/XMLSchema11.xsd"  /tmp/normalized/xsd-*.xsd 
+    xmllint --noout --schema "$DIR/../xsd/XMLSchema11.xsd"  /tmp/normalized/*-xsd-*.xsd 
 
     saxonize /tmp/wadl2norm1.wadl normalizeWadl2.xsl /tmp/wadl2norm2.wadl
     xmllint --noout --schema "$DIR/../xsd/wadl.xsd"  /tmp/wadl2norm2.wadl 

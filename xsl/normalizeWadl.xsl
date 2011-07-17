@@ -17,6 +17,8 @@
 
     <xsl:variable name="wadl-uri" select="replace(base-uri(.),'(.*/).*\.wadl', '$1')"/>
 
+    <xsl:variable name="wadl-base-file-name" select="replace(base-uri(.),'^.*/(.*)\.[a-zA-Z]*$','$1')"/>
+
     <xsl:variable name="catalog-wadl-xsds">
         <xsl:apply-templates mode="wadl-xsds"/>
     </xsl:variable>
@@ -29,7 +31,7 @@
 
     <xsl:variable name="catalog">
         <xsl:for-each-group select="$catalog-wadl-xsds//*|$catalog-imported-xsds//*" group-by="@location">
-            <xsd location="{current-grouping-key()}" name="{concat('xsd-',position(),'.xsd')}"/>
+            <xsd location="{current-grouping-key()}" name="{concat($wadl-base-file-name, '-xsd-',position(),'.xsd')}"/>
         </xsl:for-each-group>
     </xsl:variable>
 
