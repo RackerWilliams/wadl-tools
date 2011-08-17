@@ -10,30 +10,10 @@ This XSLT flattens or expands the path in the path attributes of the resource el
 
     <xsl:param name="format">-format</xsl:param>
     <!-- path or tree -->
-
+    
     <xsl:variable name="paths-tokenized">
-        <xsl:apply-templates mode="tokenize-paths"/>
+        <xsl:apply-templates select="$normalizeWadl2" mode="tokenize-paths"/>
     </xsl:variable>
-
-    <xsl:template match="/">
-        <xsl:choose>
-            <xsl:when test="$format = 'path-format'">
-                <xsl:message>[INFO] Flattening resource paths</xsl:message>
-                <xsl:apply-templates mode="path-format"/>
-            </xsl:when>
-            <xsl:when test="$format = 'tree-format'">
-                <xsl:message>[INFO] Expanding resource paths to tree format</xsl:message>
-                <xsl:variable name="tree-format">
-                    <xsl:apply-templates select="$paths-tokenized/*" mode="tree-format"/>
-                </xsl:variable>
-                <xsl:apply-templates select="$tree-format" mode="prune-params"/>
-            </xsl:when>
-            <xsl:otherwise>
-                <xsl:message>[INFO] Leaving resource paths unchanged</xsl:message>
-                <xsl:apply-templates mode="keep-format"/>
-            </xsl:otherwise>
-        </xsl:choose>
-    </xsl:template>
 
     <!-- keep-format mode means we don't touch the formatting -->
     <xsl:template match="node() | @*" mode="keep-format">

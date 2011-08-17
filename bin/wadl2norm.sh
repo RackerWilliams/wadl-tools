@@ -40,33 +40,21 @@ then
     [ -d "$(dirname $1)/normalized" ] || mkdir $(dirname $1)/normalized
 
     # Cleanup output of the last run
-    rm -f /tmp/normalized/*-xsd-*.xsd
-    rm -f /tmp/wadl2norm?.wadl
-    rm -f "$(dirname $1)/normalized/*"
+    #rm -f "$(dirname $1)/normalized/*"
 
+    # Validate hte input wadl file against the wadl xsd.
     xmllint --noent --noout --schema "$DIR/../xsd/wadl.xsd"  $1
     [ $? -eq 0 ] || exit 1
 
-    saxonize $1 normalizeWadl.xsl /tmp/wadl2norm1.wadl
-    xmllint --noout --schema "$DIR/../xsd/wadl.xsd"  /tmp/wadl2norm1.wadl 
-    [ $? -eq 0 ] || exit 1
-    xmllint --noout --schema "$DIR/../xsd/XMLSchema11.xsd"  /tmp/normalized/*-xsd-*.xsd 
-
-    saxonize /tmp/wadl2norm1.wadl normalizeWadl2.xsl /tmp/wadl2norm2.wadl
-    xmllint --noout --schema "$DIR/../xsd/wadl.xsd"  /tmp/wadl2norm2.wadl 
-    [ $? -eq 0 ] || exit 1
-
-    saxonize /tmp/wadl2norm2.wadl normalizeWadl3.xsl  /tmp/wadl2norm3.wadl $2
-    xmllint --noout --schema "$DIR/../xsd/wadl.xsd"  /tmp/wadl2norm3.wadl
-    [ $? -eq 0 ] || exit 1
-
-    cp /tmp/wadl2norm3.wadl $(dirname $1)/normalized/$(basename ${1%%.wadl}.wadl)
-
-    # Clean up temp files:
-    # rm /tmp/wadl2norm1.wadl /tmp/wadl2norm2.wadl
-    # cp -r $(dirname $1)/xsd $(dirname $1)/normalized
-    # cp -r /tmp/wadl2norm?.wadl  $(dirname $1)/normalized 
-    cp -r /tmp/normalized/*.xsd $(dirname $1)/normalized
+    # Process the document wadl document.
+    saxonize $1 normalizeWadl.xsl $(dirname $1)/normalized/$(basename ${1%%.wadl}.wadl) $2
+    
+    # Validate the output wadl.
+    xmllint --noout --schema "$DIR/../xsd/wadl.xsd"  $(dirname $1)/normalized/$(basename ${1%%.wadl}.wadl)
+    #[ $? -eq 0 ] || exit 1
+    # Validate the generated xsds
+    xmllint --noout --schema "$DIR/../xsd/XMLSchema11.xsd"  $(dirname $1)/normalized/$(basename ${1%%.wadl}-xsd-*.xsd)
+    #[ $? -eq 0 ] || exit 1
 
 else 
 

@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- This XSLT flattens the xsds associated with the wadl.  -->
-<xsl:stylesheet 
-    xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
-    xmlns:xs="http://www.w3.org/2001/XMLSchema" 
-    xmlns:wadl="http://wadl.dev.java.net/2009/02" 
-    xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
-    exclude-result-prefixes="xs wadl xsd"
-    version="2.0">
-  
-  <!-- Here we list and flatten xsds -->
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:wadl="http://wadl.dev.java.net/2009/02" xmlns:xsd="http://www.w3.org/2001/XMLSchema" exclude-result-prefixes="xs wadl xsd" version="2.0">
+
+    <xsl:import href="normalizeWadl2.xsl"/>
+    <xsl:import href="normalizeWadl3.xsl"/>
+
+    <!-- This xslt lists and flattens xsds -->
 
     <xsl:output indent="yes"/>
+
+    <xsl:param name="debug">0</xsl:param>
 
     <!-- Need this to re-establish context within for-each -->
     <xsl:variable name="root" select="/"/>
@@ -35,54 +34,100 @@
         </xsl:for-each-group>
     </xsl:variable>
 
-    <xsl:template match="/">
+    <xsl:variable name="normalizeWadl.xsl">
+        <!-- Here we store the base-uri of this file so we can use it to find files relative to this file later -->
+        <xsl:processing-instruction name="base-uri">
+            <xsl:value-of select="replace(base-uri(.),'(.*/).*\.wadl', '$1')"/>
+        </xsl:processing-instruction>
+        <xsl:apply-templates mode="process-wadl"/>
+    </xsl:variable>
 
+    <xsl:variable name="normalizeWadl2.xsl">
+        <xsl:apply-templates select="$normalizeWadl.xsl" mode="normalizeWadl2"/>
+    </xsl:variable>
+
+    <xsl:variable name="normalizeWadl3.xsl">
+        <xsl:choose>
+            <xsl:when test="$format = 'path-format'">
+                <xsl:message>[INFO] Flattening resource paths</xsl:message>
+                <xsl:apply-templates select="$normalizeWadl2" mode="path-format"/>
+            </xsl:when>
+            <xsl:when test="$format = 'tree-format'">
+                <xsl:message>[INFO] Expanding resource paths to tree format</xsl:message>
+                <xsl:variable name="tree-format">
+                    <xsl:apply-templates select="$paths-tokenized/*" mode="tree-format"/>
+                </xsl:variable>
+                <xsl:apply-templates select="$tree-format" mode="prune-params"/>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:message>[INFO] Leaving resource paths unchanged</xsl:message>
+                <xsl:apply-templates select="$normalizeWadl2" mode="keep-format"/>
+            </xsl:otherwise>
+        </xsl:choose>        
+    </xsl:variable>
+<!--    <xsl:variable name="normalizeWadl3.xsl">
+        <xsl:apply-templates select="$normalizeWadl2.xsl" mode="normalizeWadl3"/>
+    </xsl:variable>-->
+
+    <xsl:template match="/">
         <xsl:for-each select="$catalog/xsd">
             <xsl:message>[INFO] Writing: <xsl:value-of select="@location"/> as <xsl:value-of select="@name"/></xsl:message>
 
-	    <xsl:variable name="contents">
+            <xsl:variable name="contents">
                 <xsd:schema>
                     <xsl:comment>Original xsd: <xsl:value-of select="@location"/></xsl:comment>
                     <xsl:apply-templates select="document(@location,.)" mode="flatten-xsd">
                         <xsl:with-param name="stack" select="@location"/>
                     </xsl:apply-templates>
                 </xsd:schema>
-	    </xsl:variable>
+            </xsl:variable>
 
-            <xsl:result-document href="{concat('normalized/',@name)}">
-	      <xsl:apply-templates select="$contents" mode="prune-imports"/>
+            <xsl:result-document href="{@name}">
+                <xsl:apply-templates select="$contents" mode="prune-imports"/>
             </xsl:result-document>
         </xsl:for-each>
 
-        <!-- Here we store the base-uri of this file so we can use it to find files relative to this file later -->
-        <xsl:processing-instruction name="base-uri">
-            <xsl:value-of select="replace(base-uri(.),'(.*/).*\.wadl', '$1')"/>
-        </xsl:processing-instruction>
-        <xsl:apply-templates mode="process-wadl"/>
-    </xsl:template>
+        <xsl:if test="$debug != 0">
 
+            <xsl:result-document href="/tmp/normalizedWadl1.wadl">
+                <xsl:copy-of select="$normalizeWadl.xsl"/>
+            </xsl:result-document>
+
+            <xsl:result-document href="/tmp/normalizedWadl2.wadl">
+                <xsl:copy-of select="$normalizeWadl2.xsl"/>
+            </xsl:result-document>
+
+            <xsl:result-document href="/tmp/normalizedWadl3.wadl">
+                <xsl:copy-of select="$normalizeWadl3.xsl"/>
+            </xsl:result-document>
+
+        </xsl:if>
+
+
+        <xsl:copy-of select="$normalizeWadl3.xsl"/>
+    </xsl:template>
 
     <!-- Prune imports removes redundant import statements -->
     <xsl:template match="xsd:schema" mode="prune-imports">
-      <xsl:copy>
-	<xsl:apply-templates select="@*" mode="prune-imports"/>
-	<xsl:for-each select="xsd:import[not(@schemaLocation = preceding::xsd:import/@schemaLocation)]">
-	  <xsl:copy-of select="."/>
-	</xsl:for-each>
-	<xsl:apply-templates select="node()" mode="prune-imports"/>
-      </xsl:copy>
+        <xsl:copy>
+            <xsl:apply-templates select="@*" mode="prune-imports"/>
+            <xsl:for-each select="xsd:import[not(@schemaLocation = preceding::xsd:import/@schemaLocation)]">
+                <xsl:copy-of select="."/>
+            </xsl:for-each>
+            <xsl:apply-templates select="node()" mode="prune-imports"/>
+        </xsl:copy>
     </xsl:template>
 
     <xsl:template match="xsd:import" mode="prune-imports"/>
 
     <xsl:template match="@*|node()" mode="prune-imports">
-      <xsl:copy>
-	<xsl:apply-templates select="@*|node()" mode="prune-imports"/>
-      </xsl:copy>
+        <xsl:copy>
+            <xsl:apply-templates select="@*|node()" mode="prune-imports"/>
+        </xsl:copy>
     </xsl:template>
-    
+
     <!-- End prune-imports mode templates -->
-    
+
     <xsl:template match="node() | @*" mode="process-wadl">
         <xsl:copy>
             <xsl:apply-templates select="node() | @*" mode="process-wadl"/>
@@ -109,7 +154,7 @@
         <xsl:variable name="included-xsds">
             <xsl:apply-templates mode="included-xsds"/>
         </xsl:variable>
-	<xsl:apply-templates select="*" mode="process-xsd-contents"/>
+        <xsl:apply-templates select="*" mode="process-xsd-contents"/>
         <xsl:for-each-group select="$included-xsds/*" group-by="@location">
             <xsl:message>[INFO] Including <xsl:value-of select="current-grouping-key()"/></xsl:message>
             <xsl:apply-templates select="document(current-grouping-key())" mode="process-xsd-contents"/>
@@ -120,9 +165,9 @@
         <xsl:param name="stack"/>
         <xsd location="{replace(concat(replace(base-uri(.),'(.*/).*\.xsd', '$1'),@schemaLocation),'/\./','/')}"/>
         <xsl:if test="not(contains($stack, replace(concat(replace(base-uri(.),'(.*/).*\.xsd', '$1'),@schemaLocation),'/\./','/')))">
-        <xsl:apply-templates select="document(@schemaLocation)//xsd:include" mode="included-xsds">
-            <xsl:with-param name="stack" select="concat($stack,' ',base-uri(.))"/>
-        </xsl:apply-templates>
+            <xsl:apply-templates select="document(@schemaLocation)//xsd:include" mode="included-xsds">
+                <xsl:with-param name="stack" select="concat($stack,' ',base-uri(.))"/>
+            </xsl:apply-templates>
         </xsl:if>
     </xsl:template>
 
@@ -196,7 +241,7 @@
         <xsl:apply-templates select="document(substring-before(.,'#'),.)/*" mode="wadl-xsds"/>
     </xsl:template>
 
-    <xsl:template match="wadl:resource[@type]"  mode="wadl-xsds">
+    <xsl:template match="wadl:resource[@type]" mode="wadl-xsds">
         <xsl:for-each select="tokenize(normalize-space(@type),' ')">
             <xsl:variable name="doc">
                 <xsl:choose>
@@ -211,8 +256,10 @@
             <xsl:choose>
                 <xsl:when test="starts-with(normalize-space(.),'#')"/>
                 <xsl:otherwise>
-                    <xsl:message><xsl:value-of select="$doc"/></xsl:message>
-                    <xsl:apply-templates select="document($doc,$root)/*"  mode="wadl-xsds"/>
+                    <xsl:message>
+                        <xsl:value-of select="$doc"/>
+                    </xsl:message>
+                    <xsl:apply-templates select="document($doc,$root)/*" mode="wadl-xsds"/>
                 </xsl:otherwise>
             </xsl:choose>
         </xsl:for-each>
