@@ -24,47 +24,70 @@ DIR=$(resolve_symlink $0)
 
 function saxonize {
     java \
-	-jar "$DIR/../lib/saxon-9.1.0.8.jar" \
+        -jar "$DIR/../lib/saxon-9.1.0.8.jar" \
         -s:"$1" \
-	-xsl:"$DIR/../xsl/$2" \
-	-strip:all \
-	-o:"$3" \
-	format="$4-format"
+        -xsl:"$DIR/../xsl/$2" \
+        -strip:all \
+        -o:"$3" \
+        format="$4-format" \
+	$5
 }
 
-# If they passed in a file to process and if the optional
-# second argument is "path" or "tree", then 
-# "do the needful". Otherwise, quit with a usage statement.
-if [[ -f "$1" && ( ! -n $2 || $2 = "path" || $2 = "tree") ]]
+function USAGE()
+{
+    echo ""
+    echo "Usage: $(basename $0) [-?vf] -w wadlFile"
+    echo ""
+    echo "OPTIONS:"
+    echo "       -f Wadl format. path or tree"
+    echo "          path: Format resources in path format, "
+    echo "                e.g. <resource path='foo/bar'/>"
+    echo "          tree: Format resources in tree format, "
+    echo "                e.g. <resoruce path='foo'><resource path='bar'>..."
+    echo "          If you omit the -f switch, the script makes no "
+    echo "          changes to the structure of the resources."
+    echo "       -v XSD Version (1.0 and 1.1 supported, 1.1 is the default)"
+    exit 1
+}
+
+xsdVersion=1.1
+
+#PROCESS ARGS
+while getopts ":v:w:f:?" Option
+do
+    case $Option in
+        v    ) xsdVersion=$OPTARG;;
+        w    ) wadlFile=$OPTARG;;
+        f    ) wadlFormat=$OPTARG;;
+        ?    ) USAGE
+               exit 0;;
+        *    ) echo ""
+               echo "Unimplemented option chosen."
+               USAGE   # DEFAULT
+    esac
+done
+
+if [[ -f "$wadlFile" && ( ! -n $wadlFormat || $wadlFormat = "path" || $wadlFormat = "tree")]]
 then 
-    [ -d "$(dirname $1)/normalized" ] || mkdir $(dirname $1)/normalized
+    [ -d "$(dirname $wadlFile)/normalized" ] || mkdir $(dirname $wadlFile)/normalized
 
     # Cleanup output of the last run
-    #rm -f "$(dirname $1)/normalized/*"
+    #rm -f "$(dirname $wadlFile)/normalized/*"
 
     # Validate hte input wadl file against the wadl xsd.
-    xmllint --noent --noout --schema "$DIR/../xsd/wadl.xsd"  $1
+    xmllint --noent --noout --schema "$DIR/../xsd/wadl.xsd"  $wadlFile
     [ $? -eq 0 ] || exit 1
 
     # Process the document wadl document.
-    saxonize $1 normalizeWadl.xsl $(dirname $1)/normalized/$(basename ${1%%.wadl}.wadl) $2
-    
+    saxonize $wadlFile normalizeWadl.xsl $(dirname $wadlFile)/normalized/$(basename ${wadlFile%%.wadl}.wadl) "$wadlFormat" xsdVersion=$xsdVersion
+
     # Validate the output wadl.
-    xmllint --noout --schema "$DIR/../xsd/wadl.xsd"  $(dirname $1)/normalized/$(basename ${1%%.wadl}.wadl)
+    xmllint --noout --schema "$DIR/../xsd/wadl.xsd"  $(dirname $wadlFile)/normalized/$(basename ${wadlFile%%.wadl}.wadl)
+
     #[ $? -eq 0 ] || exit 1
     # Validate the generated xsds
-    xmllint --noout --schema "$DIR/../xsd/XMLSchema11.xsd"  $(dirname $1)/normalized/$(basename ${1%%.wadl}-xsd-*.xsd)
+    xmllint --noout --schema "$DIR/../xsd/XMLSchema${xsdVersion}.xsd"  $(dirname $wadlFile)/normalized/$(basename ${wadlFile%%.wadl}-xsd-*.xsd)
     #[ $? -eq 0 ] || exit 1
-
-else 
-
-    echo ""
-    echo "Usage: $(basename $0) wadl-file <path|tree>"
-    echo "       path: Format resources in path format, "
-    echo "             e.g. <resource path='foo/bar'/>"
-    echo "       tree: Format resources in tree format, "
-    echo "             e.g. <resoruce path='foo'><resource path='bar'>..."
-    echo "       If you omit the last parameter, the script makes no "
-    echo "       changes to the structure of the resources."
-    exit 1
+else
+    USAGE;
 fi

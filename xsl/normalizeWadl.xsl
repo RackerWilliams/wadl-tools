@@ -9,6 +9,8 @@
 
     <xsl:output indent="yes"/>
 
+    <xsl:param name="xsdVersion" select="xs:decimal(1.1)"/>
+
     <xsl:param name="debug">0</xsl:param>
 
     <!-- Need this to re-establish context within for-each -->
@@ -111,6 +113,10 @@
     <xsl:template match="xsd:schema" mode="prune-imports">
         <xsl:copy>
             <xsl:apply-templates select="@*" mode="prune-imports"/>
+	    <!-- Is this ok? What if two different namespaces have the same prefix? -->
+	    <xsl:for-each-group select="//namespace::node()[not(name(.) = 'xml') and not(name(.) = '')]" group-by="name(.)">
+	      <xsl:copy-of select="."/>
+	    </xsl:for-each-group>
             <xsl:for-each select="xsd:import[not(@schemaLocation = preceding::xsd:import/@schemaLocation)]">
                 <xsl:copy-of select="."/>
             </xsl:for-each>
@@ -119,6 +125,18 @@
     </xsl:template>
 
     <xsl:template match="xsd:import" mode="prune-imports"/>
+
+    <xsl:template match="*[@vc:minVersion or @vc:maxVersion]" xmlns:vc="http://www.w3.org/2007/XMLSchema-versioning" mode="prune-imports">
+      <xsl:choose>
+	<xsl:when test="@vc:minVersion and ($xsdVersion &lt; @vc:minVersion)"/>
+	<xsl:when test="@vc:maxVersion and not($xsdVersion &lt; @vc:maxVersion)"/>
+	<xsl:otherwise>
+	  <xsl:copy>
+	    <xsl:apply-templates select="@*|node()" mode="prune-imports"/>
+	  </xsl:copy>
+	</xsl:otherwise>
+      </xsl:choose>
+    </xsl:template>
 
     <xsl:template match="@*|node()" mode="prune-imports">
         <xsl:copy>
