@@ -31,6 +31,12 @@ function saxonize {
         -o:"$3" \
         format="$4-format" \
 	$5
+    # Fail if the transformation failed.
+    if [[ $? ]]
+    then
+	exit 0;
+    fi
+
 }
 
 function USAGE()

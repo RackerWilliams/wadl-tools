@@ -113,8 +113,14 @@
     <xsl:template match="xsd:schema" mode="prune-imports">
         <xsl:copy>
             <xsl:apply-templates select="@*" mode="prune-imports"/>
-	    <!-- Is this ok? What if two different namespaces have the same prefix? -->
-	    <xsl:for-each-group select="//namespace::node()[not(name(.) = 'xml') and not(name(.) = '')]" group-by="name(.)">
+	    <!-- 
+		 Note: This for-each-group/copy will fail if there are
+		 different namespace declarations sharing the same
+		 prefix. I.e. if there's both a
+		 xmlns:auth="http://foo" and xmlns:auth="http://bar",
+		 in the same set of xsds, then this fails.		 
+	    -->
+	    <xsl:for-each-group select="//namespace::node()[not(name(.) = 'xml') and not(name(.) = '')]" group-by=".">
 	      <xsl:copy-of select="."/>
 	    </xsl:for-each-group>
             <xsl:for-each select="xsd:import[not(@schemaLocation = preceding::xsd:import/@schemaLocation)]">
