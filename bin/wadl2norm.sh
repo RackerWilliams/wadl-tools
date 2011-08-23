@@ -30,7 +30,7 @@ function saxonize {
         -strip:all \
         -o:"$3" \
         format="$4-format" \
-	$5
+	$5 $6 
     # Fail if the transformation failed.
     if [[ $? ]]
     then
@@ -42,7 +42,7 @@ function saxonize {
 function USAGE()
 {
     echo ""
-    echo "Usage: $(basename $0) [-?vf] -w wadlFile"
+    echo "Usage: $(basename $0) [-?vfx] -w wadlFile"
     echo ""
     echo "OPTIONS:"
     echo "       -f Wadl format. path or tree"
@@ -53,18 +53,21 @@ function USAGE()
     echo "          If you omit the -f switch, the script makes no "
     echo "          changes to the structure of the resources."
     echo "       -v XSD Version (1.0 and 1.1 supported, 1.1 is the default)"
+    echo "       -x true or false. Flatten xsds (true by default)."
     exit 1
 }
 
 xsdVersion=1.1
+flattenXsds=true
 
 #PROCESS ARGS
-while getopts ":v:w:f:?" Option
+while getopts ":v:w:f:x:?" Option
 do
     case $Option in
         v    ) xsdVersion=$OPTARG;;
         w    ) wadlFile=$OPTARG;;
         f    ) wadlFormat=$OPTARG;;
+        x    ) flattenXsds=$OPTARG;;
         ?    ) USAGE
                exit 0;;
         *    ) echo ""
@@ -85,7 +88,7 @@ then
     [ $? -eq 0 ] || exit 1
 
     # Process the document wadl document.
-    saxonize $wadlFile normalizeWadl.xsl $(dirname $wadlFile)/normalized/$(basename ${wadlFile%%.wadl}.wadl) "$wadlFormat" xsdVersion=$xsdVersion
+    saxonize $wadlFile normalizeWadl.xsl $(dirname $wadlFile)/normalized/$(basename ${wadlFile%%.wadl}.wadl) "$wadlFormat" xsdVersion=$xsdVersion flattenXsds=$flattenXsds
 
     # Validate the output wadl.
     xmllint --noout --schema "$DIR/../xsd/wadl.xsd"  $(dirname $wadlFile)/normalized/$(basename ${wadlFile%%.wadl}.wadl)
