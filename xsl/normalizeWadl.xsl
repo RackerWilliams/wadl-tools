@@ -26,25 +26,25 @@
     <xsl:variable name="wadl-base-file-name" select="replace(base-uri(.),'^.*/(.*)\.[a-zA-Z]*$','$1')"/>
 
     <xsl:variable name="catalog-wadl-xsds">
-      <xsl:if test="$flattenXsds != 'false'">
-        <xsl:apply-templates mode="wadl-xsds"/>
-      </xsl:if>
+        <xsl:if test="$flattenXsds != 'false'">
+            <xsl:apply-templates mode="wadl-xsds"/>
+        </xsl:if>
     </xsl:variable>
 
     <xsl:variable name="catalog-imported-xsds">
-      <xsl:if test="$flattenXsds != 'false'">
-        <xsl:for-each-group select="$catalog-wadl-xsds//xsd" group-by="@location">
+        <xsl:if test="$flattenXsds != 'false'">
+            <xsl:for-each-group select="$catalog-wadl-xsds//xsd" group-by="@location">
             <xsl:apply-templates select="document(current-grouping-key())//xsd:import|document(current-grouping-key())//xsd:include" mode="catalog-imported-xsds"/>
-        </xsl:for-each-group>
-      </xsl:if>
+            </xsl:for-each-group>
+        </xsl:if>
     </xsl:variable>
 
     <xsl:variable name="catalog">
-      <xsl:if test="$flattenXsds != 'false'">
+        <xsl:if test="$flattenXsds != 'false'">
         <xsl:for-each-group select="$catalog-wadl-xsds//*|$catalog-imported-xsds//*" group-by="@location">
             <xsd location="{current-grouping-key()}" name="{concat($wadl-base-file-name, '-xsd-',position(),'.xsd')}"/>
-        </xsl:for-each-group>
-      </xsl:if>
+            </xsl:for-each-group>
+        </xsl:if>
     </xsl:variable>
 
     <xsl:variable name="normalizeWadl2.xsl">
@@ -72,17 +72,17 @@
                 <xsl:message>[INFO] Leaving resource paths unchanged</xsl:message>
                 <xsl:apply-templates select="$normalizeWadl2" mode="keep-format"/>
             </xsl:otherwise>
-        </xsl:choose>        
+        </xsl:choose>
     </xsl:variable>
-<!--    <xsl:variable name="normalizeWadl3.xsl">
+    <!--    <xsl:variable name="normalizeWadl3.xsl">
         <xsl:apply-templates select="$normalizeWadl2.xsl" mode="normalizeWadl3"/>
         </xsl:variable>-->
-   
-    
+
+
     <xsl:template match="/">
-      <xsl:if test="$flattenXsds = 'false'">
+        <xsl:if test="$flattenXsds = 'false'">
 	<xsl:message>[INFO] Not flattening xsds. You must copy xsds into place manually.</xsl:message>
-      </xsl:if>
+        </xsl:if>
 
         <xsl:for-each select="$catalog/xsd">
             <xsl:message>[INFO] Writing: <xsl:value-of select="@location"/> as <xsl:value-of select="@name"/></xsl:message>
@@ -90,7 +90,7 @@
             <xsl:variable name="contents">
                 <xsl:comment>Original xsd: <xsl:value-of select="@location"/></xsl:comment>
                 <xsd:schema>
-                    <xsl:copy-of select="document(@location,.)/xsd:schema/@*"/> 
+                    <xsl:copy-of select="document(@location,.)/xsd:schema/@*"/>
                     <xsl:apply-templates select="document(@location,.)" mode="flatten-xsd">
                         <xsl:with-param name="stack" select="@location"/>
                     </xsl:apply-templates>
@@ -101,7 +101,7 @@
                 <xsl:apply-templates select="$contents" mode="prune-imports"/>
             </xsl:variable>
 
-             <xsl:result-document href="{@name}">
+            <xsl:result-document href="{@name}">
                 <xsl:apply-templates select="$prune-imports" mode="sort-schema"/>
             </xsl:result-document>
         </xsl:for-each>
@@ -123,7 +123,7 @@
         <xsl:copy-of select="$normalizeWadl3.xsl"/>
     </xsl:template>
 
-   <!-- Sort the declarations in the flattened schema -->
+    <!-- Sort the declarations in the flattened schema -->
     <xsl:template match="node() | @*" mode="sort-schema">
         <xsl:copy>
             <xsl:apply-templates select="node() | @*" mode="sort-schema"/>
@@ -163,7 +163,7 @@
     <xsl:template match="xsd:schema" mode="prune-imports">
         <xsl:copy>
             <xsl:apply-templates select="@*" mode="prune-imports"/>
-	    <!-- 
+            <!-- 
 		 Note: This for-each-group/copy will fail if there are
 		 different namespace declarations sharing the same
 		 prefix. I.e. if there's both a
@@ -171,8 +171,8 @@
 		 in the same set of xsds, then this fails.		 
 	    -->
 	    <xsl:for-each-group select="//namespace::node()[not(name(.) = 'xml') and not(name(.) = '')]" group-by=".">
-	      <xsl:copy-of select="."/>
-	    </xsl:for-each-group>
+                <xsl:copy-of select="."/>
+            </xsl:for-each-group>
             <xsl:for-each select="xsd:import[not(@schemaLocation = preceding::xsd:import/@schemaLocation)]">
                 <xsl:copy-of select="."/>
             </xsl:for-each>
@@ -183,15 +183,15 @@
     <xsl:template match="xsd:import" mode="prune-imports"/>
 
     <xsl:template match="*[@vc:minVersion or @vc:maxVersion]" xmlns:vc="http://www.w3.org/2007/XMLSchema-versioning" mode="prune-imports">
-      <xsl:choose>
-	<xsl:when test="@vc:minVersion and ($xsdVersion &lt; @vc:minVersion)"/>
-	<xsl:when test="@vc:maxVersion and not($xsdVersion &lt; @vc:maxVersion)"/>
-	<xsl:otherwise>
-	  <xsl:copy>
-	    <xsl:apply-templates select="@*|node()" mode="prune-imports"/>
-	  </xsl:copy>
-	</xsl:otherwise>
-      </xsl:choose>
+        <xsl:choose>
+            <xsl:when test="@vc:minVersion and ($xsdVersion &lt; @vc:minVersion)"/>
+            <xsl:when test="@vc:maxVersion and not($xsdVersion &lt; @vc:maxVersion)"/>
+            <xsl:otherwise>
+                <xsl:copy>
+                    <xsl:apply-templates select="@*|node()" mode="prune-imports"/>
+                </xsl:copy>
+            </xsl:otherwise>
+        </xsl:choose>
     </xsl:template>
 
     <xsl:template match="@*|node()" mode="prune-imports">
@@ -233,20 +233,20 @@
     <xsl:template match="xsd:include" mode="included-xsds">
         <xsl:param name="stack"/>
         <xsd location="{replace(concat(replace(base-uri(.),'(.*/).*\.xsd', '$1'),@schemaLocation),'/\./','/')}"/>
-	<xsl:choose>
-	  <xsl:when test="$flattenXsds != 'false'">
-	    <xsl:if test="not(contains($stack, replace(concat(replace(base-uri(.),'(.*/).*\.xsd', '$1'),@schemaLocation),'/\./','/')))">
-	      <xsl:apply-templates select="document(@schemaLocation)//xsd:include" mode="included-xsds">
-		<xsl:with-param name="stack" select="concat($stack,' ',base-uri(.))"/>
-	      </xsl:apply-templates>
-	    </xsl:if>
-	  </xsl:when>
-	  <xsl:otherwise>
-	    <xsl:copy>
-		<xsl:apply-templates select="@*|node()" mode="included-xsds"/>
-	    </xsl:copy>
-	  </xsl:otherwise>
-	</xsl:choose>
+        <xsl:choose>
+            <xsl:when test="$flattenXsds != 'false'">
+        <xsl:if test="not(contains($stack, replace(concat(replace(base-uri(.),'(.*/).*\.xsd', '$1'),@schemaLocation),'/\./','/')))">
+            <xsl:apply-templates select="document(@schemaLocation)//xsd:include" mode="included-xsds">
+                        <xsl:with-param name="stack" select="concat($stack,' ',base-uri(.))"/>
+                    </xsl:apply-templates>
+                </xsl:if>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:copy>
+                    <xsl:apply-templates select="@*|node()" mode="included-xsds"/>
+                </xsl:copy>
+            </xsl:otherwise>
+        </xsl:choose>
     </xsl:template>
 
     <xsl:template match="text()|comment()|processing-instruction()" mode="included-xsds"/>
