@@ -146,16 +146,17 @@ This XSLT flattens or expands the path in the path attributes of the resource el
             <xsl:attribute name="path">
                 <xsl:for-each select="ancestor-or-self::wadl:resource">
                     <xsl:sort order="ascending" select="position()"/>
-                    <xsl:value-of select="@path"/>
+                    <xsl:value-of select="translate(@path,'/','')"/>
                     <xsl:if test="not(position() = last())">/</xsl:if>
                 </xsl:for-each>
             </xsl:attribute>
+            <xsl:apply-templates select="wadl:doc" mode="copy"/>
             <xsl:apply-templates select="ancestor-or-self::wadl:resource/wadl:param[@style = 'template' or @style = 'header' ]" mode="copy"/>
             <xsl:apply-templates select="wadl:method" mode="copy"/>
         </resource>
         <xsl:apply-templates mode="path-format"/>
     </xsl:template>
 
-    <xsl:template match="processing-instruction('base-uri')" mode="path-format"/>
+    <xsl:template match="processing-instruction('base-uri')|wadl:doc" mode="path-format"/>
 
 </xsl:stylesheet>
