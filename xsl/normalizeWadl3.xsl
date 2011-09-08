@@ -126,11 +126,11 @@ This XSLT flattens or expands the path in the path attributes of the resource el
 
     <xsl:template match="wadl:method[parent::wadl:resource]|wadl:param[ancestor::wadl:resource]" mode="path-format"/>
 
-    <xsl:template match="wadl:resource[not(child::wadl:method) and not(child::wadl:param)]" mode="path-format">
+    <xsl:template match="wadl:resource[not(child::wadl:method)]" mode="path-format">
         <xsl:apply-templates select="wadl:resource" mode="path-format"/>
     </xsl:template>
 
-    <xsl:template match="wadl:resource[wadl:method or wadl:param]" mode="path-format">
+    <xsl:template match="wadl:resource[wadl:method]" mode="path-format">
         <resource>
             <xsl:copy-of select="@*"/>
             <xsl:attribute name="path">
