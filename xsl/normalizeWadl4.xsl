@@ -54,9 +54,19 @@
   </xsl:template>
 
   <xsl:template match="wadl:param" mode="collect-types">
-    <xsl:variable name="prefix" select="substring-before(@type,':')"/>
+    <xsl:variable name="prefix">
+      <xsl:choose>
+        <xsl:when test="@rax:type"><xsl:value-of select="substring-before(@rax:type,':')"/></xsl:when>
+        <xsl:otherwise><xsl:value-of select="substring-before(@type,':')"/></xsl:otherwise>
+      </xsl:choose>
+    </xsl:variable>
     <xsl:variable name="namespace-uri" select="namespace-uri-for-prefix($prefix,.)"/>
-    <xsl:variable name="name" select="substring-after(@type,':')"/>
+    <xsl:variable name="name">
+      <xsl:choose>
+        <xsl:when test="@rax:type"><xsl:value-of select="substring-after(@rax:type,':')"/></xsl:when>
+        <xsl:otherwise><xsl:value-of select="substring-after(@type,':')"/></xsl:otherwise>
+      </xsl:choose>
+    </xsl:variable>
     
     <xsl:if test="not($namespace-uri = 'http://www.w3.org/2001/XMLSchema')">
       <rax:type prefix="{$prefix}" namespace="{$namespace-uri}" name="{$name}">
