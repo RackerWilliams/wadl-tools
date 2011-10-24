@@ -9,6 +9,8 @@
     <!-- This xslt lists and flattens xsds -->
 
     <xsl:output indent="yes"/>
+    
+    <xsl:param name="wadl2docbook">0</xsl:param>
 
     <xsl:param name="xsdVersion" select="xs:decimal(1.1)"/>
 
@@ -50,6 +52,11 @@
         </xsl:if>
     </xsl:variable>
 
+    <!-- 
+        This variable contains ALL the flattened xsds rooted at rax:xsd. 
+        We can use this to analyze all the xsds, e.g. looking for a 
+        particular type. 
+    -->
     <xsl:variable name="xsds">
        <xsl:for-each select="$catalog/xsd">
            <rax:xsd xmlns:rax="http://docs.rackspace.com/api"
@@ -64,6 +71,7 @@
            </rax:xsd>         
        </xsl:for-each>
     </xsl:variable>
+    
     <xsl:variable name="normalizeWadl2.xsl">
         <!-- Here we store the base-uri of this file so we can use it to find files relative to this file later -->
         <xsl:processing-instruction name="base-uri">

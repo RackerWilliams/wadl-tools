@@ -29,7 +29,7 @@
                 <method href="#createUser"/>
                 <resource id="user" path="{userId}">
                     <param name="userId" style="template" type="xsd:string"/>
-                    <method href="#getUser"/>
+                    <method href="#getUser" />
                     <method href="#deleteUser"/>
                     <method href="#updateUser"/>
                     <resource id="enabled" path="enabled">
@@ -116,13 +116,17 @@
                 required="false" type="auth:UserType"
                 default="CLOUD" />
             -->
+	    <param name="type"      style="query"
+                required="false" type="auth:UserType"
+                default="CLOUD" />
+
             <!-- Here's what I have to say: -->
-            <param name="type" style="query" required="false"
-                   type="xsd:string" default="CLOUD">
-                <option value="CLOUD"/>
-                <option value="NAST"/>
-                <option value="MOSSO"/>
-            </param>
+            <!-- <param name="type" style="query" required="false" -->
+            <!--        type="xsd:string" default="CLOUD"> -->
+            <!--     <option value="CLOUD"/> -->
+            <!--     <option value="NAST"/> -->
+            <!--     <option value="MOSSO"/> -->
+            <!-- </param> -->
             <!-- Achives the same thing, but makes SOAPUI Happy, need to
                  keep this consistent with UserType -->
         </request>
