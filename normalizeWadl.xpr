@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="13.0">
+    <meta>
+        <filters directoryPatterns="" filePatterns="" positiveFilePatterns="" showHiddenFiles="false"/>
+        <options/>
+    </meta>
+    <projectTree name="normalizeWadl.xpr">
+        <folder path="bin/"/>
+        <folder path="lib/"/>
+        <folder path="samples/"/>
+        <folder path="xsd/"/>
+        <folder path="xsl/"/>
+    </projectTree>
+</project>
