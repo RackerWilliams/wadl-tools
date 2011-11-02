@@ -42,14 +42,15 @@ function saxonize {
 function USAGE()
 {
     echo ""
-    echo "Usage: $(basename $0) [-?vfx] -w wadlFile"
+    echo "Usage: $(basename $0) [-?fvx] -w wadlFile"
     echo ""
     echo "OPTIONS:"
+    echo "       -w wadlFile: The wadl file to normalize."
     echo "       -f Wadl format. path or tree"
     echo "          path: Format resources in path format, "
     echo "                e.g. <resource path='foo/bar'/>"
     echo "          tree: Format resources in tree format, "
-    echo "                e.g. <resoruce path='foo'><resource path='bar'>..."
+    echo "                e.g. <resource path='foo'><resource path='bar'>..."
     echo "          If you omit the -f switch, the script makes no "
     echo "          changes to the structure of the resources."
     echo "       -v XSD Version (1.0 and 1.1 supported, 1.1 is the default)"

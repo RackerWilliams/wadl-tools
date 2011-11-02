@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
-
-<unauthorized xmlns="http://docs.rackspacecloud.com/auth/api/v1.1"
-              code="401">
-    <message>Oh no you don't</message>
-    <details>Error Details...</details>
-</unauthorized>

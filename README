@@ -41,6 +41,9 @@ schematron rules. In addition, wadl-tools adds a transformation
 scenario to oXygen to normalize wadls. Note that oXygen is a
 commercial tool available from http://www.oxygenxml.com/
 
+Note that the transformation scenario in oXygen currently does not
+validate the wadl or xsds as the shell script does.
+
 h2. Usage
 
 Invoke the script as follows:

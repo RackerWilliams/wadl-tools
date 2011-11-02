@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
-
-<authFault xmlns="http://docs.rackspacecloud.com/auth/api/v1.1"
-           code="500">
-    <message>Fault</message>
-    <details>Error Details...</details>
-</authFault>

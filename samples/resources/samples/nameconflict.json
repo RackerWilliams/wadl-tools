@@ -1,7 +1,0 @@
-{
-    "usernameConflict" : {
-        "code" : 409,
-        "message" : "Name Exists!",
-        "details" : "Error Details..."
-    }
-}

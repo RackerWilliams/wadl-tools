@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
-<token xmlns="http://docs.rackspacecloud.com/auth/api/v1.1"
-       id="asdasdasd-adsasdads-asdasdasd-adsadsasd"
-       userId="hub_cap"
-       userURL="/users/hub_cap"
-       created="2010-11-01T03:32:15-05:00"
-       expires="2010-11-02T03:32:15-05:00"/>

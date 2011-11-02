@@ -1,7 +1,0 @@
-{
-    "unauthorized" : {
-        "code" : 401,
-        "message" : "Oh no you don't",
-        "details" : "Error Details..."
-    }
-}

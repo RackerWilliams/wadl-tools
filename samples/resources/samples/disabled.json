@@ -1,7 +1,0 @@
-{
-    "userDisabled" : {
-        "code" : 403,
-        "message" : "The user has been disabled.",
-        "details" : "Error Details..."
-    }
-}

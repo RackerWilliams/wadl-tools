@@ -1,0 +1,118 @@
+@namespace wadl url('http://wadl.dev.java.net/2009/02');
+@namespace xs url('http://www.w3.org/2001/XMLSchema');
+@namespace oxy url('http://www.oxygenxml.com/extensions/author');
+*{
+    display : block;
+    padding-left:0.5em;
+    white-space :pre;
+}
+
+wadl|* {
+  white-space :normal;
+}
+
+wadl|text {
+  white-space :pre;
+}
+
+*:before {
+    content : '<' name() attributes()'>';
+    color : rgb(0,0,150);
+}
+wadl|*{
+    foldable:true;
+}
+*:after {
+    content : '</' name() '>';
+    color : rgb(0,0,150);
+}
+
+/* XML comments */
+oxy|*:before {
+    content : '';
+}
+oxy|*:after {
+    content : '';
+}
+oxy|comment {
+    display:block !important;
+    background-color: #F5F5FF !important;
+    white-space:pre !important;
+    margin: 20px !important;
+    padding: 4px !important;
+    border-right :2px solid gray !important;
+    border-bottom :2px solid gray !important;
+    border-left :1px dotted gray !important;
+    border-top :1px dotted gray !important;
+    margin-right:1em !important;
+}
+* > oxy|comment {
+    display:block !important;
+}
+
+/* stylesheet */
+
+wadl|stylesheet:before {
+    content : 'WADLT Stylesheet';
+    font-size : 2em;
+}
+wadl|stylesheet {
+    content : attributes();
+    color : gray;
+    padding-left : 0;
+}
+wadl|stylesheet:after {
+    content : '';
+}
+
+/* set fonts bigger on stylesheet components and reset them after */
+wadl|stylesheet > * {
+    font-size : 1.5em;
+}
+wadl|stylesheet > * > * {
+    font-size : medium;
+}
+
+/* first level */
+wadl|stylesheet > wadl|*:before {
+    color : blue;
+    font-size : 1.5em;
+    content : local-name();
+}
+wadl|stylesheet > wadl|* {
+    font-size:medium;
+    content : ' ' attributes();
+    background-color:#FCFFF2;
+    margin : 20px;
+    border-right :2px solid gray !important;
+    border-bottom :2px solid gray !important;
+    border-left :1px dotted gray !important;
+    border-top :1px dotted gray !important;
+}
+
+wadl|stylesheet > wadl|*:after {
+    content : '';
+}
+
+wadl|stylesheet > wadl|* > * {
+    color : black;
+}
+
+wadl|import,
+wadl|import-schema,
+wadl|include {
+    content : '';
+}
+wadl|import:after, 
+wadl|include:after {
+    link : attr(href, url);
+    content : ' ' url('img/link.png') '' attributes();
+}
+wadl|import-schema:after {
+    link : attr(schema-location, url);
+    content : ' ' url('img/link.png') '' attributes();
+}
+wadl|comment {
+    white-space:pre;
+}
+

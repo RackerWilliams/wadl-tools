@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project basedir=".." default="normalize" name="NormalizeWadl">
+    <property name="outdir" value="normalized"/>
+    <property name="xsdVersion" value="1.1"/>
+    <property name="flattenXsds" value="true"/>
+    <property name="wadlFormat" value="path"/>
+    
+    <target name="normalize">
+
+        <!--        <schemavalidate file="${wadlFileDir}/${wadlFile}"  disabledtd="yes" >
+            <schema file="${basedir}/xsd/wadl.xsd"  namespace="http://wadl.dev.java.net/2009/02"/>
+            </schemavalidate>  -->
+       
+
+        <xslt out="${outdir}/${wadlFile}" in="${wadlFileDir}/${wadlFile}"
+            style="xsl/normalizeWadl.xsl" classpath="${basedir}/../../lib/saxon9ee.jar"/>
+
+        <schemavalidate file="${outdir}/${wadlFile}">
+            <schema file="${basedir}/xsd/wadl.xsd" namespace="http://wadl.dev.java.net/2009/02"/>
+        </schemavalidate>
+
+        <!--        <schemavalidate>
+            <fileset dir="${outdir}">
+                <include  name="*.xsd"/>
+            </fileset>
+            <schema file="${basedir}/xsd/XMLSchema${xsdVersion}.xsd" namespace="http://www.w3.org/2001/XMLSchema"/>
+        </schemavalidate>   -->
+
+    </target> 
+</project>

@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
-
-<serviceUnavailable xmlns="http://docs.rackspacecloud.com/auth/api/v1.1"
-                    code="503">
-    <message>The Service is Unavailable at the Moment</message>
-    <details>Error Details...</details>
-</serviceUnavailable>

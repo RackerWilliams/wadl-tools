@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<!DOCTYPE catalog PUBLIC "-//OASIS//DTD Entity Resolution XML Catalog V1.0//EN"
+                         "http://www.oasis-open.org/committees/entity/release/1.0/catalog.dtd">
+<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">    
+    <rewriteSystem systemIdStartString="http://wadl.dev.java.net/2009/02 http://www.w3.org/Submission/wadl/" rewritePrefix="xsd/"/>
+
+</catalog>

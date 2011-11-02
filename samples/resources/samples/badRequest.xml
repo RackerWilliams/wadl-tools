@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
-
-<badRequest xmlns="http://docs.rackspacecloud.com/auth/api/v1.1"
-            code="400">
-    <message>Bad Request!</message>
-    <details>Error Details...</details>
-</badRequest>

@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
-
-<userDisabled xmlns="http://docs.rackspacecloud.com/auth/api/v1.1"
-              code="403">
-    <message>The user has been disabled.</message>
-    <details>Error Details...</details>
-</userDisabled>

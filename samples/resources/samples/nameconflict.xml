@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
-
-<usernameConflict xmlns="http://docs.rackspacecloud.com/auth/api/v1.1"
-                  code="409">
-    <message>Name Exists!</message>
-    <details>Error Details...</details>
-</usernameConflict>
