@@ -326,6 +326,8 @@
 
 
     <xsl:template match="wadl:grammars" mode="normalizeWadl2">
+      <xsl:choose>
+	<xsl:when test="$flattenXsds = 'yes'">
         <wadl:grammars>
             <xsl:for-each select="$catalog-wadl-xsds//xsd">
                 <xsl:comment>Original xsd: <xsl:value-of select="@location"/></xsl:comment>
@@ -336,6 +338,11 @@
                 </wadl:include>
             </xsl:for-each>
         </wadl:grammars>
+	</xsl:when>
+	<xsl:otherwise>
+	  <xsl:copy-of select="."/>
+	</xsl:otherwise>
+      </xsl:choose>
     </xsl:template>
 
     <!-- Flatten xsds -->
