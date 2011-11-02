@@ -1,26 +1,53 @@
 1. Overview
 
-The Wadl normalizer (normalizeWadl.sh) is a tool that takes as input a
-wadl file that is spread out into several files and has been written
-with methods split out and reused (e.g. <method
-href="#getVersionInfo"/>) and produces a version of the wadl flattened
-into a single file and with all of the references expanded. As part of
-this process, the tool flattens any xsds included in the wadl (or in
-any wadls pulled in to the source wadl) and any xsds imported into any
-of those xsds. These flattened xsds are written out as xsd-1.xsd,
-xsd-2.xsd, etc. All references to the xsds are updated.
+The Wadl normalizer (normalizeWadl.sh and the associated xslts) is a
+tool that takes as input a wadl file that is spread out into several
+files and has been written with methods split out and reused
+(e.g. <method href="#getVersionInfo"/>) and produces a version of the
+wadl flattened into a single file and with all of the references
+expanded. As part of this process, the tool flattens any xsds included
+in the wadl (or in any wadls pulled in to the source wadl) and any
+xsds imported into any of those xsds. These flattened xsds are written
+out as xsd-1.xsd, xsd-2.xsd, etc. All references to the xsds are
+updated.
 
 After producing the flattened wadl and xsds, the tool validates them
 against the appropriate w3c schema using xmllint.
 
 The flattened version of the wadl is easier to process, especially if
 the source wadl takes advantage of authoring convenience features such
-as resource_types.
+as resource_types. Even tools with bugs and limitations in their
+ability to handle wadls like SoapUI can consume a normalized wadl.
+
+In addition to flattening the wadl out, the normalizer also simplifies
+other constructs that are known to cause problems for tools like
+SoapUI. For example, give a wadl:param like the following where
+auth:UserType is an enumeration with three possible values:
+
+   <param name="type"      
+          style="query"
+          required="false" 
+          type="auth:UserType"
+          default="CLOUD" />
+
+The normalizer converts the wadl:param to a string:
+
+   <param name="type" 
+	  style="query" required="false" default="CLOUD"
+          type="xsd:string">
+          <option value="CLOUD"/>
+          <option value="NAST"/>
+          <option value="MOSSO"/>
+   </param>
 
 1.1. Dependencies
 
 The wadl normalizer is a bash script and requires that xmllint be in
-your path. Windows users should use the script with Cygwin.
+your path. Windows users should use the script with Cygwin. 
+
+These scripts require an xslt 2.0 processor such as Saxon. Saxon
+9.1.0.8, released under the Mozilla Public License is provided bundled
+with the scripts as a convenience.
 
 1.2. Limitations
 
@@ -76,15 +103,21 @@ resource elements:
 
  * Using "path" as the second argument causes the normalizer to
    flatten out the path attributes on resources. So:
+
    <resource path="nast" id="nastUsers">
             <resource path="{nastId}" id="nastId">
+
    becomes:
+
             <resource path="nast/{nastId}" id="nastUsers">
 
  * Using "tree" as the second arguments causes the normalizer to
    expand any flat path attributes on resource elements. So:
+
             <resource path="nast/{nastId}" id="nastUsers">
+
    becomes
+
             <resource path="nast" id="nastUsers">
                <resource path="{nastId}" id="nastId-d2e381">
 
@@ -103,12 +136,12 @@ Typing normalizeWadl.sh -? prints out a brief usage summary.
 * Wadl Specification: http://www.w3.org/Submission/wadl
 * Cygwin: http://www.cygwin.com/
 * Oxygen XML Editor: http://www.oxygenxml.com/
+* SoapUI: http://www.soapui.org/
 
 4. License
 
 These scripts are released under the Apache 2 license. See LICENSE for
 more information.
 
-These scripts require an xslt 2.0 processor such as Saxon. Saxon
-9.1.0.8, released under the Mozilla Public License is provided as a
-convenience.
+Saxon 9.1.0.8, released under the Mozilla Public License is provided
+with the scripts as a convenience.
