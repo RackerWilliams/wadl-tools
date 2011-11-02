@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project version="13.0">
+<project version="13.1">
     <meta>
         <filters directoryPatterns="" filePatterns="" positiveFilePatterns="" showHiddenFiles="false"/>
         <options/>
@@ -7,8 +7,10 @@
     <projectTree name="normalizeWadl.xpr">
         <folder path="bin/"/>
         <folder path="lib/"/>
-        <folder path="samples/"/>
+        <folder path="oxygen/"/>
         <folder path="xsd/"/>
         <folder path="xsl/"/>
+        <file name="../../Documents/rax/wadl-tools/LICENSE"/>
+        <file name="../../Documents/rax/wadl-tools/README"/>
     </projectTree>
 </project>

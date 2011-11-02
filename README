@@ -98,8 +98,17 @@ flattened out.
 
 Typing normalizeWadl.sh -? prints out a brief usage summary. 
 
-h2. References
+3. References
 
 * Wadl Specification: http://www.w3.org/Submission/wadl
 * Cygwin: http://www.cygwin.com/
 * Oxygen XML Editor: http://www.oxygenxml.com/
+
+4. License
+
+These scripts are released under the Apache 2 license. See LICENSE for
+more information.
+
+These scripts require an xslt 2.0 processor such as Saxon. Saxon
+9.1.0.8, released under the Mozilla Public License is provided as a
+convenience.
