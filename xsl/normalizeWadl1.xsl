@@ -347,9 +347,9 @@
 
     <xsl:template match="wadl:include" mode="adjust-xsd-path">
       <xsl:copy>
-	<xsl:attribute name="href">
+    	<xsl:attribute name="href">
 	  <xsl:choose>
-	    <xsl:when test="not(contains(.,':/')) and not(starts-with(.,'/'))"><xsl:value-of select="concat('../',@href)"/></xsl:when>
+	    <xsl:when test="not(contains(@href,':/')) and not(starts-with(@href,'/'))"><xsl:value-of select="concat('../',@href)"/></xsl:when>
 	    <xsl:otherwise><xsl:value-of select="."/></xsl:otherwise>
 	  </xsl:choose>
 	</xsl:attribute>

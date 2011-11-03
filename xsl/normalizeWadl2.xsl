@@ -181,8 +181,8 @@ Resolves hrefs on method and resource_type elements.
 	
 	<xsl:template match="wadl:param" mode="copy-nw2 normalizeWadl2">
 		<xsl:param name="generated-id"/>
-		<xsl:variable name="type-nsuri" select="namespace-uri-for-prefix(substring-before(@type,':'),.)"/>
-		<xsl:variable name="type" select="substring-after(@type,':')"/>
+		<xsl:variable name="type-nsuri" select="namespace-uri-for-prefix(substring-before(string(@type),':'),.)"/>
+		<xsl:variable name="type" select="substring-after(string(@type),':')"/>
 		<xsl:choose>
 			<xsl:when test="@default and $xsds/*/xsd:schema[@targetNamespace = $type-nsuri]/xsd:simpleType[@name = $type]/xsd:restriction[@base = 'xsd:string']/xsd:enumeration">
 				<xsl:copy>
