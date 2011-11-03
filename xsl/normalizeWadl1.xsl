@@ -211,7 +211,7 @@
             </xsl:choose></title><programlisting language="{@language}" xmlns="http://docbook.org/ns/docbook"><xsl:copy-of select="unparsed-text(concat($samples.path, '/',@href))"/></programlisting></example></xsl:template>
     <xsl:template match="/">
         <xsl:if test="$flattenXsds = 'false'">
-	<xsl:message>[INFO] Not flattening xsds. You must copy xsds into place manually.</xsl:message>
+	<xsl:message>[INFO] Not flattening xsds. Adjusting paths to xsds.</xsl:message>
         </xsl:if>
 
         <xsl:for-each select="$xsds/rax:xsd" xmlns:rax="http://docs.rackspace.com/api">
@@ -340,9 +340,20 @@
         </wadl:grammars>
 	</xsl:when>
 	<xsl:otherwise>
-	  <xsl:copy-of select="."/>
+	  <xsl:apply-templates mode="adjust-xsd-path"/>
 	</xsl:otherwise>
       </xsl:choose>
+    </xsl:template>
+
+    <xsl:template match="wadl:include" mode="adjust-xsd-path">
+      <xsl:copy>
+	<xsl:attribute name="href">
+	  <xsl:choose>
+	    <xsl:when test="not(contains(.,'://'))"><xsl:value-of select="concat('../',@href)"/></xsl:when>
+	    <xsl:otherwise><xsl:value-of select="."/></xsl:otherwise>
+	  </xsl:choose>
+	</xsl:attribute>
+      </xsl:copy>
     </xsl:template>
 
     <!-- Flatten xsds -->
