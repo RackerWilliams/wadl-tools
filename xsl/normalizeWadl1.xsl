@@ -340,7 +340,10 @@
         </wadl:grammars>
 	</xsl:when>
 	<xsl:otherwise>
+	    <xsl:copy>
+	        <xsl:copy-of select="@*"/>
 	  <xsl:apply-templates mode="adjust-xsd-path"/>
+	    </xsl:copy>
 	</xsl:otherwise>
       </xsl:choose>
     </xsl:template>
