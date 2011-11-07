@@ -14,7 +14,7 @@
 								<Integer>9</Integer>
 							</field>
 							<field name="uri">
-								<String>${frameworks}/wadl/wadl.nvdl</String>
+								<String>${frameworks}/wadl-tools/wadl.nvdl</String>
 							</field>
 						</docTypeSchema>
 					</field>
@@ -1138,7 +1138,7 @@
 														<Integer>2</Integer>
 													</field>
 													<field name="uri">
-														<String>${frameworks}/wadl/xsd/wadl.xsd</String>
+														<String>${frameworks}/wadl-tools/xsd/wadl.xsd</String>
 													</field>
 												</validationUnitSchema>
 											</field>
@@ -1179,7 +1179,7 @@
 														<Integer>7</Integer>
 													</field>
 													<field name="uri">
-														<String>${frameworks}/wadl/xsd/wadl.sch</String>
+														<String>${frameworks}/wadl-tools/xsd/wadl.sch</String>
 													</field>
 												</validationUnitSchema>
 											</field>
@@ -1232,7 +1232,7 @@
 														<Integer>9</Integer>
 													</field>
 													<field name="uri">
-														<String>${frameworks}/wadl/wadl.nvdl</String>
+														<String>${frameworks}/wadl-tools/wadl.nvdl</String>
 													</field>
 												</validationUnitSchema>
 											</field>
