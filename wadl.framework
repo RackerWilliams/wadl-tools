@@ -1017,7 +1017,7 @@
 									<null/>
 								</field>
 								<field name="name">
-									<String>Normalize Current WADL (xproc) - Experimental</String>
+									<String>Normalize Current WADL (xproc)</String>
 								</field>
 								<field name="baseURL">
 									<null/>
@@ -1252,7 +1252,7 @@
 						<String>WADL</String>
 					</field>
 					<field name="defaultTransformationScenarioName">
-						<String>Normalize WADL (Ant)</String>
+						<String>Normalize Current WADL (xproc)</String>
 					</field>
 					<field name="extensionsBundleClassName">
 						<null/>
