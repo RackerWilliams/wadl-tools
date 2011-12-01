@@ -6,6 +6,9 @@ import org.scalatest.junit.JUnitRunner
 import org.scalatest.GivenWhenThen
 import org.scalatest.matchers.ShouldMatchers._
 
+import WADLFormat._
+import XSDVersion._
+
 @RunWith(classOf[JUnitRunner])
 class NormalizeWADLSpec extends BaseWADLSpec with GivenWhenThen {
 
@@ -22,21 +25,19 @@ class NormalizeWADLSpec extends BaseWADLSpec with GivenWhenThen {
             <resources base="https://test.api.openstack.com">
               <resource path="a">
                 <resource path="b">
-                  <resource path="c">
-                  </resource>
+                  <resource path="c"/>
                 </resource>
               </resource>
               <resource path="d">
-                <resource path="e">
-                </resource>
+                <resource path="e"/>
               </resource>
               <resource path="f"/>
               </resources>
         </application>
       when("the WADL is normalized")
-      val normWADL = normalizeWADL(inWADL)
+      val normWADL = normalizeWADL(inWADL, TREE)
       then("the resources should remain unchanged")
-      inWADL should equal (normWADL)
+      conon(inWADL) should equal (conon(normWADL))
     }
 
     scenario ("The original WADL is in the path format") (pending)

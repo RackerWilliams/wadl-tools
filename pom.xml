@@ -17,6 +17,7 @@
         <saxon.version>9.3</saxon.version>
         <scala.test.version>1.6.1</scala.test.version>
         <junit.version>4.10</junit.version>
+        <xmlsec.version>1.4.6</xmlsec.version>
     </properties>
 
     <dependencies>
@@ -41,6 +42,11 @@
             <groupId>org.scalatest</groupId>
             <artifactId>scalatest_2.9.0</artifactId>
             <version>${scala.test.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.santuario</groupId>
+            <artifactId>xmlsec</artifactId>
+            <version>${xmlsec.version}</version>
         </dependency>
     </dependencies>
     <profiles>
