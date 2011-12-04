@@ -45,17 +45,22 @@ class NormalizeWADLSpec extends BaseWADLSpec with GivenWhenThen {
 	val inWADL =
         <application xmlns="http://wadl.dev.java.net/2009/02">
             <resources base="https://test.api.openstack.com">
-              <resource path="a/b/c"/>
+              <resource path="a/b/c">
+	        <method href="#foo"/>
+	      </resource>
               <resource path="d/e"/>
               <resource path="f"/>
             </resources>
+            <method id="foo"/>
         </application>
 	val treeWADL = 
         <application xmlns="http://wadl.dev.java.net/2009/02">
             <resources base="https://test.api.openstack.com">
               <resource path="a">
                 <resource path="b">
-                  <resource path="c"/>
+                  <resource path="c">
+	             <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo"/>
+                  </resource>
                 </resource>
               </resource>
               <resource path="d">
@@ -63,14 +68,55 @@ class NormalizeWADLSpec extends BaseWADLSpec with GivenWhenThen {
               </resource>
               <resource path="f"/>
               </resources>
+              <method id="foo"/>
         </application>
       when("the WADL is normalized")
       val normWADL = normalizeWADL(inWADL, TREE)
       then("the resources should now be in tree format")
       canon(treeWADL) should equal (canon(normWADL))
-
     }
 
-    scenario ("The original WADL is in mixed path/tree format") (pending)
+    scenario ("The original WADL is in mixed path/tree format"){
+	given("a WADL with resources in mixed path/tree format")
+	val inWADL =
+        <application xmlns="http://wadl.dev.java.net/2009/02">
+            <resources base="https://test.api.openstack.com">
+              <resource path="a/b">
+	        <resource path="c">
+  	         <method href="#foo"/>
+               </resource>
+	      </resource>
+              <resource path="d">
+	         <resource path="e/f"/>
+	      </resource>
+              <resource path="g"/>
+            </resources>
+            <method id="foo"/>
+        </application>
+	val treeWADL = 
+        <application xmlns="http://wadl.dev.java.net/2009/02">
+            <resources base="https://test.api.openstack.com">
+              <resource path="a">
+                <resource path="b">
+                  <resource path="c">
+	             <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo"/>
+                  </resource>
+                </resource>
+              </resource>
+              <resource path="d">
+                <resource path="e">
+                   <resource path="f"/>
+                </resource>
+              </resource>
+              <resource path="g"/>
+              </resources>
+              <method id="foo"/>
+        </application>
+      when("the WADL is normalized")
+      val normWADL = normalizeWADL(inWADL, TREE)
+      then("the resources should now be in tree format")
+      canon(treeWADL) should equal (canon(normWADL))
+    } 
+
   }
 }
