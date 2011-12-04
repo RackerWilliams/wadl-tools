@@ -39,9 +39,38 @@ class NormalizeWADLSpec extends BaseWADLSpec with GivenWhenThen {
       then("the resources should remain unchanged")
       canon(inWADL) should equal (canon(normWADL))
     }
+
+    scenario ("The original WADL is in the path format"){
+	given("a WADL with resources in path format")
+	val inWADL =
+        <application xmlns="http://wadl.dev.java.net/2009/02">
+            <resources base="https://test.api.openstack.com">
+              <resource path="a/b/c"/>
+              <resource path="d/e"/>
+              <resource path="f"/>
+            </resources>
+        </application>
+	val treeWADL = 
+        <application xmlns="http://wadl.dev.java.net/2009/02">
+            <resources base="https://test.api.openstack.com">
+              <resource path="a">
+                <resource path="b">
+                  <resource path="c"/>
+                </resource>
+              </resource>
+              <resource path="d">
+                <resource path="e"/>
+              </resource>
+              <resource path="f"/>
+              </resources>
+        </application>
+      when("the WADL is normalized")
+      val normWADL = normalizeWADL(inWADL, TREE)
+      then("the resources should now be in tree format")
+      canon(treeWADL) should equal (canon(normWADL))
+
     }
 
-    scenario ("The original WADL is in the path format") (pending)
     scenario ("The original WADL is in mixed path/tree format") (pending)
   }
 }
