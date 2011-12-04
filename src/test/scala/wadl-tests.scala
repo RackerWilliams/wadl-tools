@@ -37,7 +37,8 @@ class NormalizeWADLSpec extends BaseWADLSpec with GivenWhenThen {
       when("the WADL is normalized")
       val normWADL = normalizeWADL(inWADL, TREE)
       then("the resources should remain unchanged")
-      conon(inWADL) should equal (conon(normWADL))
+      canon(inWADL) should equal (canon(normWADL))
+    }
     }
 
     scenario ("The original WADL is in the path format") (pending)

@@ -40,7 +40,7 @@ class BaseWADLSpec extends FeatureSpec {
 
   private val tfactory = TransformerFactory.newInstance()
   private val transformer = tfactory.newTransformer(new StreamSource(normXSL))
-  private val cononicalizer = Canonicalizer.getInstance(Canonicalizer.ALGO_ID_C14N_OMIT_COMMENTS);
+  private val canonicalizer = Canonicalizer.getInstance(Canonicalizer.ALGO_ID_C14N_OMIT_COMMENTS);
 
   def normalizeWADL(in : NodeSeq,
                     format : WADLFormat.Format = DONT,
@@ -53,13 +53,13 @@ class BaseWADLSpec extends FeatureSpec {
     transformer.setParameter("flattenXsds", flattenXSDs.toString())
     transformer.transform (new StreamSource(new ByteArrayInputStream(in.toString().getBytes())), new StreamResult(bytesOut))
     XML.loadString (bytesOut.toString())
-  }
+}
 
   //
-  //  Given a node sequence returns a cononicalized XML string that
+  //  Given a node sequence returns a canonicalized XML string that
   //  can be used for comparisons.
   //
-  def conon(in : NodeSeq) = {
-    new String (cononicalizer.canonicalize(Utility.trim(in(0)).toString().getBytes()))
+  def canon(in : NodeSeq) = {
+    new String (canonicalizer.canonicalize(Utility.trim(in(0)).toString().getBytes()))
   }
 }
