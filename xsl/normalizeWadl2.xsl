@@ -37,10 +37,6 @@ Resolves hrefs on method and resource_type elements.
 		</xsl:choose>	
 	</xsl:variable>
 
-	<xsl:param name="base-uri">
-		<xsl:value-of select="normalize-space(//processing-instruction('base-uri')[1])"/>
-	</xsl:param>
-
 	<xsl:param name="strip-ids">0</xsl:param>
 
 	<!-- Need this to re-establish context within for-each -->
@@ -160,19 +156,20 @@ Resolves hrefs on method and resource_type elements.
 				</xsl:apply-templates>
 			</xsl:when>
 			<xsl:otherwise>
-				<xsl:comment><xsl:value-of select="local-name(.)"/> included from external wadl: <xsl:value-of select="concat($base-uri, substring-before(@href,'#'))"/></xsl:comment>
 				<xsl:variable name="doc">
 					<xsl:choose>
 						<xsl:when test="starts-with(normalize-space(@href),'http://') or starts-with(normalize-space(@href),'file://')">
-							<xsl:value-of select="substring-before(normalize-space(@href),'#')"/>
+						  <xsl:value-of select="substring-before(normalize-space(@href),'#')"/>
 						</xsl:when>
 						<xsl:otherwise>
-							<xsl:value-of select="concat($base-uri, substring-before(normalize-space(@href),'#'))"/>
+						  <!-- It must be a relative path -->
+						  <xsl:value-of select="resolve-uri(substring-before(normalize-space(@href),'#'),base-uri(.))"/>
 						</xsl:otherwise>
 					</xsl:choose>
 				</xsl:variable>
+				<xsl:comment><xsl:value-of select="local-name(.)"/> included from external wadl: <xsl:value-of select="$doc"/></xsl:comment>
 				<xsl:variable name="included-wadl">
-					<xsl:apply-templates select="document($doc,$root)/*" mode="normalizeWadl2"/>
+					<xsl:apply-templates select="document($doc)/*" mode="normalizeWadl2"/>
 				</xsl:variable>
 				<xsl:apply-templates select="$included-wadl//wadl:*[@id = substring-after(current()/@href,'#')]" mode="copy-nw2">
 					<xsl:with-param name="generated-id" select="generate-id(.)"/>
@@ -230,6 +227,7 @@ Resolves hrefs on method and resource_type elements.
 
 	<xsl:template match="wadl:resource[@type]" mode="normalizeWadl2">
         <xsl:param name="baseID" select="@id"/>
+	<xsl:param name="context" select="."/>
         <xsl:variable name="realBase">
             <xsl:choose>
                 <xsl:when test="@id and not($baseID)">
@@ -249,7 +247,7 @@ Resolves hrefs on method and resource_type elements.
 							<xsl:value-of select="substring-before(normalize-space(.),'#')"/>
 						</xsl:when>
 						<xsl:otherwise>
-							<xsl:value-of select="concat($base-uri, substring-before(normalize-space(.),'#'))"/>
+							<xsl:value-of select="resolve-uri(substring-before(normalize-space(.),'#'),base-uri($context))"/>
 						</xsl:otherwise>
 					</xsl:choose>
 				</xsl:variable>
