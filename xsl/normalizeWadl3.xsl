@@ -77,33 +77,49 @@ This XSLT flattens or expands the path in the path attributes of the resource el
         </resources>
     </xsl:template>
 
+    <xsl:template match="wadl:resource" mode="tree-format">
+      <xsl:param name="token-number">1</xsl:param>
+      <xsl:param name="resources"/>
+      <xsl:copy>
+            <xsl:copy-of select="@*"/>
+            <xsl:call-template name="group">
+                <xsl:with-param name="token-number" select="$token-number + 1"/>
+                <xsl:with-param name="resources" select="wadl:resource"/>
+            </xsl:call-template>
+	    <xsl:apply-templates select="*" mode="tree-format"/>
+      </xsl:copy>
+    </xsl:template>
+
     <xsl:template name="group">
         <xsl:param name="token-number"/>
         <xsl:param name="resources"/>
         <xsl:for-each-group select="$resources" group-by="wadl:tokens/wadl:token[$token-number]">
-
             <resource path="{current-grouping-key()}">
                 <xsl:if test="count(wadl:tokens/wadl:token) = $token-number">
-                    <xsl:apply-templates select="*[not(self::wadl:resource)]" mode="tree-format"/>
+		  <xsl:apply-templates select="*[not(self::wadl:resource)]" mode="tree-format"/>
+		  <xsl:call-template name="group">
+		    <xsl:with-param name="token-number" select="1"/>
+		    <xsl:with-param name="resources" select="wadl:resource"/>
+		  </xsl:call-template>
                 </xsl:if>
-                <!--
-                <xsl:call-template name="group">
-                    <xsl:with-param name="token-number" select="$token-number + 1"/>
-                    <xsl:with-param name="resources" select="wadl:resource"/>
-                </xsl:call-template>-->
-                <xsl:call-template name="group">
-                    <xsl:with-param name="token-number" select="1"/>
-                    <xsl:with-param name="resources" select="wadl:resource"/>
-                </xsl:call-template>
                 <xsl:call-template name="group">
                     <xsl:with-param name="token-number" select="$token-number + 1"/>
                     <xsl:with-param name="resources" select="current-group()"/>
                 </xsl:call-template>
+		<!-- <xsl:if test="count(wadl:tokens/wadl:token) = $token-number"> -->
+		<!--   <xsl:apply-templates select="wadl:resource" mode="tree-format"/> -->
+		<!-- </xsl:if> -->
             </resource>
         </xsl:for-each-group>
     </xsl:template>
 
-    <xsl:template match="wadl:tokens" mode="tree-format"/>
+    <xsl:template match="wadl:tokens" mode="tree-format">
+      <xsl:if test="$debug != 0">
+        <xsl:copy>
+            <xsl:apply-templates select="node() | @*" mode="tree-format"/>
+        </xsl:copy>
+      </xsl:if>
+    </xsl:template>
 
     <xsl:template match="node() | @*" mode="tokenize-paths">
         <xsl:copy>
