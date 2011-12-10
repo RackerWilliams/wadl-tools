@@ -348,7 +348,7 @@
 		 xmlns:auth="http://foo" and xmlns:auth="http://bar",
 		 in the same set of xsds, then this fails.		 
 	    -->
-	    <xsl:for-each-group select="//namespace::node()[not(name(.) = 'xml') and not(name(.) = '')]" group-by=".">
+	    <xsl:for-each-group select="//namespace::node()[not(name(.) = 'xml') and not(name(.) = '')]" group-by="name(.)">
                 <xsl:copy-of select="."/>
             </xsl:for-each-group>
             <xsl:for-each select="xsd:import[not(@schemaLocation = preceding::xsd:import/@schemaLocation)]">
