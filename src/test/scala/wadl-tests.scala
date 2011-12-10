@@ -32,7 +32,22 @@ class NormalizeWADLSpec extends BaseWADLSpec with GivenWhenThen {
                 <resource path="e"/>
               </resource>
               <resource path="f"/>
-              </resources>
+	      <resource path="g"/>
+	      <resource path="h">
+	      <resource path="i">
+		<resource path="{j}">
+		   <param name="j" style="template" stype="xsd:string" required="true"/>
+		   <resource path="k">
+		      <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo"/>
+		      <resource path="l">
+			 <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo"/>
+		      </resource>
+		   </resource>
+		</resource>
+	      </resource>
+	      </resource>
+            </resources>
+              <method id="foo"/>
         </application>
       when("the WADL is normalized")
       val normWADL = normalizeWADL(inWADL, TREE)
@@ -50,6 +65,13 @@ class NormalizeWADLSpec extends BaseWADLSpec with GivenWhenThen {
 	      </resource>
               <resource path="d/e"/>
               <resource path="f"/>
+	      <resource path="h/i/{j}/k">
+	        <param name="j" style="template" stype="xsd:string" required="true"/>
+	        <method href="#foo"/>
+	      </resource>
+	      <resource path="h/i/{j}/k/l">
+	        <method href="#foo"/>		
+	      </resource>
             </resources>
             <method id="foo"/>
         </application>
@@ -67,8 +89,21 @@ class NormalizeWADLSpec extends BaseWADLSpec with GivenWhenThen {
                 <resource path="e"/>
               </resource>
               <resource path="f"/>
-              </resources>
-              <method id="foo"/>
+	      <resource path="h">
+		 <resource path="i">
+		    <resource path="{j}">
+		       <param name="j" style="template" stype="xsd:string" required="true"/>
+		       <resource path="k">
+			  <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo"/>
+			  <resource path="l">
+			     <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo"/>
+			  </resource>
+		       </resource>
+		    </resource>
+		 </resource>
+	      </resource>
+             </resources>
+             <method id="foo"/>
         </application>
       when("the WADL is normalized")
       val normWADL = normalizeWADL(inWADL, TREE)
@@ -90,10 +125,11 @@ class NormalizeWADLSpec extends BaseWADLSpec with GivenWhenThen {
       <resource path="e/f"/>
     </resource>
     <resource path="g"/>
-    <resource path="h/i/j/k">
+    <resource path="h/i/{j}/k">
+      <param name="j" style="template" stype="xsd:string" required="true"/>
       <method href="#foo"/>
     </resource>
-    <resource path="h/i/j/k/l">
+    <resource path="h/i/{j}/k/l">
       <method href="#foo"/>		
     </resource>
   </resources>
@@ -117,7 +153,8 @@ class NormalizeWADLSpec extends BaseWADLSpec with GivenWhenThen {
       <resource path="g"/>
       <resource path="h">
          <resource path="i">
-            <resource path="j">
+            <resource path="{j}">
+               <param name="j" style="template" stype="xsd:string" required="true"/>
                <resource path="k">
                   <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo"/>
                   <resource path="l">

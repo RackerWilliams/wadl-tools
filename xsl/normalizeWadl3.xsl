@@ -86,8 +86,26 @@ This XSLT flattens or expands the path in the path attributes of the resource el
                 <xsl:with-param name="token-number" select="$token-number + 1"/>
                 <xsl:with-param name="resources" select="wadl:resource"/>
             </xsl:call-template>
-	    <xsl:apply-templates select="*" mode="tree-format"/>
+	    <xsl:apply-templates select="*" mode="tree-format">
+	      <xsl:with-param name="path" select="@path"/>	      
+	    </xsl:apply-templates>
       </xsl:copy>
+    </xsl:template>
+
+    <xsl:template match="wadl:param" mode="tree-format">
+      <xsl:param name="path"/>
+      <xsl:variable name="opencurly">{</xsl:variable>
+      <xsl:variable name="closecurly">}</xsl:variable>
+      <xsl:choose>
+	<xsl:when test="@style = 'template' and 
+			not(concat($opencurly,@name,$closecurly) = $path )">
+ 	</xsl:when>
+	<xsl:otherwise>
+	  <param>
+	    <xsl:apply-templates select="node() | @*[not(name(.) = 'rax:id')]" mode="tree-format"/>
+	  </param>
+	</xsl:otherwise>
+      </xsl:choose>
     </xsl:template>
 
     <xsl:template name="group">
@@ -95,8 +113,11 @@ This XSLT flattens or expands the path in the path attributes of the resource el
         <xsl:param name="resources"/>
         <xsl:for-each-group select="$resources" group-by="wadl:tokens/wadl:token[$token-number]">
             <resource path="{current-grouping-key()}">
-                <xsl:if test="count(wadl:tokens/wadl:token) = $token-number">
-		  <xsl:apply-templates select="*[not(self::wadl:resource)]" mode="tree-format"/>
+	      <xsl:apply-templates select="wadl:param[@style = 'template']" mode="tree-format">
+		<xsl:with-param name="path" select="current-grouping-key()"/>
+	      </xsl:apply-templates>	      
+	      <xsl:if test="count(wadl:tokens/wadl:token) = $token-number">
+		  <xsl:apply-templates select="*[not(self::wadl:resource) and not(self::wadl:param[@style = 'template'])]" mode="tree-format"/>
 		  <xsl:call-template name="group">
 		    <xsl:with-param name="token-number" select="1"/>
 		    <xsl:with-param name="resources" select="wadl:resource"/>
