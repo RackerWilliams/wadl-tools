@@ -22,8 +22,17 @@ object XSDVersion extends Enumeration {
   val XSD11 = Value("1.1")
 }
 
+object Converters {
+  //
+  //  Convert a node sequence to a Source
+  //
+  implicit def nodeSeq2Source(ns : NodeSeq) : Source = new StreamSource(new ByteArrayInputStream(ns.toString().getBytes()))
+}
+
+
 import WADLFormat._
 import XSDVersion._
+import Converters._
 
 class BaseWADLSpec extends FeatureSpec {
   //
@@ -51,7 +60,7 @@ class BaseWADLSpec extends FeatureSpec {
     transformer.setParameter("format",format.toString())
     transformer.setParameter("xsdVersion", xsdVersion.toString())
     transformer.setParameter("flattenXsds", flattenXSDs.toString())
-    transformer.transform (new StreamSource(new ByteArrayInputStream(in.toString().getBytes())), new StreamResult(bytesOut))
+    transformer.transform (in, new StreamResult(bytesOut))
     XML.loadString (bytesOut.toString())
 }
 
