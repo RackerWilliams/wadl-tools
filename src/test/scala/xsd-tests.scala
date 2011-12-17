@@ -20,6 +20,26 @@ class NormalizeXSDSpec extends BaseWADLSpec with GivenWhenThen {
     info("by correctly processing the schema versioning attributes")
     info("So that I can process the WADL with an XSD 1.0 tool")
 
+    scenario("The WADL does not contain an XSD") {
+      given("a WADL with no schema")
+      val inWADL =
+        <application xmlns="http://wadl.dev.java.net/2009/02">
+            <grammars>
+            </grammars>
+            <resources base="https://test.api.openstack.com">
+              <resource path="a">
+                <resource path="b">
+                  <resource path="c"/>
+                </resource>
+              </resource>
+            </resources>
+        </application>
+      when("the wadl is normalized")
+      val normWADL = normalizeWADL(inWADL, TREE, XSD10, true)
+      then("No additonal documents should be produced")
+      outputs.size should equal (0)
+    }
+
     scenario("The WADL points to a single XSD with no versioning schema") {
       given("a WADL with a schema")
       register("test://schema/1",
