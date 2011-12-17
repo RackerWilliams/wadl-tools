@@ -11,6 +11,7 @@ import javax.xml.xpath.XPath
 import javax.xml.xpath.XPathFactory
 import javax.xml.xpath.XPathExpression
 import javax.xml.xpath.XPathConstants
+import javax.xml.xpath.XPathException
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import org.apache.xml.security.c14n.Canonicalizer
@@ -65,20 +66,26 @@ trait XPathAssertions extends NamespaceContext {
   private val xpathFactory = XPathFactory.newInstance(NamespaceConstant.OBJECT_MODEL_SAXON, "net.sf.saxon.xpath.XPathFactoryImpl", null)
 
 
-  def registerPrefix(prefix : String, uri : String) : Unit = {
+  def register (prefix : String, uri : String) : Unit = {
     nsMap += (prefix -> uri)
   }
 
   def assert (node : NodeSeq, xpathString : String) {
-    val xpath = xpathFactory.newXPath()
-    val src : Source = node
+    try {
+      val xpath = xpathFactory.newXPath()
+      val src : Source = node
 
-    xpath.setNamespaceContext(this);
-    val xpathExpression = xpath.compile(xpathString)
-    val ret : Boolean = xpathExpression.evaluate(src.asInstanceOf[Any], XPathConstants.BOOLEAN).asInstanceOf[Boolean]
-    if (!ret) {
-      throw new TestFailedException ("Cannot evaluate "+xpathString, 4)
-    }
+      xpath.setNamespaceContext(this);
+      val xpathExpression = xpath.compile(xpathString)
+      val ret : Boolean = xpathExpression.evaluate(src.asInstanceOf[Any], XPathConstants.BOOLEAN).asInstanceOf[Boolean]
+      if (!ret) {
+        throw new TestFailedException ("XPath expression does not evaluate to true(): "+xpathString, 4)
+      }
+    } catch {
+      case xpe : XPathException => throw new TestFailedException("Error in XPath! ", xpe, 4)
+      case tf  : TestFailedException => throw tf
+      case unknown => throw new TestFailedException ("Unkown XPath assert error! ", unknown, 4)
+    } 
   }
 
   //
