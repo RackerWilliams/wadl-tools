@@ -40,9 +40,9 @@ class NormalizeXSDSpec extends BaseWADLSpec with GivenWhenThen {
       outputs.size should equal (0)
     }
 
-    scenario("The WADL points to a single XSD with no versioning schema") {
-      given("a WADL with a schema")
-      register("test://schema/1",
+    scenario("The WADL points to a single XSD with no versioning schema in a relative path") {
+      given("a WADL with a relative path schema")
+      register("test://path/to/test/schema1.xsd",
        <schema elementFormDefault="qualified"
           attributeFormDefault="unqualified"
           xmlns="http://www.w3.org/2001/XMLSchema"
@@ -50,10 +50,10 @@ class NormalizeXSDSpec extends BaseWADLSpec with GivenWhenThen {
           targetNamespace="test://schema/a">
              <element name="test" type="xsd:string"/>
        </schema>)
-      val inWADL =
+      val inWADL = ("test://path/to/test/test.wadl",
         <application xmlns="http://wadl.dev.java.net/2009/02">
             <grammars>
-               <include href="test://schema/1"/>
+               <include href="schema1.xsd"/>
             </grammars>
             <resources base="https://test.api.openstack.com">
               <resource path="a">
@@ -62,7 +62,7 @@ class NormalizeXSDSpec extends BaseWADLSpec with GivenWhenThen {
                 </resource>
               </resource>
             </resources>
-        </application>
+        </application>)
       when("the wadl is normalized")
       val normWADL = normalizeWADL(inWADL, TREE, XSD10, true)
       then("There should be a single XSD produced")
