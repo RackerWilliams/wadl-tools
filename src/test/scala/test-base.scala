@@ -31,6 +31,16 @@ object Converters {
   //
   implicit def nodeSeq2Source(ns : NodeSeq) : Source = new StreamSource(new ByteArrayInputStream(ns.toString().getBytes()))
 
+
+  //
+  //  Convert a node sequence string touple to a source with a system ID set
+  //
+  implicit def nodeSeqString2Source (nss : (String, NodeSeq)) : Source = {
+    val s = nodeSeq2Source(nss._2)
+    s.setSystemId(nss._1)
+    s
+  }
+
   //
   //  Convert a byte array stream result to a NodeSeq
   //
@@ -120,10 +130,10 @@ class BaseWADLSpec extends FeatureSpec with TransformHandler {
   private val transformer = transformerFactory.newTransformer(new StreamSource(normXSL))
   private val canonicalizer = Canonicalizer.getInstance(Canonicalizer.ALGO_ID_C14N_OMIT_COMMENTS);
 
-  def normalizeWADL(in : NodeSeq,
-                    format : WADLFormat.Format = DONT,
-                    xsdVersion : XSDVersion.Version = XSD11,
-                    flattenXSDs : Boolean = false) = {
+  def normalizeWADL(in : (String, NodeSeq),
+                    format : WADLFormat.Format,
+                    xsdVersion : XSDVersion.Version,
+                    flattenXSDs : Boolean) : NodeSeq = {
     val bytesOut = new ByteArrayOutputStream()
     transformer.clearParameters
     transformer.setParameter("format",format.toString())
@@ -131,7 +141,14 @@ class BaseWADLSpec extends FeatureSpec with TransformHandler {
     transformer.setParameter("flattenXsds", flattenXSDs.toString())
     transformer.transform (in, new StreamResult(bytesOut))
     XML.loadString (bytesOut.toString())
-}
+  }
+
+  def normalizeWADL(in : NodeSeq,
+                    format : WADLFormat.Format = DONT,
+                    xsdVersion : XSDVersion.Version = XSD11,
+                    flattenXSDs : Boolean = false) : NodeSeq = {
+    normalizeWADL(("", in), format, xsdVersion, flattenXSDs)
+  }
 
   //
   //  Given a node sequence returns a canonicalized XML string that
