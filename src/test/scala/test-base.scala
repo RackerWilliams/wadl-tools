@@ -10,6 +10,7 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import org.apache.xml.security.c14n.Canonicalizer
 import org.scalatest.FeatureSpec
+import net.sf.saxon.lib.OutputURIResolver
 
 object WADLFormat extends Enumeration {
   type Format = Value
@@ -29,6 +30,11 @@ object Converters {
   //  Convert a node sequence to a Source
   //
   implicit def nodeSeq2Source(ns : NodeSeq) : Source = new StreamSource(new ByteArrayInputStream(ns.toString().getBytes()))
+
+  //
+  //  Convert a byte array stream result to a NodeSeq
+  //
+  implicit def byteArrayStreamResult2NodeSeq(sr : StreamResult) : NodeSeq = XML.loadString (sr.getOutputStream().toString())
 }
 
 
@@ -36,9 +42,44 @@ import WADLFormat._
 import XSDVersion._
 import Converters._
 
-trait URLHandlers extends URIResolver {
+trait TransformHandler {
+  val transformerFactory = TransformerFactory.newInstance("net.sf.saxon.TransformerFactoryImpl", null)
+
+  private val defaultResolver = transformerFactory.getURIResolver
   private val sourceMap : Map[String, Source] = new HashMap[String, Source]()
-  val defaultResolver: URIResolver;
+  private val destMap : Map[String, StreamResult] = new HashMap[String, StreamResult]()
+
+  //
+  //  Set input URL resolver
+  //
+  transformerFactory.setURIResolver (new Object() with URIResolver {
+    //
+    //  URL resolver implementation, I'm ignoring the base input, I
+    //  don't think that we need it.
+    //
+    def resolve(href : String, base : String) = sourceMap getOrElse (href, defaultResolver.resolve(href, base)) 
+  })
+
+  //
+  //  Set output URL resolver
+  //
+  transformerFactory.setAttribute ("http://saxon.sf.net/feature/outputURIResolver", new Object() with OutputURIResolver {
+    //
+    //  Output URI resolver, again ignoring the base here...
+    //
+    def resolve(href : String, base : String) = {
+      val result = new StreamResult(new ByteArrayOutputStream())
+      destMap + (href -> result)
+      result
+    }
+
+    //
+    //  Close the result
+    //
+    def close(result : Result) = {
+      result.asInstanceOf[StreamResult].getOutputStream().close()
+    }
+  })
 
   //
   //  Add a source to consider
@@ -48,13 +89,24 @@ trait URLHandlers extends URIResolver {
   }
 
   //
-  //  URL resolver implementation, I'm ignoring the base input, I
-  //  don't think that we need it.
+  //  Get outputs
   //
-  def resolve(href : String, base : String) = sourceMap getOrElse (href, defaultResolver.resolve(href, base))
+  def outputs : Map[String, NodeSeq] = {
+    val result : Map[String, NodeSeq] = new HashMap[String, NodeSeq]()
+    destMap foreach ( (t) => result + (t._1 -> t._2))
+    result
+  }
+
+  //
+  //  Clear all!
+  //
+  def clearAll : Unit = {
+    destMap.clear()
+    sourceMap.clear()
+  }
 }
 
-class BaseWADLSpec extends FeatureSpec with URLHandlers {
+class BaseWADLSpec extends FeatureSpec with TransformHandler {
   //
   // The normalization XSL
   //
@@ -65,24 +117,8 @@ class BaseWADLSpec extends FeatureSpec with URLHandlers {
   //
   org.apache.xml.security.Init.init()
 
-  //
-  //  Make sure we use Saxon's XSL Transformer
-  //
-  System.setProperty("javax.xml.transform.TransformerFactory", "net.sf.saxon.TransformerFactoryImpl")
-
-  private val tfactory = TransformerFactory.newInstance()
-  private val transformer = tfactory.newTransformer(new StreamSource(normXSL))
+  private val transformer = transformerFactory.newTransformer(new StreamSource(normXSL))
   private val canonicalizer = Canonicalizer.getInstance(Canonicalizer.ALGO_ID_C14N_OMIT_COMMENTS);
-
-  //
-  //  Get the default resolver
-  //
-  val defaultResolver = tfactory.getURIResolver
-
-  //
-  //  Set ourselves as the resolver
-  //
-  tfactory.setURIResolver (this)
 
   def normalizeWADL(in : NodeSeq,
                     format : WADLFormat.Format = DONT,
