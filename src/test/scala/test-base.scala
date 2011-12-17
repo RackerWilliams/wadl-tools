@@ -69,7 +69,7 @@ trait TransformHandler {
     //
     def resolve(href : String, base : String) = {
       val result = new StreamResult(new ByteArrayOutputStream())
-      destMap + (href -> result)
+      destMap += (href -> result)
       result
     }
 
@@ -84,8 +84,8 @@ trait TransformHandler {
   //
   //  Add a source to consider
   //
-  def → (url : String, xml : NodeSeq) : Unit = {
-    sourceMap + (url -> xml)
+  def register (url : String, xml : NodeSeq) : Unit = {
+    sourceMap += (url -> xml)
   }
 
   //
@@ -93,7 +93,7 @@ trait TransformHandler {
   //
   def outputs : Map[String, NodeSeq] = {
     val result : Map[String, NodeSeq] = new HashMap[String, NodeSeq]()
-    destMap foreach ( (t) => result + (t._1 -> t._2))
+    destMap foreach ( (t) => result += (t._1 -> t._2))
     result
   }
 
