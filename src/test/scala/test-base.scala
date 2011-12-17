@@ -6,11 +6,18 @@ import scala.collection.mutable.HashMap
 import javax.xml.transform._
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
+import javax.xml.namespace.NamespaceContext
+import javax.xml.xpath.XPath
+import javax.xml.xpath.XPathFactory
+import javax.xml.xpath.XPathExpression
+import javax.xml.xpath.XPathConstants
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import org.apache.xml.security.c14n.Canonicalizer
 import org.scalatest.FeatureSpec
+import org.scalatest.TestFailedException
 import net.sf.saxon.lib.OutputURIResolver
+import net.sf.saxon.lib.NamespaceConstant
 
 object WADLFormat extends Enumeration {
   type Format = Value
@@ -51,6 +58,36 @@ object Converters {
 import WADLFormat._
 import XSDVersion._
 import Converters._
+
+
+trait XPathAssertions extends NamespaceContext {
+  private val nsMap : Map[String, String] = new HashMap[String, String]()
+  private val xpathFactory = XPathFactory.newInstance(NamespaceConstant.OBJECT_MODEL_SAXON, "net.sf.saxon.xpath.XPathFactoryImpl", null)
+
+
+  def registerPrefix(prefix : String, uri : String) : Unit = {
+    nsMap += (prefix -> uri)
+  }
+
+  def assert (node : NodeSeq, xpathString : String) {
+    val xpath = xpathFactory.newXPath()
+    val src : Source = node
+
+    xpath.setNamespaceContext(this);
+    val xpathExpression = xpath.compile(xpathString)
+    val ret : Boolean = xpathExpression.evaluate(src.asInstanceOf[Any], XPathConstants.BOOLEAN).asInstanceOf[Boolean]
+    if (!ret) {
+      throw new TestFailedException ("Cannot evaluate "+xpathString, 4)
+    }
+  }
+
+  //
+  //  Implementation of namespace context
+  //
+  def getNamespaceURI (prefix : String) = nsMap(prefix)
+  def getPrefix(uri : String) = null
+  def getPrefixes(uri : String) = null
+}
 
 trait TransformHandler {
   val transformerFactory = TransformerFactory.newInstance("net.sf.saxon.TransformerFactoryImpl", null)
@@ -118,7 +155,8 @@ trait TransformHandler {
   }
 }
 
-class BaseWADLSpec extends FeatureSpec with TransformHandler {
+class BaseWADLSpec extends FeatureSpec with TransformHandler 
+                                       with XPathAssertions {
   //
   // The normalization XSL
   //
