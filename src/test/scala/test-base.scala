@@ -98,6 +98,8 @@ trait TransformHandler {
     sourceMap += (url -> xml)
   }
 
+  def register (in : (String, NodeSeq)) : Unit = register(in._1, in._2)
+
   //
   //  Get outputs
   //
