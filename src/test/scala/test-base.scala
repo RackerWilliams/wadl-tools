@@ -1,6 +1,8 @@
 package com.rackspace.cloud.api.wadl.test
 
 import scala.xml._
+import scala.collection.mutable.Map
+import scala.collection.mutable.HashMap
 import javax.xml.transform._
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
@@ -34,7 +36,30 @@ import WADLFormat._
 import XSDVersion._
 import Converters._
 
-class BaseWADLSpec extends FeatureSpec {
+trait URLHandlers extends URIResolver {
+  private val sourceMap : Map[String, Source] = new HashMap[String, Source]()
+  val defaultResolver: URIResolver;
+
+  //
+  //  Add a source to consider
+  //
+  def → (url : String, xml : NodeSeq) : Unit = {
+    sourceMap + (url -> xml)
+  }
+
+  //
+  //  URL resolver implementation, I'm ignoring the base input, I
+  //  don't think that we need it.
+  //
+  def resolve(href : String, base : String) = sourceMap getOrElse (href, defaultResolver.resolve(href, base))
+}
+
+class BaseWADLSpec extends FeatureSpec with URLHandlers {
+  //
+  // The normalization XSL
+  //
+  val normXSL = "xsl/normalizeWadl.xsl"
+
   //
   //  Init xml security lib
   //
@@ -45,11 +70,19 @@ class BaseWADLSpec extends FeatureSpec {
   //
   System.setProperty("javax.xml.transform.TransformerFactory", "net.sf.saxon.TransformerFactoryImpl")
 
-  val normXSL = "xsl/normalizeWadl.xsl"
-
   private val tfactory = TransformerFactory.newInstance()
   private val transformer = tfactory.newTransformer(new StreamSource(normXSL))
   private val canonicalizer = Canonicalizer.getInstance(Canonicalizer.ALGO_ID_C14N_OMIT_COMMENTS);
+
+  //
+  //  Get the default resolver
+  //
+  val defaultResolver = tfactory.getURIResolver
+
+  //
+  //  Set ourselves as the resolver
+  //
+  tfactory.setURIResolver (this)
 
   def normalizeWADL(in : NodeSeq,
                     format : WADLFormat.Format = DONT,
