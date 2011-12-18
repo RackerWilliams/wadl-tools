@@ -210,7 +210,7 @@ class BaseWADLSpec extends FeatureSpec with TransformHandler
   // Override scenario so that it resets files
   //
   override protected def scenario(specText: String, testTags: Tag*)(testFun: => Unit) {
-    val testCall = {
+    def testCall = {
       testFun
       reset
     }
