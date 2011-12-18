@@ -7,17 +7,20 @@ import javax.xml.transform._
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.namespace.NamespaceContext
+import javax.xml.validation._
 import javax.xml.xpath.XPath
 import javax.xml.xpath.XPathFactory
 import javax.xml.xpath.XPathExpression
 import javax.xml.xpath.XPathConstants
 import javax.xml.xpath.XPathException
+import java.io.File
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import org.apache.xml.security.c14n.Canonicalizer
 import org.scalatest.FeatureSpec
 import org.scalatest.Tag
 import org.scalatest.TestFailedException
+import org.xml.sax.SAXException
 import net.sf.saxon.lib.OutputURIResolver
 import net.sf.saxon.lib.NamespaceConstant
 
@@ -61,6 +64,20 @@ import WADLFormat._
 import XSDVersion._
 import Converters._
 
+class SchemaAsserter(xsdSource : String) {
+  private val factory = SchemaFactory.newInstance("http://www.w3.org/2001/XMLSchema")
+  private val schema = factory.newSchema(new File(xsdSource))
+
+  def assert (node : NodeSeq) {
+    try {
+      val validator = schema.newValidator()
+      validator.validate(node)
+    } catch {
+      case se : SAXException => throw new TestFailedException("Validation Error: ", se, 4)
+      case unknown => throw new TestFailedException ("Unkown validation error! ", unknown, 4)
+    }
+  }
+}
 
 trait XPathAssertions extends NamespaceContext {
   private val nsMap : Map[String, String] = new HashMap[String, String]()
@@ -176,7 +193,9 @@ class BaseWADLSpec extends FeatureSpec with TransformHandler
   org.apache.xml.security.Init.init()
 
   private val transformer = transformerFactory.newTransformer(new StreamSource(normXSL))
-  private val canonicalizer = Canonicalizer.getInstance(Canonicalizer.ALGO_ID_C14N_OMIT_COMMENTS);
+  private val canonicalizer = Canonicalizer.getInstance(Canonicalizer.ALGO_ID_C14N_OMIT_COMMENTS)
+  private val xsd10Asserter = new SchemaAsserter("xsd/XMLSchema1.0.xsd")
+  private val wadlAsserter  = new SchemaAsserter("xsd/wadl.xsd")
 
   def normalizeWADL(in : (String, NodeSeq),
                     format : WADLFormat.Format,
@@ -196,6 +215,20 @@ class BaseWADLSpec extends FeatureSpec with TransformHandler
                     xsdVersion : XSDVersion.Version = XSD11,
                     flattenXSDs : Boolean = false) : NodeSeq = {
     normalizeWADL(("", in), format, xsdVersion, flattenXSDs)
+  }
+
+  //
+  //  Asserts that a node sequence is valid XSD 1.0
+  //
+  def assertXSD10 (in : NodeSeq) {
+    xsd10Asserter.assert(in)
+  }
+
+  //
+  //  Asserts that a node sequence is valid WADL
+  //
+  def assertWADL (in : NodeSeq) {
+    wadlAsserter.assert(in)
   }
 
   //
