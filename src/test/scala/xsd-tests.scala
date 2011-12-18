@@ -165,6 +165,39 @@ class NormalizeXSDSpec extends BaseWADLSpec with GivenWhenThen {
       commonSingleXSDAssertions
     }
 
+    scenario("The WADL points to a single XSD with an element with mix version 1.0/1.1") {
+      given("a WADL with an XSD element mix version 1.0/1.1")
+      register ("test://path/to/test/schema1.xsd",
+                <schema elementFormDefault="qualified"
+                        attributeFormDefault="unqualified"
+                        xmlns="http://www.w3.org/2001/XMLSchema"
+                        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                        xmlns:vc="http://www.w3.org/2007/XMLSchema-versioning"
+                        targetNamespace="test://schema/a">
+                    <element vc:minVersion="1.0" vc:maxVersion="1.1" name="test" type="xsd:string"/>
+                    <element vc:minVersion="1.1" name="test2" type="xsd:string"/>
+                </schema>)
+      val inWADL = ("test://path/to/test/mywadl.wadl",
+        <application xmlns="http://wadl.dev.java.net/2009/02">
+            <grammars>
+               <include href="schema1.xsd"/>
+            </grammars>
+            <resources base="https://test.api.openstack.com">
+              <resource path="a">
+                <resource path="b">
+                  <resource path="c"/>
+                </resource>
+              </resource>
+            </resources>
+        </application>)
+      when("the wadl is normalized")
+      val normWADL = normalizeWADL(inWADL, TREE, XSD10, true)
+      //
+      //  Call the common assertions above...
+      //
+      commonSingleXSDAssertions
+    }
+
     scenario("The WADL points to a single XSD with no versioning schema in an absolute path") {
       given("a WADL with an absolute path schema")
       register ("test://path/to/other/schema1.xsd",
