@@ -53,6 +53,7 @@
     </xsl:variable>
 
     <xsl:variable name="catalog-imported-xsds">
+
         <xsl:if test="$flattenXsds != 'false'">
             <xsl:for-each-group select="$catalog-wadl-xsds//xsd" group-by="@location">
             <xsl:apply-templates select="document(current-grouping-key())//xsd:import|document(current-grouping-key())//xsd:include" mode="catalog-imported-xsds"/>
@@ -511,7 +512,7 @@
     </xsl:template>
 
     <xsl:template match="wadl:include" mode="wadl-xsds">
-        <xsd location="{concat($wadl-uri,@href)}"/>
+        <xsd location="{resolve-uri(@href,$wadl-uri)}"/>
     </xsl:template>
 
     <xsl:template match="@href[not(substring-before(.,'#') = '')]" mode="wadl-xsds">
@@ -522,7 +523,7 @@
         <xsl:for-each select="tokenize(normalize-space(@type),' ')">
             <xsl:variable name="doc">
                 <xsl:choose>
-                    <xsl:when test="starts-with(normalize-space(.),'http://') or starts-with(normalize-space(.),'file://')">
+                    <xsl:when test="starts-with(normalize-space(.),'http://') or starts-with(normalize-space(.),'file://') or starts-with(normalize-space(.),'test://')">
                         <xsl:value-of select="substring-before(normalize-space(.),'#')"/>
                     </xsl:when>
                     <xsl:otherwise>
