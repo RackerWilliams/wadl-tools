@@ -56,6 +56,8 @@ class NormalizeXSDSpec extends BaseWADLSpec with GivenWhenThen {
       outputs.size should equal (1)
       and("The name of the XSD file produced should be WADLName-xsd-1.xsd")
       assert (outputs contains "mywadl-xsd-1.xsd")
+      and("It's a valid XSD 1.0 file")
+      assertXSD10(outputs("mywadl-xsd-1.xsd"))
       and("The resulting schema contains a single string element named test of type xsd:string")
       assert (outputs("mywadl-xsd-1.xsd"), "count(//xsd:element) = 1")
       assert (outputs("mywadl-xsd-1.xsd"), "/xsd:schema/xsd:element[@name='test']")
