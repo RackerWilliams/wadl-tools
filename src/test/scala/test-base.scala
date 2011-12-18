@@ -16,6 +16,7 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import org.apache.xml.security.c14n.Canonicalizer
 import org.scalatest.FeatureSpec
+import org.scalatest.Tag
 import org.scalatest.TestFailedException
 import net.sf.saxon.lib.OutputURIResolver
 import net.sf.saxon.lib.NamespaceConstant
@@ -154,9 +155,9 @@ trait TransformHandler {
   }
 
   //
-  //  Clear all!
+  //  Clear all data...
   //
-  def clearAll : Unit = {
+  def reset : Unit = {
     destMap.clear()
     sourceMap.clear()
   }
@@ -203,5 +204,16 @@ class BaseWADLSpec extends FeatureSpec with TransformHandler
   //
   def canon(in : NodeSeq) = {
     new String (canonicalizer.canonicalize(Utility.trim(in(0)).toString().getBytes()))
+  }
+
+  //
+  // Override scenario so that it resets files
+  //
+  override protected def scenario(specText: String, testTags: Tag*)(testFun: => Unit) {
+    val testCall = {
+      testFun
+      reset
+    }
+    super.scenario(specText, testTags:_*)(testCall)
   }
 }
