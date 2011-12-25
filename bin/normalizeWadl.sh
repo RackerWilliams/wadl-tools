@@ -44,7 +44,7 @@ function saxonize {
         -strip:all \
         -o:"$3" \
         format="$4-format" \
-	$5 $6 
+	$5 $6 $7 $8 $9 
     # Fail if the transformation failed.
     if [[ $? ]]
     then
@@ -69,20 +69,23 @@ function USAGE()
     echo "          changes to the structure of the resources."
     echo "       -v XSD Version (1.0 and 1.1 supported, 1.1 is the default)"
     echo "       -x true or false. Flatten xsds (true by default)."
+    echo "       -r keep or omit. Omit resource_type elements (keep by default)."
     exit 1
 }
 
 xsdVersion=1.1
 flattenXsds=true
+resource_types=keep
 
 #PROCESS ARGS
-while getopts ":v:w:f:x:?" Option
+while getopts ":v:w:f:x:r:?" Option
 do
     case $Option in
         v    ) xsdVersion=$OPTARG;;
         w    ) wadlFile=$OPTARG;;
         f    ) wadlFormat=$OPTARG;;
         x    ) flattenXsds=$OPTARG;;
+	r    ) resource_types=$OPTARG;;
         ?    ) USAGE
                exit 0;;
         *    ) echo ""
@@ -102,8 +105,9 @@ then
     xmllint --noent --noout --schema "$DIR/../xsd/wadl.xsd"  $wadlFile
     [ $? -eq 0 ] || exit 1
 
+
     # Process the document wadl document.
-    saxonize $wadlFile normalizeWadl.xsl $(dirname $wadlFile)/normalized/$(basename ${wadlFile%%.wadl}.wadl) "$wadlFormat" xsdVersion=$xsdVersion flattenXsds=$flattenXsds
+    saxonize $wadlFile normalizeWadl.xsl $(dirname $wadlFile)/normalized/$(basename ${wadlFile%%.wadl}.wadl) "$wadlFormat" xsdVersion=$xsdVersion flattenXsds=$flattenXsds resource_types=$resource_types
 
     # Validate the output wadl.
     xmllint --noout --schema "$DIR/../xsd/wadl.xsd"  $(dirname $wadlFile)/normalized/$(basename ${wadlFile%%.wadl}.wadl)

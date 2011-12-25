@@ -31,6 +31,12 @@ object WADLFormat extends Enumeration {
   val DONT = Value("dont-format")
 }
 
+object RType extends Enumeration {
+  type ResourceType = Value
+  val KEEP = Value("keep")
+  val OMIT = Value("omit")
+}
+
 object XSDVersion extends Enumeration {
   type Version = Value
   val XSD10 = Value("1.0")
@@ -62,6 +68,7 @@ object Converters {
 
 import WADLFormat._
 import XSDVersion._
+import RType._
 import Converters._
 
 class SchemaAsserter(xsdSource : String) {
@@ -200,11 +207,13 @@ class BaseWADLSpec extends FeatureSpec with TransformHandler
   def normalizeWADL(in : (String, NodeSeq),
                     format : WADLFormat.Format,
                     xsdVersion : XSDVersion.Version,
-                    flattenXSDs : Boolean) : NodeSeq = {
+                    flattenXSDs : Boolean,
+		    resource_types : RType.ResourceType) : NodeSeq = {
     val bytesOut = new ByteArrayOutputStream()
     transformer.clearParameters
     transformer.setParameter("format",format.toString())
     transformer.setParameter("xsdVersion", xsdVersion.toString())
+    transformer.setParameter("resource_types", resource_types.toString())
     transformer.setParameter("flattenXsds", flattenXSDs.toString())
     transformer.transform (in, new StreamResult(bytesOut))
     XML.loadString (bytesOut.toString())
@@ -213,8 +222,9 @@ class BaseWADLSpec extends FeatureSpec with TransformHandler
   def normalizeWADL(in : NodeSeq,
                     format : WADLFormat.Format = DONT,
                     xsdVersion : XSDVersion.Version = XSD11,
-                    flattenXSDs : Boolean = false) : NodeSeq = {
-    normalizeWADL(("", in), format, xsdVersion, flattenXSDs)
+                    flattenXSDs : Boolean = false,
+		    resource_types : RType.ResourceType = KEEP) : NodeSeq = {
+    normalizeWADL(("", in), format, xsdVersion, flattenXSDs, resource_types)
   }
 
   //

@@ -94,6 +94,7 @@ can pass in other parameters:
           changes to the structure of the resources.
        -v XSD Version (1.0 and 1.1 supported, 1.1 is the default)
        -x true or false. Flatten xsds (true by default).
+       -r keep or omit. Omit resource_type elements (keep by default).
 
 The -f argument controls the format of the path attributes on the
 resource elements:

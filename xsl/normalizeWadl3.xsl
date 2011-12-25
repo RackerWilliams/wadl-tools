@@ -24,6 +24,8 @@ This XSLT flattens or expands the path in the path attributes of the resource el
 
     <xsl:output indent="yes"/>
 
+    <xsl:param name="resource_types">keep</xsl:param>
+
     <xsl:param name="format">-format</xsl:param>
     <!-- path or tree -->
     
@@ -44,6 +46,14 @@ This XSLT flattens or expands the path in the path attributes of the resource el
             <xsl:apply-templates select="node() | @*" mode="prune-params"/>
         </xsl:copy>
     </xsl:template>
+
+    <xsl:template match="wadl:resource_type|wadl:link[@resource_type]" mode="keep-format tree-format path-format">
+      <xsl:if test="$resource_types = 'keep'">
+	<xsl:copy>
+	  <xsl:apply-templates select="@*|node()" mode="#current"/>
+	</xsl:copy>      
+      </xsl:if>
+    </xsl:template>    
 
     <xsl:template 
         match="wadl:param" 
@@ -199,8 +209,8 @@ This XSLT flattens or expands the path in the path attributes of the resource el
       		    </xsl:choose>
             </xsl:attribute>
             <xsl:apply-templates select="wadl:doc" mode="copy"/>
-            <xsl:apply-templates select="ancestor-or-self::wadl:resource/wadl:param[@style = 'template' or @style = 'header' ]" mode="copy"/>
-            <xsl:apply-templates select="wadl:method" mode="copy"/>
+            <xsl:apply-templates select="ancestor-or-self::wadl:resource/wadl:param[@style = 'template' or @style = 'header' ]" mode="path-format"/>
+            <xsl:apply-templates select="wadl:method" mode="path-format"/>
         </resource>
         <xsl:apply-templates mode="path-format"/>
     </xsl:template>
