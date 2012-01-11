@@ -24,25 +24,6 @@ import org.xml.sax.SAXException
 import net.sf.saxon.lib.OutputURIResolver
 import net.sf.saxon.lib.NamespaceConstant
 
-object WADLFormat extends Enumeration {
-  type Format = Value
-  val TREE = Value("tree-format")
-  val PATH = Value("path-format")
-  val DONT = Value("dont-format")
-}
-
-object RType extends Enumeration {
-  type ResourceType = Value
-  val KEEP = Value("keep")
-  val OMIT = Value("omit")
-}
-
-object XSDVersion extends Enumeration {
-  type Version = Value
-  val XSD10 = Value("1.0")
-  val XSD11 = Value("1.1")
-}
-
 object Converters {
   //
   //  Convert a node sequence to a Source
@@ -65,10 +46,9 @@ object Converters {
   implicit def byteArrayStreamResult2NodeSeq(sr : StreamResult) : NodeSeq = XML.loadString (sr.getOutputStream().toString())
 }
 
-
-import WADLFormat._
-import XSDVersion._
-import RType._
+import com.rackspace.cloud.api.wadl.WADLFormat._
+import com.rackspace.cloud.api.wadl.XSDVersion._
+import com.rackspace.cloud.api.wadl.RType._
 import Converters._
 
 class SchemaAsserter(xsdSource : String) {
@@ -205,10 +185,10 @@ class BaseWADLSpec extends FeatureSpec with TransformHandler
   private val wadlAsserter  = new SchemaAsserter("xsd/wadl.xsd")
 
   def normalizeWADL(in : (String, NodeSeq),
-                    format : WADLFormat.Format,
-                    xsdVersion : XSDVersion.Version,
+                    format : Format,
+                    xsdVersion : Version,
                     flattenXSDs : Boolean,
-		    resource_types : RType.ResourceType) : NodeSeq = {
+		    resource_types : ResourceType) : NodeSeq = {
     val bytesOut = new ByteArrayOutputStream()
     transformer.clearParameters
     transformer.setParameter("format",format.toString())
@@ -220,10 +200,10 @@ class BaseWADLSpec extends FeatureSpec with TransformHandler
   }
 
   def normalizeWADL(in : NodeSeq,
-                    format : WADLFormat.Format = DONT,
-                    xsdVersion : XSDVersion.Version = XSD11,
+                    format : Format = DONT,
+                    xsdVersion : Version = XSD11,
                     flattenXSDs : Boolean = false,
-		    resource_types : RType.ResourceType = KEEP) : NodeSeq = {
+		    resource_types : ResourceType = KEEP) : NodeSeq = {
     normalizeWADL(("", in), format, xsdVersion, flattenXSDs, resource_types)
   }
 

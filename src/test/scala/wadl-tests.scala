@@ -6,9 +6,9 @@ import org.scalatest.junit.JUnitRunner
 import org.scalatest.GivenWhenThen
 import org.scalatest.matchers.ShouldMatchers._
 
-import WADLFormat._
-import XSDVersion._
-import RType._
+import com.rackspace.cloud.api.wadl.WADLFormat._
+import com.rackspace.cloud.api.wadl.XSDVersion._
+import com.rackspace.cloud.api.wadl.RType._
 
 @RunWith(classOf[JUnitRunner])
 class NormalizeWADLSpec extends BaseWADLSpec with GivenWhenThen {
