@@ -24,32 +24,10 @@ import org.xml.sax.SAXException
 import net.sf.saxon.lib.OutputURIResolver
 import net.sf.saxon.lib.NamespaceConstant
 
-object Converters {
-  //
-  //  Convert a node sequence to a Source
-  //
-  implicit def nodeSeq2Source(ns : NodeSeq) : Source = new StreamSource(new ByteArrayInputStream(ns.toString().getBytes()))
-
-
-  //
-  //  Convert a node sequence string touple to a source with a system ID set
-  //
-  implicit def nodeSeqString2Source (nss : (String, NodeSeq)) : Source = {
-    val s = nodeSeq2Source(nss._2)
-    s.setSystemId(nss._1)
-    s
-  }
-
-  //
-  //  Convert a byte array stream result to a NodeSeq
-  //
-  implicit def byteArrayStreamResult2NodeSeq(sr : StreamResult) : NodeSeq = XML.loadString (sr.getOutputStream().toString())
-}
-
 import com.rackspace.cloud.api.wadl.WADLFormat._
 import com.rackspace.cloud.api.wadl.XSDVersion._
 import com.rackspace.cloud.api.wadl.RType._
-import Converters._
+import com.rackspace.cloud.api.wadl.Converters._
 
 class SchemaAsserter(xsdSource : String) {
   private val factory = SchemaFactory.newInstance("http://www.w3.org/2001/XMLSchema")
