@@ -22,10 +22,15 @@ object XSDVersion extends Enumeration {
 import WADLFormat._
 import RType._
 import XSDVersion._
+import Converters._
+
+import scala.xml._
+
+import java.io.ByteArrayOutputStream
 
 import javax.xml.transform._
 import javax.xml.transform.sax._
-import javax.xml.transform.stream.StreamSource
+import javax.xml.transform.stream._
 
 class WADLNormalizer(private var transformerFactory : TransformerFactory) {
 
@@ -44,7 +49,10 @@ class WADLNormalizer(private var transformerFactory : TransformerFactory) {
 
   def newTransformer = templates.newTransformer()
 
-  def normalizeWADL(in: Source, out: Result,
+  //
+  // Normalize a WADL given a source and result
+  //
+  def normalize(in: Source, out: Result,
                     format : Format = DONT,
                     xsdVersion : Version = XSD11,
                     flattenXSDs : Boolean = false,
@@ -58,4 +66,32 @@ class WADLNormalizer(private var transformerFactory : TransformerFactory) {
     transformer.setParameter("flattenXsds", flattenXSDs.toString())
     transformer.transform (in, out)
   }
+
+  //
+  // Normalize a WADL given a systemID and a NodeSeq, return a node
+  // sequence response.
+  //
+  def normalize(in : (String, NodeSeq),
+                format : Format,
+                xsdVersion : Version,
+                flattenXSDs : Boolean,
+		          resource_types : ResourceType) : NodeSeq = {
+    val bytesOut = new ByteArrayOutputStream()
+    normalize(in, new StreamResult(bytesOut),
+              format, xsdVersion, flattenXSDs,
+              resource_types);
+    XML.loadString (bytesOut.toString())
+  }
+
+  //
+  // Normalize a WADL given a NodeSeq and return a NodeSeq
+  //
+  def normalize(in : NodeSeq,
+                format : Format,
+                xsdVersion : Version,
+                flattenXSDs : Boolean,
+		          resource_types : ResourceType) : NodeSeq = {
+    normalize(("", in), format, xsdVersion, flattenXSDs, resource_types)
+  }
+
 }
