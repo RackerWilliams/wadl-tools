@@ -9,6 +9,7 @@ import org.scalatest.matchers.ShouldMatchers._
 import com.rackspace.cloud.api.wadl.WADLFormat._
 import com.rackspace.cloud.api.wadl.XSDVersion._
 import com.rackspace.cloud.api.wadl.RType._
+import com.rackspace.cloud.api.wadl.Converters._
 
 @RunWith(classOf[JUnitRunner])
 class NormalizeXSDSpec extends BaseWADLSpec with GivenWhenThen {
@@ -42,7 +43,7 @@ class NormalizeXSDSpec extends BaseWADLSpec with GivenWhenThen {
             </resources>
         </application>
       when("the wadl is normalized")
-      val normWADL = normalizeWADL(inWADL, TREE, XSD10, true, KEEP)
+      val normWADL = wadl.normalize(inWADL, TREE, XSD10, true, KEEP)
       then("No additonal documents should be produced")
       outputs.size should equal (0)
     }
@@ -95,7 +96,7 @@ class NormalizeXSDSpec extends BaseWADLSpec with GivenWhenThen {
             </resources>
         </application>)
       when("the wadl is normalized")
-      val normWADL = normalizeWADL(inWADL, TREE, XSD10, true, KEEP)
+      val normWADL = wadl.normalize(inWADL, TREE, XSD10, true, KEEP)
       //
       //  Call the common assertions above...
       //
@@ -128,7 +129,7 @@ class NormalizeXSDSpec extends BaseWADLSpec with GivenWhenThen {
             </resources>
         </application>)
       when("the wadl is normalized")
-      val normWADL = normalizeWADL(inWADL, TREE, XSD10, true, KEEP)
+      val normWADL = wadl.normalize(inWADL, TREE, XSD10, true, KEEP)
       //
       //  Call the common assertions above...
       //
@@ -160,7 +161,7 @@ class NormalizeXSDSpec extends BaseWADLSpec with GivenWhenThen {
             </resources>
         </application>)
       when("the wadl is normalized")
-      val normWADL = normalizeWADL(inWADL, TREE, XSD10, true, KEEP)
+      val normWADL = wadl.normalize(inWADL, TREE, XSD10, true, KEEP)
       //
       //  Call the common assertions above...
       //
@@ -193,7 +194,7 @@ class NormalizeXSDSpec extends BaseWADLSpec with GivenWhenThen {
             </resources>
         </application>)
       when("the wadl is normalized")
-      val normWADL = normalizeWADL(inWADL, TREE, XSD10, true, KEEP)
+      val normWADL = wadl.normalize(inWADL, TREE, XSD10, true, KEEP)
       //
       //  Call the common assertions above...
       //
@@ -224,7 +225,7 @@ class NormalizeXSDSpec extends BaseWADLSpec with GivenWhenThen {
             </resources>
         </application>)
       when("the wadl is normalized")
-      val normWADL = normalizeWADL(inWADL, TREE, XSD10, true, KEEP)
+      val normWADL = wadl.normalize(inWADL, TREE, XSD10, true, KEEP)
       //
       //  Call the common assertions above...
       //

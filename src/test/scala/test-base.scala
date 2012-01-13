@@ -28,6 +28,7 @@ import com.rackspace.cloud.api.wadl.WADLFormat._
 import com.rackspace.cloud.api.wadl.XSDVersion._
 import com.rackspace.cloud.api.wadl.RType._
 import com.rackspace.cloud.api.wadl.Converters._
+import com.rackspace.cloud.api.wadl.WADLNormalizer
 
 class SchemaAsserter(xsdSource : String) {
   private val factory = SchemaFactory.newInstance("http://www.w3.org/2001/XMLSchema")
@@ -147,43 +148,17 @@ trait TransformHandler {
 
 class BaseWADLSpec extends FeatureSpec with TransformHandler 
                                        with XPathAssertions {
-  //
-  // The normalization XSL
-  //
-  val normXSL = "xsl/normalizeWadl.xsl"
+
+  val wadl = new WADLNormalizer(transformerFactory)
 
   //
   //  Init xml security lib
   //
   org.apache.xml.security.Init.init()
 
-  private val transformer = transformerFactory.newTransformer(new StreamSource(normXSL))
   private val canonicalizer = Canonicalizer.getInstance(Canonicalizer.ALGO_ID_C14N_OMIT_COMMENTS)
   private val xsd10Asserter = new SchemaAsserter("xsd/XMLSchema1.0.xsd")
   private val wadlAsserter  = new SchemaAsserter("xsd/wadl.xsd")
-
-  def normalizeWADL(in : (String, NodeSeq),
-                    format : Format,
-                    xsdVersion : Version,
-                    flattenXSDs : Boolean,
-		    resource_types : ResourceType) : NodeSeq = {
-    val bytesOut = new ByteArrayOutputStream()
-    transformer.clearParameters
-    transformer.setParameter("format",format.toString())
-    transformer.setParameter("xsdVersion", xsdVersion.toString())
-    transformer.setParameter("resource_types", resource_types.toString())
-    transformer.setParameter("flattenXsds", flattenXSDs.toString())
-    transformer.transform (in, new StreamResult(bytesOut))
-    XML.loadString (bytesOut.toString())
-  }
-
-  def normalizeWADL(in : NodeSeq,
-                    format : Format = DONT,
-                    xsdVersion : Version = XSD11,
-                    flattenXSDs : Boolean = false,
-		    resource_types : ResourceType = KEEP) : NodeSeq = {
-    normalizeWADL(("", in), format, xsdVersion, flattenXSDs, resource_types)
-  }
 
   //
   //  Asserts that a node sequence is valid XSD 1.0

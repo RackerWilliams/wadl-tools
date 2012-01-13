@@ -42,21 +42,35 @@ class WADLNormalizer(private var transformerFactory : TransformerFactory) {
     throw new RuntimeException("Need a SAX-compatible TransformerFactory!")
   }
 
+  private val defaultResolver = transformerFactory.getURIResolver
+  private val sourceMap = Map ( "normalizeWadl.xsl" -> new StreamSource(getClass().getResourceAsStream("/normalizeWadl.xsl")),
+                               "normalizeWadl1.xsl" -> new StreamSource(getClass().getResourceAsStream("/normalizeWadl1.xsl")),
+                               "normalizeWadl2.xsl" -> new StreamSource(getClass().getResourceAsStream("/normalizeWadl2.xsl")),
+                               "normalizeWadl3.xsl" -> new StreamSource(getClass().getResourceAsStream("/normalizeWadl3.xsl")),
+                               "normalizeWadl4.xsl" -> new StreamSource(getClass().getResourceAsStream("/normalizeWadl4.xsl")))
+
+  //
+  //  Set input URL resolver
+  //
+  transformerFactory.setURIResolver (new Object() with URIResolver {
+    def resolve(href : String, base : String) = sourceMap getOrElse (href, defaultResolver.resolve(href,base))
+  })
+
   private val saxTransformerFactory : SAXTransformerFactory = transformerFactory.asInstanceOf[SAXTransformerFactory]
-  private val templates : Templates = saxTransformerFactory.newTemplates(new StreamSource(getClass().getResourceAsStream("normalizeWadl.xsl")))
+  private val templates : Templates = saxTransformerFactory.newTemplates(sourceMap("normalizeWadl.xsl"))
 
   def this() = this(null)
 
-  def newTransformer = templates.newTransformer()
+  def newTransformer = templates.newTransformer
 
   //
   // Normalize a WADL given a source and result
   //
   def normalize(in: Source, out: Result,
-                    format : Format = DONT,
-                    xsdVersion : Version = XSD11,
-                    flattenXSDs : Boolean = false,
-		              resource_types : ResourceType = KEEP) : Unit = {
+                    format : Format,
+                    xsdVersion : Version,
+                    flattenXSDs : Boolean,
+		              resource_types : ResourceType) : Unit = {
 
     val transformer = newTransformer
 
@@ -87,10 +101,10 @@ class WADLNormalizer(private var transformerFactory : TransformerFactory) {
   // Normalize a WADL given a NodeSeq and return a NodeSeq
   //
   def normalize(in : NodeSeq,
-                format : Format,
-                xsdVersion : Version,
-                flattenXSDs : Boolean,
-		          resource_types : ResourceType) : NodeSeq = {
+                format : Format = DONT,
+                xsdVersion : Version = XSD11,
+                flattenXSDs : Boolean = false,
+		          resource_types : ResourceType = KEEP) : NodeSeq = {
     normalize(("", in), format, xsdVersion, flattenXSDs, resource_types)
   }
 
