@@ -56,8 +56,8 @@ class WADLNormalizer(private var transformerFactory : TransformerFactory) {
     def resolve(href : String, base : String) = sourceMap getOrElse (href, defaultResolver.resolve(href,base))
   })
 
-  private val saxTransformerFactory : SAXTransformerFactory = transformerFactory.asInstanceOf[SAXTransformerFactory]
-  private val templates : Templates = saxTransformerFactory.newTemplates(sourceMap("normalizeWadl.xsl"))
+  val saxTransformerFactory : SAXTransformerFactory = transformerFactory.asInstanceOf[SAXTransformerFactory]
+  val templates : Templates = saxTransformerFactory.newTemplates(sourceMap("normalizeWadl.xsl"))
 
   def this() = this(null)
 
