@@ -3,7 +3,6 @@ package com.rackspace.cloud.api.wadl.test
 import scala.xml._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.GivenWhenThen
 import org.scalatest.matchers.ShouldMatchers._
 
 import com.rackspace.cloud.api.wadl.WADLFormat._
@@ -12,7 +11,7 @@ import com.rackspace.cloud.api.wadl.RType._
 import com.rackspace.cloud.api.wadl.Converters._
 
 @RunWith(classOf[JUnitRunner])
-class NormalizeWADLSpec extends BaseWADLSpec with GivenWhenThen {
+class NormalizeWADLSpec extends BaseWADLSpec {
 
   feature ("The WADL normalizer can convert WADL resources into a tree format") {
 

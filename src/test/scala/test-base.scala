@@ -18,6 +18,7 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import org.apache.xml.security.c14n.Canonicalizer
 import org.scalatest.FeatureSpec
+import org.scalatest.GivenWhenThen
 import org.scalatest.Tag
 import org.scalatest.TestFailedException
 import org.xml.sax.SAXException
@@ -147,7 +148,8 @@ trait TransformHandler {
 }
 
 class BaseWADLSpec extends FeatureSpec with TransformHandler 
-                                       with XPathAssertions {
+                                       with XPathAssertions
+                                       with GivenWhenThen {
 
   val wadl = new WADLNormalizer(transformerFactory)
 
