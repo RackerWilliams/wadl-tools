@@ -406,6 +406,8 @@ class NormalizeWADLSpec extends BaseWADLSpec {
            <grammars/>
            <resources base="https://test.api.openstack.com">
               <resource path="path/to/my">
+		  <resource path="/{j}">
+		   <param name="j" style="template" stype="xsd:string" required="true"/>
                    <resource path="/resource">
                      <method name="GET">
                         <response status="200 203"/>
@@ -414,6 +416,7 @@ class NormalizeWADLSpec extends BaseWADLSpec {
                         <response status="200"/>
                      </method>
                    </resource>
+		</resource>
               </resource>
            </resources>
         </application>
@@ -423,6 +426,8 @@ class NormalizeWADLSpec extends BaseWADLSpec {
            <grammars/>
            <resources base="https://test.api.openstack.com">
               <resource path="path/to/my">
+		  <resource path="{j}">
+		   <param name="j" style="template" stype="xsd:string" required="true"/>
                    <resource path="resource">
                      <method name="GET">
                         <response status="200 203"/>
@@ -431,6 +436,7 @@ class NormalizeWADLSpec extends BaseWADLSpec {
                         <response status="200"/>
                      </method>
                    </resource>
+		 </resource>
               </resource>
            </resources>
         </application>
@@ -445,6 +451,8 @@ class NormalizeWADLSpec extends BaseWADLSpec {
            <grammars/>
            <resources base="https://test.api.openstack.com">
               <resource path="path/to/my">
+		  <resource path="/{j}">
+		   <param name="j" style="template" stype="xsd:string" required="true"/>
                    <resource id="foo" path="/resource">
                      <method name="GET">
                         <response status="200 203"/>
@@ -453,6 +461,7 @@ class NormalizeWADLSpec extends BaseWADLSpec {
                         <response status="200"/>
                      </method>
                    </resource>
+		  </resource>
               </resource>
            </resources>
         </application>
@@ -462,6 +471,8 @@ class NormalizeWADLSpec extends BaseWADLSpec {
            <grammars/>
            <resources base="https://test.api.openstack.com">
               <resource path="path/to/my">
+		  <resource path="{j}">
+		   <param name="j" style="template" stype="xsd:string" required="true"/>
                    <resource id="foo" path="resource">
                      <method name="GET">
                         <response status="200 203"/>
@@ -470,6 +481,7 @@ class NormalizeWADLSpec extends BaseWADLSpec {
                         <response status="200"/>
                      </method>
                    </resource>
+                 </resource>
               </resource>
            </resources>
         </application>
