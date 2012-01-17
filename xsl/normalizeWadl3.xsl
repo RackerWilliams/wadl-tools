@@ -40,6 +40,10 @@ This XSLT flattens or expands the path in the path attributes of the resource el
         </xsl:copy>
     </xsl:template>
 
+    <xsl:template match="@path[starts-with(.,'/')]" mode="keep-format">
+      <xsl:attribute name="path"><xsl:value-of select="substring-after(.,'/')"/></xsl:attribute>
+    </xsl:template>
+
     <!--  prune-params mode: one final pass in tree-format mode where we prune redundant params  -->
     <xsl:template match="node() | @*" mode="prune-params">
         <xsl:copy>
