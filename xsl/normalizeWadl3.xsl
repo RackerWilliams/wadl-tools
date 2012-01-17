@@ -162,7 +162,7 @@ This XSLT flattens or expands the path in the path attributes of the resource el
         <resource>
             <xsl:copy-of select="@*"/>
             <tokens>
-                <xsl:for-each select="tokenize(replace(@path,'(.*)/$','$1'),'/')">
+                <xsl:for-each select="tokenize(replace(@path,'^/?(.+)/?$','$1'),'/')">
                     <token>
                         <xsl:value-of select="."/>
                     </token>
