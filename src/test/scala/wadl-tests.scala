@@ -533,9 +533,103 @@ class NormalizeWADLSpec extends BaseWADLSpec {
       then("the normalize wadls should be equivalent if the format is unchnaged")
       canon(wadl.normalize(inWADL, DONT, XSD11, true, OMIT)) should equal (canon(wadl.normalize(inWADL2, DONT, XSD11, true, OMIT)))
     }
+  }
 
+  feature ("The WADL normalizer can convert WADL resources into a path format") {
+
+    info("As a developer")
+    info("I want to be able to convert all resources in a WADL into a path format")
+    info("So that I can process the WADL in a consistent fashion and use the wadl to produce DocBook")
+
+    scenario ("The original WADL is in a tree format") {
+      given("a WADL with resources in tree format")
+      val inWADL =
+	<application xmlns="http://wadl.dev.java.net/2009/02">
+	  <resources base="https://test.api.openstack.com">
+	    <resource path="a">
+	      <resource path="b">
+		<resource path="c" id="rc">
+		  <method href="#foo"/>		
+		</resource>
+	      </resource>
+	    </resource>
+	    <resource path="d">
+	      <resource path="e" id="re">
+		<method href="#foo"/>
+	      </resource>
+	    </resource>
+	    <resource path="f" id="rf">
+	      <method href="#foo"/>
+	    </resource>
+	    <resource path="g" id="rg">
+	      <method href="#foo"/>
+	    </resource>    
+	    <resource path="h">
+	      <resource path="i">
+		<resource path="{j}">
+		  <param name="j" style="template" stype="xsd:string" required="true"/>
+		  <resource path="k" id="rk">
+		    <method href="#foo"/>
+		    <resource path="l" id="rl">
+		      <method href="#foo"/>
+		    </resource>
+		  </resource>
+		</resource>
+	      </resource>
+	    </resource>
+	</resources>
+	<method id="foo">
+	  <response status="200 203"/>
+	</method>
+	</application>
+      val outWADL =
+        <application xmlns="http://wadl.dev.java.net/2009/02">
+            <resources base="https://test.api.openstack.com">
+              <resource path="a/b/c" id="rc">
+	           <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo">
+                       <response status="200 203"/>
+                   </method>
+	      </resource>
+              <resource path="d/e" id="re">
+	           <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo">
+                       <response status="200 203"/>
+                   </method>
+	      </resource>
+              <resource path="f" id="rf">
+	           <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo">
+                       <response status="200 203"/>
+                   </method>
+	      </resource>
+	      <resource path="g" id="rg">
+	           <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo">
+                       <response status="200 203"/>
+                   </method>
+	      </resource>
+	      <resource path="h/i/{j}/k" id="rk">
+                      <param name="j" xmlns:rax="http://docs.rackspace.com/api" style="template" stype="xsd:string" required="true" rax:id=""/>
+	              <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo">
+                        <response status="200 203"/>
+                      </method>
+              </resource>
+	      <resource path="h/i/{j}/k/l" id="rl">
+                      <param name="j" xmlns:rax="http://docs.rackspace.com/api" style="template" stype="xsd:string" required="true" rax:id=""/>
+	              <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo">
+                        <response status="200 203"/>
+                      </method>
+	      </resource>
+            </resources>
+            <method id="foo">
+                 <response status="200 203"/>
+            </method>
+        </application>
+      when("the WADL is normalized")
+      val normWADL = wadl.normalize(inWADL, PATH)
+      then("the paths in the resource should be flattened")
+      canon(outWADL) should equal (canon(normWADL))
+    }
 
 
 
   }
+
 }
