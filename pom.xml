@@ -12,6 +12,32 @@
         jar, so that they can be accessed through maven.
     </description>
 
+    <repositories>
+        <repository>
+            <id>public.maven.research.rackspace.com</id>
+            <name>Rackspace Research</name>
+            <url>http://maven.research.rackspacecloud.com/content/groups/aggregate</url>
+        </repository>
+
+        <repository>
+            <id>releases.maven.research.rackspace.com</id>
+            <name>Rackspace Research Releases</name>
+            <url>http://maven.research.rackspacecloud.com/content/repositories/releases</url>
+        </repository>
+
+        <repository>
+            <id>trancecode.org</id>
+            <name>Trance Code Release Repo</name>
+            <url>http://maven.trancecode.org/releases/</url>
+        </repository>
+
+        <repository>
+            <id>snapshots.trancecode.org</id>
+            <name>Trance Code Snapshot Repo</name>
+            <url>http://maven.trancecode.org/snapshots/</url>
+        </repository>
+    </repositories>
+
     <properties>
         <scala.version>2.9.0</scala.version>
         <saxon.version>9.3</saxon.version>
