@@ -107,6 +107,27 @@
             </pluginRepositories>
         </profile>
     </profiles>
+
+    <scm>
+        <connection>scm:git:ssh://git@github.com:rackspace/wadl-tools.git</connection>
+    </scm>
+
+    <distributionManagement>
+        <repository>
+            <id>releases.maven.research.rackspacecloud.com</id>
+
+            <name>Rackspace Cloud Research Releases</name>
+            <url>http://maven.research.rackspacecloud.com/content/repositories/releases/</url>
+        </repository>
+
+        <snapshotRepository>
+            <id>snapshots.maven.research.rackspacecloud.com</id>
+
+            <name>Rackspace Cloud Research Snapshots</name>
+            <url>http://maven.research.rackspacecloud.com/content/repositories/snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
     <build>
         <sourceDirectory>src/main/scala</sourceDirectory>
         <testSourceDirectory>src/test/scala</testSourceDirectory>
