@@ -127,6 +127,7 @@ This XSLT flattens or expands the path in the path attributes of the resource el
         <xsl:param name="resources"/>
         <xsl:for-each-group select="$resources" group-by="wadl:tokens/wadl:token[$token-number]">
             <resource path="{current-grouping-key()}">
+	      <xsl:copy-of select="self::wadl:resource/@*[contains(name(),':')]"/>  
 	      <xsl:apply-templates select="wadl:param[@style = 'template']" mode="tree-format">
 		<xsl:with-param name="path" select="current-grouping-key()"/>
 	      </xsl:apply-templates>	      
