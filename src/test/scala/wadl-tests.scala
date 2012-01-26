@@ -418,7 +418,7 @@ class NormalizeWADLSpec extends BaseWADLSpec {
                <method name="GET">
                     <response status="200 203"/>
                 </method>
-                <resource path="to/my/resource">
+                <resource path="to/my/resource" rax:invisible="true">
                      <method name="GET">
                         <response status="200 203"/>
                      </method>
@@ -433,6 +433,9 @@ class NormalizeWADLSpec extends BaseWADLSpec {
       val normWADL  = wadl.normalize(inWADL, TREE, XSD11, false, OMIT)
       then ("The extension attribute should be preserved")
       assert (normWADL, "//wadl:resource[@path='path' and @rax:invisible='true']")
+      assert (normWADL, "//wadl:resource[@path='to' and @rax:invisible='true']")
+      assert (normWADL, "//wadl:resource[@path='my' and @rax:invisible='true']")
+      assert (normWADL, "//wadl:resource[@path='resource' and @rax:invisible='true']")
     }
 
     scenario ("The original WADL contains paths prefixed with / to be converted to TREE format"){
