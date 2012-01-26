@@ -419,6 +419,7 @@ class NormalizeWADLSpec extends BaseWADLSpec {
                     <response status="200 203"/>
                 </method>
                 <resource path="to/my/resource" rax:invisible="true">
+		     <rax:foo/>
                      <method name="GET">
                         <response status="200 203"/>
                      </method>
@@ -436,6 +437,10 @@ class NormalizeWADLSpec extends BaseWADLSpec {
       assert (normWADL, "//wadl:resource[@path='to' and @rax:invisible='true']")
       assert (normWADL, "//wadl:resource[@path='my' and @rax:invisible='true']")
       assert (normWADL, "//wadl:resource[@path='resource' and @rax:invisible='true']")
+      assert (normWADL, "//wadl:resource[@path='to']/rax:foo")
+      assert (normWADL, "//wadl:resource[@path='my']/rax:foo")
+      assert (normWADL, "//wadl:resource[@path='resource']/rax:foo")
+
     }
 
     scenario ("The original WADL contains paths prefixed with / to be converted to TREE format"){
