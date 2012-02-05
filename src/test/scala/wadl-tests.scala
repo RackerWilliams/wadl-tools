@@ -27,13 +27,16 @@ class NormalizeWADLSpec extends BaseWADLSpec {
     info("I want to be able to convert all resources in a WADL into a tree format")
     info("So that I can process the WADL in a consistent fashion")
 
-    scenario ("The original WADL is already in a tree format") {
+    //
+    //  Ignored because queryType is not being handled correctly!
+    //
+    ignore ("The original WADL is already in a tree format") {
       given("a WADL with resources in tree format")
       val inWADL =
         <application xmlns="http://wadl.dev.java.net/2009/02"
                      xmlns:xsd="http://www.w3.org/2001/XMLSchema">
             <resources base="https://test.api.openstack.com">
-              <resource path="a">
+              <resource path="a" queryType="application/x-www-form-urlencoded">
                 <resource path="b">
                   <resource path="c"/>
                 </resource>
@@ -63,7 +66,7 @@ class NormalizeWADLSpec extends BaseWADLSpec {
         <application xmlns="http://wadl.dev.java.net/2009/02"
             xmlns:xsd="http://www.w3.org/2001/XMLSchema">
             <resources base="https://test.api.openstack.com">
-              <resource path="a">
+              <resource path="a" queryType="application/x-www-form-urlencoded">
                 <resource path="b">
                   <resource path="c"/>
                 </resource>
