@@ -30,7 +30,8 @@ class NormalizeWADLSpec extends BaseWADLSpec {
     scenario ("The original WADL is already in a tree format") {
       given("a WADL with resources in tree format")
       val inWADL =
-        <application xmlns="http://wadl.dev.java.net/2009/02">
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema">
             <resources base="https://test.api.openstack.com">
               <resource path="a">
                 <resource path="b">
@@ -45,7 +46,7 @@ class NormalizeWADLSpec extends BaseWADLSpec {
 	      <resource path="h">
 	      <resource path="i">
 		<resource path="{j}">
-		   <param name="j" style="template" stype="xsd:string" required="true"/>
+		   <param name="j" style="template" type="xsd:string" required="true"/>
 		   <resource path="k">
 		      <method href="#foo"/>
 		      <resource path="l">
@@ -56,10 +57,11 @@ class NormalizeWADLSpec extends BaseWADLSpec {
 	      </resource>
 	      </resource>
             </resources>
-            <method id="foo"/>
+            <method name="GET" id="foo"/>
         </application>
       val outWADL =
-        <application xmlns="http://wadl.dev.java.net/2009/02">
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema">
             <resources base="https://test.api.openstack.com">
               <resource path="a">
                 <resource path="b">
@@ -74,21 +76,23 @@ class NormalizeWADLSpec extends BaseWADLSpec {
 	      <resource path="h">
 	      <resource path="i">
 		<resource path="{j}">
-		   <param name="j" style="template" stype="xsd:string" required="true"/>
+		   <param name="j" style="template" type="xsd:string" required="true" repeating="false"/>
 		   <resource path="k">
-		      <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo"/>
+		      <method name="GET" xmlns:rax="http://docs.rackspace.com/api" rax:id="foo"/>
 		      <resource path="l">
-			 <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo"/>
+			 <method name="GET" xmlns:rax="http://docs.rackspace.com/api" rax:id="foo"/>
 		      </resource>
 		   </resource>
 		</resource>
 	      </resource>
 	      </resource>
             </resources>
-            <method id="foo"/>
+            <method name="GET" id="foo"/>
         </application>
       when("the WADL is normalized")
       val normWADL = wadl.normalize(inWADL, TREE)
+      assertWADL(normWADL)
+      assertWADL(outWADL)
       then("the resources should remain unchanged")
       canon(outWADL) should equal (canon(normWADL))
     }
@@ -96,7 +100,8 @@ class NormalizeWADLSpec extends BaseWADLSpec {
     scenario ("The original WADL is already in a tree format and resource_types should be omitted") {
       given("a WADL with resources in tree format that uses resource_types")
       val inWADL =
-        <application xmlns="http://wadl.dev.java.net/2009/02">
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema">
             <resources base="https://test.api.openstack.com">
               <resource path="a">
                 <resource path="b">
@@ -111,7 +116,7 @@ class NormalizeWADLSpec extends BaseWADLSpec {
 	      <resource path="h">
 	      <resource path="i">
 		<resource path="{j}">
-		   <param name="j" style="template" stype="xsd:string" required="true">
+		   <param name="j" style="template" type="xsd:string" required="true">
 	              <link resource_type="#rtype" rel="self"/>
 		   </param>
 		   <resource path="k">
@@ -128,7 +133,8 @@ class NormalizeWADLSpec extends BaseWADLSpec {
             </resource_type> 
         </application>
       val outWADL = 
-        <application xmlns="http://wadl.dev.java.net/2009/02">
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema">
             <resources base="https://test.api.openstack.com">
               <resource path="a">
                 <resource path="b">
@@ -143,7 +149,7 @@ class NormalizeWADLSpec extends BaseWADLSpec {
 	      <resource path="h">
 	      <resource path="i">
 		<resource path="{j}">
-		   <param name="j" style="template" stype="xsd:string" required="true"/>
+		   <param name="j" style="template" type="xsd:string" required="true" repeating="false"/>
 		   <resource path="k">
 		      <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo"/>
 		      <resource path="l">
@@ -166,7 +172,8 @@ class NormalizeWADLSpec extends BaseWADLSpec {
     scenario ("The original WADL is in the path format"){
 	given("a WADL with resources in path format")
 	val inWADL =
-        <application xmlns="http://wadl.dev.java.net/2009/02">
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema">
             <resources base="https://test.api.openstack.com">
               <resource path="a/b/c">
 	        <method href="#foo"/>
@@ -174,7 +181,7 @@ class NormalizeWADLSpec extends BaseWADLSpec {
               <resource path="d/e"/>
               <resource path="f"/>
 	      <resource path="h/i/{j}/k">
-	        <param name="j" style="template" stype="xsd:string" required="true"/>
+	        <param name="j" style="template" type="xsd:string" required="true"/>
 	        <method href="#foo"/>
 	      </resource>
 	      <resource path="h/i/{j}/k/l">
@@ -184,7 +191,8 @@ class NormalizeWADLSpec extends BaseWADLSpec {
             <method id="foo"/>
         </application>
 	val treeWADL = 
-        <application xmlns="http://wadl.dev.java.net/2009/02">
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema">
             <resources base="https://test.api.openstack.com">
               <resource path="a">
                 <resource path="b">
@@ -200,7 +208,7 @@ class NormalizeWADLSpec extends BaseWADLSpec {
 	      <resource path="h">
 		 <resource path="i">
 		    <resource path="{j}">
-		       <param name="j" style="template" stype="xsd:string" required="true"/>
+		       <param name="j" style="template" type="xsd:string" required="true" repeating="false"/>
 		       <resource path="k">
 			  <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo"/>
 			  <resource path="l">
@@ -222,13 +230,14 @@ class NormalizeWADLSpec extends BaseWADLSpec {
     scenario ("The original WADL is in the path format and resource_types should be omitted"){
 	given("a WADL with resources in path format that uses resource_types")
 	val inWADL =
-        <application xmlns="http://wadl.dev.java.net/2009/02">
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema">
             <resources base="https://test.api.openstack.com">
               <resource path="a/b/c" type="#rtype"/>
               <resource path="d/e"/>
               <resource path="f"/>
 	      <resource path="h/i/{j}/k">
-	        <param name="j" style="template" stype="xsd:string" required="true">
+	        <param name="j" style="template" type="xsd:string" required="true">
                   <link resource_type="#rtype" rel="self"/>
 	        </param>
 	        <method href="#foo"/>
@@ -243,7 +252,8 @@ class NormalizeWADLSpec extends BaseWADLSpec {
             </resource_type> 
         </application>
 	val treeWADL = 
-        <application xmlns="http://wadl.dev.java.net/2009/02">
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema">
             <resources base="https://test.api.openstack.com">
               <resource path="a">
                 <resource path="b">
@@ -259,7 +269,7 @@ class NormalizeWADLSpec extends BaseWADLSpec {
 	      <resource path="h">
 		 <resource path="i">
 		    <resource path="{j}">
-		       <param name="j" style="template" stype="xsd:string" required="true"/>
+		       <param name="j" style="template" type="xsd:string" required="true" repeating="false"/>
 		       <resource path="k">
 			  <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo"/>
 			  <resource path="l">
@@ -282,7 +292,8 @@ class NormalizeWADLSpec extends BaseWADLSpec {
     scenario ("The original WADL is in mixed path/tree format"){
 	given("a WADL with resources in mixed path/tree format")
 	val inWADL =
-<application xmlns="http://wadl.dev.java.net/2009/02">
+<application xmlns="http://wadl.dev.java.net/2009/02"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <resources base="https://test.api.openstack.com">
     <resource path="a/b">
       <resource path="c">
@@ -294,7 +305,7 @@ class NormalizeWADLSpec extends BaseWADLSpec {
     </resource>
     <resource path="g"/>
     <resource path="h/i/{j}/k">
-      <param name="j" style="template" stype="xsd:string" required="true"/>
+      <param name="j" style="template" type="xsd:string" required="true"/>
       <method href="#foo"/>
     </resource>
     <resource path="h/i/{j}/k/l">
@@ -304,7 +315,8 @@ class NormalizeWADLSpec extends BaseWADLSpec {
   <method id="foo"/>
 </application>
 	val treeWADL = 
-<application xmlns="http://wadl.dev.java.net/2009/02">
+<application xmlns="http://wadl.dev.java.net/2009/02"
+      xmlns:xsd="http://www.w3.org/2001/XMLSchema">
    <resources base="https://test.api.openstack.com">
       <resource path="a">
          <resource path="b">
@@ -322,7 +334,7 @@ class NormalizeWADLSpec extends BaseWADLSpec {
       <resource path="h">
          <resource path="i">
             <resource path="{j}">
-               <param name="j" style="template" stype="xsd:string" required="true"/>
+               <param name="j" style="template" type="xsd:string" required="true" repeating="false"/>
                <resource path="k">
                   <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo"/>
                   <resource path="l">
@@ -345,7 +357,8 @@ class NormalizeWADLSpec extends BaseWADLSpec {
     scenario ("The original WADL is in mixed path/tree format and resource_types should be omitted"){
 	given("a WADL with resources in mixed path/tree format that uses resource_types")
 	val inWADL =
-<application xmlns="http://wadl.dev.java.net/2009/02">
+<application xmlns="http://wadl.dev.java.net/2009/02"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <resources base="https://test.api.openstack.com">
     <resource path="a/b">
       <resource path="c" type="#rtype"/>
@@ -355,7 +368,7 @@ class NormalizeWADLSpec extends BaseWADLSpec {
     </resource>
     <resource path="g"/>
     <resource path="h/i/{j}/k">
-      <param name="j" style="template" stype="xsd:string" required="true">
+      <param name="j" style="template" type="xsd:string" required="true">
          <link resource_type="#rtype" rel="self"/>
       </param>
       <method href="#foo"/>
@@ -370,7 +383,8 @@ class NormalizeWADLSpec extends BaseWADLSpec {
    </resource_type> 
 </application>
 	val treeWADL = 
-<application xmlns="http://wadl.dev.java.net/2009/02">
+<application xmlns="http://wadl.dev.java.net/2009/02"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema">
    <resources base="https://test.api.openstack.com">
       <resource path="a">
          <resource path="b">
@@ -388,7 +402,7 @@ class NormalizeWADLSpec extends BaseWADLSpec {
       <resource path="h">
          <resource path="i">
             <resource path="{j}">
-               <param name="j" style="template" stype="xsd:string" required="true"/>
+               <param name="j" style="template" type="xsd:string" required="true" repeating="false"/>
                <resource path="k">
                   <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo"/>
                   <resource path="l">
@@ -419,13 +433,13 @@ class NormalizeWADLSpec extends BaseWADLSpec {
                     <response status="200 203"/>
                 </method>
                 <resource path="to/my/resource" rax:invisible="true">
-		     <rax:foo/>
                      <method name="GET">
                         <response status="200 203"/>
                      </method>
                      <method name="DELETE">
                         <response status="200"/>
                      </method>
+		               <rax:foo/>
                 </resource>
               </resource>
            </resources>
@@ -446,12 +460,13 @@ class NormalizeWADLSpec extends BaseWADLSpec {
     scenario ("The original WADL contains paths prefixed with / to be converted to TREE format"){
 	   given("a WADL with / prefixed paths in mixed mode")
       val inWADL =
-        <application xmlns="http://wadl.dev.java.net/2009/02">
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+           xmlns:xsd="http://www.w3.org/2001/XMLSchema">
            <grammars/>
            <resources base="https://test.api.openstack.com">
               <resource path="path/to/my">
 		  <resource path="/{j}">
-		   <param name="j" style="template" stype="xsd:string" required="true"/>
+		   <param name="j" style="template" type="xsd:string" required="true"/>
                    <resource path="/resource">
                      <method name="GET">
                         <response status="200 203"/>
@@ -466,12 +481,13 @@ class NormalizeWADLSpec extends BaseWADLSpec {
         </application>
       and ("a WADL without the / prefix")
       val inWADL2 =
-        <application xmlns="http://wadl.dev.java.net/2009/02">
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+           xmlns:xsd="http://www.w3.org/2001/XMLSchema">
            <grammars/>
            <resources base="https://test.api.openstack.com">
               <resource path="path/to/my">
 		  <resource path="{j}">
-		   <param name="j" style="template" stype="xsd:string" required="true"/>
+		   <param name="j" style="template" type="xsd:string" required="true"/>
                    <resource path="resource">
                      <method name="GET">
                         <response status="200 203"/>
@@ -491,12 +507,13 @@ class NormalizeWADLSpec extends BaseWADLSpec {
     scenario ("The original WADL contains paths prefixed with / to be converted to PATH format"){
 	   given("a WADL with / prefixed paths in mixed mode")
       val inWADL =
-        <application xmlns="http://wadl.dev.java.net/2009/02">
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema">
            <grammars/>
            <resources base="https://test.api.openstack.com">
               <resource path="path/to/my">
 		  <resource path="/{j}">
-		   <param name="j" style="template" stype="xsd:string" required="true"/>
+		   <param name="j" style="template" type="xsd:string" required="true"/>
                    <resource id="foo" path="/resource">
                      <method name="GET">
                         <response status="200 203"/>
@@ -511,12 +528,13 @@ class NormalizeWADLSpec extends BaseWADLSpec {
         </application>
       and ("a WADL without the / prefix")
       val inWADL2 =
-        <application xmlns="http://wadl.dev.java.net/2009/02">
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+           xmlns:xsd="http://www.w3.org/2001/XMLSchema">
            <grammars/>
            <resources base="https://test.api.openstack.com">
               <resource path="path/to/my">
 		  <resource path="{j}">
-		   <param name="j" style="template" stype="xsd:string" required="true"/>
+		   <param name="j" style="template" type="xsd:string" required="true"/>
                    <resource id="foo" path="resource">
                      <method name="GET">
                         <response status="200 203"/>
@@ -536,12 +554,13 @@ class NormalizeWADLSpec extends BaseWADLSpec {
     scenario ("The original WADL contains paths prefixed with / to with the format unchanged"){
 	   given("a WADL with / prefixed paths in mixed mode")
       val inWADL =
-        <application xmlns="http://wadl.dev.java.net/2009/02">
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+           xmlns:xsd="http://www.w3.org/2001/XMLSchema">
            <grammars/>
            <resources base="https://test.api.openstack.com">
               <resource path="path/to/my">
 		  <resource path="/{j}">
-		   <param name="j" style="template" stype="xsd:string" required="true"/>
+		   <param name="j" style="template" type="xsd:string" required="true"/>
                    <resource id="foo" path="/resource">
                      <method name="GET">
                         <response status="200 203"/>
@@ -556,12 +575,13 @@ class NormalizeWADLSpec extends BaseWADLSpec {
         </application>
       and ("a WADL without the / prefix")
       val inWADL2 =
-        <application xmlns="http://wadl.dev.java.net/2009/02">
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+           xmlns:xsd="http://www.w3.org/2001/XMLSchema">
            <grammars/>
            <resources base="https://test.api.openstack.com">
               <resource path="path/to/my">
 		  <resource path="{j}">
-		   <param name="j" style="template" stype="xsd:string" required="true"/>
+		   <param name="j" style="template" type="xsd:string" required="true"/>
                    <resource id="foo" path="resource">
                      <method name="GET">
                         <response status="200 203"/>
@@ -588,7 +608,8 @@ class NormalizeWADLSpec extends BaseWADLSpec {
     scenario ("The original WADL is in a tree format") {
       given("a WADL with resources in tree format")
       val inWADL =
-	<application xmlns="http://wadl.dev.java.net/2009/02">
+	<application xmlns="http://wadl.dev.java.net/2009/02"
+                xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	  <resources base="https://test.api.openstack.com">
 	    <resource path="a">
 	      <resource path="b">
@@ -611,7 +632,7 @@ class NormalizeWADLSpec extends BaseWADLSpec {
 	    <resource path="h">
 	      <resource path="i">
 		<resource path="{j}">
-		  <param name="j" style="template" stype="xsd:string" required="true"/>
+		  <param name="j" style="template" type="xsd:string" required="true"/>
 		  <resource path="k" id="rk">
 		    <method href="#foo"/>
 		    <resource path="l" id="rl">
@@ -622,47 +643,48 @@ class NormalizeWADLSpec extends BaseWADLSpec {
 	      </resource>
 	    </resource>
 	</resources>
-	<method id="foo">
+	<method name="GET" id="foo">
 	  <response status="200 203"/>
 	</method>
 	</application>
       val outWADL =
-        <application xmlns="http://wadl.dev.java.net/2009/02">
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema">
             <resources base="https://test.api.openstack.com">
-              <resource path="a/b/c" id="rc">
-	           <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo">
+              <resource path="a/b/c" id="rc" queryType="application/x-www-form-urlencoded">
+	           <method name="GET" xmlns:rax="http://docs.rackspace.com/api" rax:id="foo">
                        <response status="200 203"/>
                    </method>
 	      </resource>
-              <resource path="d/e" id="re">
-	           <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo">
+              <resource path="d/e" id="re" queryType="application/x-www-form-urlencoded">
+	           <method name="GET" xmlns:rax="http://docs.rackspace.com/api" rax:id="foo">
                        <response status="200 203"/>
                    </method>
 	      </resource>
-              <resource path="f" id="rf">
-	           <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo">
+              <resource path="f" id="rf" queryType="application/x-www-form-urlencoded">
+	           <method name="GET" xmlns:rax="http://docs.rackspace.com/api" rax:id="foo">
                        <response status="200 203"/>
                    </method>
 	      </resource>
-	      <resource path="g" id="rg">
-	           <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo">
+	      <resource path="g" id="rg" queryType="application/x-www-form-urlencoded">
+	           <method name="GET" xmlns:rax="http://docs.rackspace.com/api" rax:id="foo">
                        <response status="200 203"/>
                    </method>
 	      </resource>
-	      <resource path="h/i/{j}/k" id="rk">
-                      <param name="j" xmlns:rax="http://docs.rackspace.com/api" style="template" stype="xsd:string" required="true" rax:id=""/>
-	              <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo">
+	      <resource path="h/i/{j}/k" id="rk" queryType="application/x-www-form-urlencoded">
+                      <param name="j" xmlns:rax="http://docs.rackspace.com/api" style="template" type="xsd:string" required="true" rax:id="" repeating="false"/>
+	              <method name="GET" xmlns:rax="http://docs.rackspace.com/api" rax:id="foo">
                         <response status="200 203"/>
                       </method>
               </resource>
-	      <resource path="h/i/{j}/k/l" id="rl">
-                      <param name="j" xmlns:rax="http://docs.rackspace.com/api" style="template" stype="xsd:string" required="true" rax:id=""/>
-	              <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo">
+	      <resource path="h/i/{j}/k/l" id="rl" queryType="application/x-www-form-urlencoded">
+                      <param name="j" xmlns:rax="http://docs.rackspace.com/api" style="template" type="xsd:string" required="true" rax:id="" repeating="false"/>
+	              <method name="GET" xmlns:rax="http://docs.rackspace.com/api" rax:id="foo">
                         <response status="200 203"/>
                       </method>
 	      </resource>
             </resources>
-            <method id="foo">
+            <method name="GET" id="foo">
                  <response status="200 203"/>
             </method>
         </application>
