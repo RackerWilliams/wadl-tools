@@ -504,14 +504,14 @@ class NormalizeWADLSpec extends BaseWADLSpec {
       canon(wadl.normalize(inWADL, TREE, XSD11, true, OMIT)) should equal (canon(wadl.normalize(inWADL2, TREE, XSD11, true, OMIT)))
     }
 
-    scenario ("The original WADL contains paths prefixed with / to be converted to PATH format"){
+    scenario ("The original WADL contains paths starting and ending  with / to be converted to PATH format"){
 	   given("a WADL with / prefixed paths in mixed mode")
       val inWADL =
         <application xmlns="http://wadl.dev.java.net/2009/02"
                      xmlns:xsd="http://www.w3.org/2001/XMLSchema">
            <grammars/>
            <resources base="https://test.api.openstack.com">
-              <resource path="path/to/my">
+              <resource path="path/to/my/">
 		  <resource path="/{j}">
 		   <param name="j" style="template" type="xsd:string" required="true"/>
                    <resource id="foo" path="/resource">
