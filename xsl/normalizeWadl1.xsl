@@ -411,7 +411,7 @@
     	<xsl:attribute name="href">
 	  <xsl:choose>
 	    <xsl:when test="not(contains(@href,':/')) and not(starts-with(@href,'/'))"><xsl:value-of select="concat('../',@href)"/></xsl:when>
-	    <xsl:otherwise><xsl:value-of select="."/></xsl:otherwise>
+	    <xsl:otherwise><xsl:value-of select="@href"/></xsl:otherwise>
 	  </xsl:choose>
 	</xsl:attribute>
       </xsl:copy>
