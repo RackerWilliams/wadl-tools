@@ -611,6 +611,8 @@ class NormalizeWADLSpec extends BaseWADLSpec {
                                            "= 'test://schema/a'")
       assert (normWADL, "local-name-from-QName(resolve-QName(//wadl:param[@name='yn'][1]/@type, //wadl:param[@name='yn'][1])) "+
                                            "= 'yesno'")
+      assert (normWADL, "local-name-from-QName(resolve-QName(//wadl:resource[@path='{yn}'][1]/wadl:method/wadl:request/wadl:representation/@element, //wadl:resource[@path='{yn}'][1]/wadl:method/wadl:request/wadl:representation)) " + 
+					  "= 'credentials'")
       and ("The grammar files shoud remain included")
       assert (normWADL, "/wadl:application/wadl:grammars/wadl:include/@href = 'test://simple.xsd'")
     }
@@ -630,6 +632,9 @@ class NormalizeWADLSpec extends BaseWADLSpec {
               </resource>
            </resources>
            <method id="getMethod" name="GET">
+	        <request>
+	  	  <representation mediaType="application/xml" element="credentials"/>
+	        </request>
                <response status="200 203"/>
            </method>
         </application>
@@ -674,6 +679,9 @@ class NormalizeWADLSpec extends BaseWADLSpec {
              </resource>
            </resources>
            <method id="getMethod" name="GET">
+	        <request>
+	  	  <representation mediaType="application/xml" element="credentials"/>
+	        </request>
                <response status="200 203"/>
            </method>
         </application>
@@ -714,6 +722,9 @@ class NormalizeWADLSpec extends BaseWADLSpec {
                </resource>
            </resources>
            <method id="getMethod" name="GET">
+	        <request>
+	  	  <representation mediaType="application/xml" element="credentials"/>
+	        </request>
                <response status="200 203"/>
            </method>
         </application>
@@ -750,6 +761,9 @@ class NormalizeWADLSpec extends BaseWADLSpec {
               </wadl:resource>
            </wadl:resources>
            <wadl:method id="getMethod" name="GET">
+	        <wadl:request>
+	  	  <wadl:representation mediaType="application/xml" element="credentials"/>
+	        </wadl:request>
                <wadl:response status="200 203"/>
            </wadl:method>
         </wadl:application>
@@ -794,6 +808,9 @@ class NormalizeWADLSpec extends BaseWADLSpec {
              </wadl:resource>
            </wadl:resources>
            <wadl:method id="getMethod" name="GET">
+	        <wadl:request>
+	  	  <wadl:representation mediaType="application/xml" element="credentials"/>
+	        </wadl:request>
                <wadl:response status="200 203"/>
            </wadl:method>
         </wadl:application>
@@ -834,6 +851,9 @@ class NormalizeWADLSpec extends BaseWADLSpec {
                </wadl:resource>
            </wadl:resources>
            <wadl:method id="getMethod" name="GET">
+	        <wadl:request>
+	  	  <wadl:representation mediaType="application/xml" element="credentials"/>
+	        </wadl:request>
                <wadl:response status="200 203"/>
            </wadl:method>
         </wadl:application>
