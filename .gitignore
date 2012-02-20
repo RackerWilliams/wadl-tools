@@ -1,3 +1,6 @@
 samples
 *~
 target
+.idea
+cli-test
+*.iml
