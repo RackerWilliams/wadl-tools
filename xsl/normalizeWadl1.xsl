@@ -131,7 +131,7 @@
     </xsl:variable>
 
     <xsl:template match="xsdxt:transitions" mode="normalizeWadl2">
-        <db:informaltable frame="void">
+        <db:informaltable rules="all">
             <db:tbody>
                 <xsl:apply-templates mode="transition"/>
             </db:tbody>
