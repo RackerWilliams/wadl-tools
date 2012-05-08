@@ -39,6 +39,8 @@
 
     <xsl:param name="samples.path" select="replace(base-uri(/),'(.*/).*\.wadl', '$1')"/>
 
+    <xsl:param name="checksum"/>
+
     <!-- Need this to re-establish context within for-each -->
     <xsl:variable name="root" select="/"/>
 
@@ -384,6 +386,7 @@
 
 
     <xsl:template match="wadl:grammars" mode="normalizeWadl2">
+        <xsl:variable name="prefix"><xsl:if test="not($checksum = '')"><xsl:value-of select="$checksum"/>-</xsl:if></xsl:variable>
       <xsl:choose>
 	<xsl:when test="$flattenXsds != 'false'">
         <wadl:grammars>
@@ -391,7 +394,7 @@
                 <xsl:comment>Original xsd: <xsl:value-of select="@location"/></xsl:comment>
                 <wadl:include>
                     <xsl:attribute name="href">
-                        <xsl:value-of select="$catalog//xsd[@location = current()/@location]/@name"/>
+                        <xsl:value-of select="concat($prefix,$catalog//xsd[@location = current()/@location]/@name)"/>
                     </xsl:attribute>
                 </wadl:include>
             </xsl:for-each>
