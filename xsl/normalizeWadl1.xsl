@@ -37,7 +37,7 @@
 
 	<xsl:param name="xsd.output.path"/>
 
-    <xsl:param name="samples.path" select="replace(base-uri(/),'(.*/).*\.wadl', '$1')"/>
+    <xsl:param name="samples.path" select="replace(base-uri(/),'(.*)/.*\.wadl', '$1')"/>
 
     <xsl:param name="checksum"/>
 
