@@ -58,6 +58,9 @@ Resolves hrefs on method and resource_type elements.
 	<xsl:when test="$wadl2docbook != 0">
 	<application>
 	  <xsl:apply-templates select="@*" mode="normalizeWadl2"/>
+		<xsl:if test="$wadl2docbook != 0">
+			<xsl:attribute name="rax:original-wadl" select="base-uri()"/>
+		</xsl:if>
 	  <xsl:comment>
 	    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	    ! This is a representation of the resources tree           !
