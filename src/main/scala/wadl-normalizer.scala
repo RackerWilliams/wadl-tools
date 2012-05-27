@@ -48,6 +48,16 @@ class WADLNormalizer(private var transformerFactory : TransformerFactory) {
     transformerFactory = TransformerFactory.newInstance("net.sf.saxon.TransformerFactoryImpl", null)
   }
 
+  try {
+    //
+    // Don't enable byte code generation in saxon-ee 9.4 this causes errors!
+    //
+    transformerFactory.setAttribute("http://saxon.sf.net/feature/generateByteCode",false)
+  } catch {
+    case i : IllegalArgumentException => { /* ignore */ }
+  }
+
+
   if (!transformerFactory.getFeature(SAXTransformerFactory.FEATURE)) {
     throw new RuntimeException("Need a SAX-compatible TransformerFactory!")
   }
