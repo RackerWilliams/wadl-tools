@@ -218,7 +218,7 @@ This XSLT flattens or expands the path in the path attributes of the resource el
       		    </xsl:choose>
             </xsl:attribute>
             <xsl:apply-templates select="wadl:doc" mode="copy"/>
-            <xsl:apply-templates select="ancestor-or-self::wadl:resource/wadl:param[@style = 'template' or @style = 'header' or @style='query' or @style='plain']" mode="copy"/>
+            <xsl:apply-templates select="ancestor-or-self::wadl:resource/wadl:param[@style = 'template' or @style = 'header']|wadl:param[@style = 'query']" mode="copy"/>
             <xsl:apply-templates select="wadl:method" mode="copy"/>
         </resource>
         <xsl:apply-templates mode="path-format"/>

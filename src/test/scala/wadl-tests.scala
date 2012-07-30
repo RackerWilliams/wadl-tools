@@ -1143,6 +1143,48 @@ class NormalizeWADLSpec extends BaseWADLSpec {
     }
 
 
+    scenario ("The original WADL is in a tree format with a query param should not copy that query param down the tree") {
+      given("a WADL with resources in tree format with a query param")
+      val inWADL =
+	<application xmlns="http://wadl.dev.java.net/2009/02"
+                xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	  <resources base="https://test.api.openstack.com">
+	    <resource path="a">
+	      <param name="j" style="query" type="xsd:string" required="true"/>
+	      <resource path="b">
+		<resource path="c" id="rc">
+		  <param name="k" style="query" type="xsd:string" required="true"/>
+		  <method href="#foo"/>		
+		</resource>
+	      </resource>
+	    </resource>
+	</resources>
+	<method name="GET" id="foo">
+	  <response status="200 203"/>
+	</method>
+	</application>
+      val outWADL =
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+            <resources base="https://test.api.openstack.com">
+              <resource path="a/b/c" id="rc" queryType="application/x-www-form-urlencoded">
+	          <param xmlns:rax="http://docs.rackspace.com/api" name="k" repeating="false" required="true" style="query" type="xsd:string" rax:id=""/>
+	           <method name="GET" xmlns:rax="http://docs.rackspace.com/api" rax:id="foo">
+                       <response status="200 203"/>
+                   </method>
+	      </resource>
+            </resources>
+            <method name="GET" id="foo">
+                 <response status="200 203"/>
+            </method>
+        </application>
+      when("the WADL is normalized")
+      val normWADL = wadl.normalize(inWADL, PATH)
+      then("the paths in the resource should be flattened")
+      canon(outWADL) should equal (canon(normWADL))
+    }
+
+
 
   }
 
