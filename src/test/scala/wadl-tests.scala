@@ -175,7 +175,7 @@ class NormalizeWADLSpec extends BaseWADLSpec {
         <application xmlns="http://wadl.dev.java.net/2009/02"
             xmlns:xsd="http://www.w3.org/2001/XMLSchema">
             <resources base="https://test.api.openstack.com">
-              <resource path="a/b/c">
+              <resource id="someId" path="a/b/c">
 	        <method href="#foo"/>
 	      </resource>
               <resource path="d/e"/>
@@ -194,9 +194,9 @@ class NormalizeWADLSpec extends BaseWADLSpec {
         <application xmlns="http://wadl.dev.java.net/2009/02"
             xmlns:xsd="http://www.w3.org/2001/XMLSchema">
             <resources base="https://test.api.openstack.com">
-              <resource queryType="application/x-www-form-urlencoded" path="a">
-                <resource queryType="application/x-www-form-urlencoded" path="b">
-                  <resource queryType="application/x-www-form-urlencoded" path="c">
+              <resource id="someId" queryType="application/x-www-form-urlencoded" path="a">
+                <resource  id="someId-2" queryType="application/x-www-form-urlencoded" path="b">
+                  <resource  id="someId-3" queryType="application/x-www-form-urlencoded" path="c">
 	             <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo"/>
                   </resource>
                 </resource>

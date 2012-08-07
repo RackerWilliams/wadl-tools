@@ -130,7 +130,12 @@ This XSLT flattens or expands the path in the path attributes of the resource el
         <xsl:param name="resources"/>
         <xsl:for-each-group select="$resources" group-by="wadl:tokens/wadl:token[$token-number]">
             <resource path="{current-grouping-key()}">
-	      <xsl:copy-of select="self::wadl:resource/@*[not(local-name(.) = 'path')]"/>
+	      <xsl:copy-of select="self::wadl:resource/@*[not(local-name(.) = 'path') and not(local-name(.) = 'id')]"/>
+	      <xsl:choose>
+		<xsl:when test="@id and not($token-number = 1)"><xsl:attribute name="id" select="concat(@id,'-', $token-number )"/></xsl:when>
+		<xsl:when test="@id"><xsl:attribute name="id" select="@id"/></xsl:when>		
+	      </xsl:choose>
+	      <!-- Possible Bug: Should I be copying header params down in tree format? -->
 	      <xsl:apply-templates select="wadl:param[@style = 'template']|*[not(namespace-uri() = 'http://wadl.dev.java.net/2009/02')]" mode="tree-format">
 		<xsl:with-param name="path" select="current-grouping-key()"/>
 	      </xsl:apply-templates>	      
