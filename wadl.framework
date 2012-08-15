@@ -14,7 +14,7 @@
 								<Integer>2</Integer>
 							</field>
 							<field name="uri">
-								<String>${framework}/xsd/wadl.xsd</String>
+								<String>${frameworks}/wadl-tools/xsd/wadl.xsd</String>
 							</field>
 						</docTypeSchema>
 					</field>
