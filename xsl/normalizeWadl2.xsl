@@ -18,7 +18,7 @@ Resolves hrefs on method and resource_type elements.
    limitations under the License.
 -->
 
-<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:wadl="http://wadl.dev.java.net/2009/02" xmlns="http://wadl.dev.java.net/2009/02" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:rax="http://docs.rackspace.com/api" exclude-result-prefixes="xs wadl" version="2.0">
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:wadl="http://wadl.dev.java.net/2009/02" xmlns="http://wadl.dev.java.net/2009/02" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:rax="http://docs.rackspace.com/api" xmlns:raxf="http://docs.rackspace.com/functions"  exclude-result-prefixes="#all" version="2.0">
 
   <xsl:param name="wadl2docbook">0</xsl:param>
 
@@ -90,7 +90,7 @@ Resolves hrefs on method and resource_type elements.
       	<xsl:attribute name="rax:id">
       		<xsl:choose>
       			<xsl:when test="@id"><xsl:value-of select="@id"/></xsl:when>
-      			<xsl:otherwise><xsl:value-of select="generate-id()"/></xsl:otherwise>
+      			<xsl:otherwise><xsl:value-of select="raxf:generate-resource-id(.)"/></xsl:otherwise>
       		</xsl:choose>
       	</xsl:attribute>
 		<xsl:apply-templates select="wadl:resource|processing-instruction('rax')" mode="store-tree"/>
@@ -277,6 +277,7 @@ Resolves hrefs on method and resource_type elements.
 
 		<resource>
 			<xsl:copy-of select="@*[name() != 'type']"/>
+			<xsl:if test="not(@id)"><xsl:attribute name="id" select="raxf:generate-resource-id(.)"/></xsl:if>
 			<!-- Since we've combined resource types, we need to sort the
 	     elements to keep things valid against the schema -->
 			<xsl:copy-of select="$content/wadl:doc"/>

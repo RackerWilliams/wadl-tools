@@ -20,7 +20,7 @@ This XSLT flattens or expands the path in the path attributes of the resource el
    limitations under the License.
 -->
 
-<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:wadl="http://wadl.dev.java.net/2009/02" xmlns="http://wadl.dev.java.net/2009/02" xmlns:xsd="http://www.w3.org/2001/XMLSchema" exclude-result-prefixes="xsd wadl xs xsl" version="2.0">
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:wadl="http://wadl.dev.java.net/2009/02" xmlns="http://wadl.dev.java.net/2009/02" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:raxf="http://docs.rackspace.com/functions" exclude-result-prefixes="#all" version="2.0">
 
     <xsl:output indent="yes"/>
 
@@ -131,10 +131,11 @@ This XSLT flattens or expands the path in the path attributes of the resource el
         <xsl:for-each-group select="$resources" group-by="wadl:tokens/wadl:token[$token-number]">
             <resource path="{current-grouping-key()}">
 	      <xsl:copy-of select="self::wadl:resource/@*[not(local-name(.) = 'path') and not(local-name(.) = 'id')]"/>
-	      <xsl:choose>
-		<xsl:when test="@id and not($token-number = 1)"><xsl:attribute name="id" select="concat(@id,'-', $token-number )"/></xsl:when>
-		<xsl:when test="@id"><xsl:attribute name="id" select="@id"/></xsl:when>		
-	      </xsl:choose>
+                <xsl:choose>
+                    <xsl:when test="@id and not($token-number = 1)"><xsl:attribute name="id" select="concat(@id,'-', $token-number )"/></xsl:when>
+                    <xsl:when test="@id"><xsl:attribute name="id" select="@id"/></xsl:when>	
+                    <xsl:when test="count(wadl:tokens/wadl:token) = $token-number"><xsl:attribute name="id" select="raxf:generate-resource-id(.)"/></xsl:when>
+                </xsl:choose>
 	      <!-- Possible Bug: Should I be copying header params down in tree format? -->
 	      <xsl:apply-templates select="wadl:param[@style = 'template']|*[not(namespace-uri() = 'http://wadl.dev.java.net/2009/02')]" mode="tree-format">
 		<xsl:with-param name="path" select="current-grouping-key()"/>
@@ -219,7 +220,7 @@ This XSLT flattens or expands the path in the path attributes of the resource el
             <xsl:attribute name="id">
       		    <xsl:choose>
       			   <xsl:when test="@id"><xsl:value-of select="@id"/></xsl:when>
-      			   <xsl:otherwise><xsl:value-of select="generate-id()"/></xsl:otherwise>
+      			   <xsl:otherwise><xsl:value-of select="raxf:generate-resource-id(.)"/></xsl:otherwise>
       		    </xsl:choose>
             </xsl:attribute>
             <xsl:apply-templates select="wadl:doc" mode="copy"/>
@@ -230,5 +231,12 @@ This XSLT flattens or expands the path in the path attributes of the resource el
     </xsl:template>
 
     <xsl:template match="processing-instruction('base-uri')|wadl:doc" mode="path-format"/>
+
+    <xsl:function name="raxf:generate-resource-id" >
+        <xsl:param name="current-node"/>
+        <xsl:variable name="paths" select="for $path in $current-node/ancestor-or-self::wadl:resource/@path return concat($path,'-')"/>
+        <xsl:variable name="id">rax-<xsl:for-each select="$paths"><xsl:value-of select="translate(.,'{}/','__-')"/></xsl:for-each><xsl:value-of select="count($current-node/preceding::wadl:resource)"/></xsl:variable> 
+        <xsl:value-of select="replace($id,'-+','-')"/>
+     </xsl:function>
 
 </xsl:stylesheet>

@@ -60,35 +60,40 @@ class NormalizeWADLSpec extends BaseWADLSpec {
             <method name="GET" id="foo"/>
         </application>
       val outWADL =
-        <application xmlns="http://wadl.dev.java.net/2009/02"
-            xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-            <resources base="https://test.api.openstack.com">
-              <resource path="a" queryType="application/x-www-form-urlencoded">
-                <resource queryType="application/x-www-form-urlencoded" path="b">
-                  <resource queryType="application/x-www-form-urlencoded" path="c"/>
-                </resource>
-              </resource>
-              <resource queryType="application/x-www-form-urlencoded" path="d">
-                <resource queryType="application/x-www-form-urlencoded" path="e"/>
-              </resource>
-              <resource queryType="application/x-www-form-urlencoded" path="f"/>
-	      <resource queryType="application/x-www-form-urlencoded" path="g"/>
-	      <resource queryType="application/x-www-form-urlencoded" path="h">
-	      <resource queryType="application/x-www-form-urlencoded" path="i">
-		<resource queryType="application/x-www-form-urlencoded" path="{j}">
-		   <param name="j" style="template" type="xsd:string" required="true" repeating="false"/>
-		   <resource queryType="application/x-www-form-urlencoded" path="k">
-		      <method name="GET" xmlns:rax="http://docs.rackspace.com/api" rax:id="foo"/>
-		      <resource queryType="application/x-www-form-urlencoded" path="l">
-			 <method name="GET" xmlns:rax="http://docs.rackspace.com/api" rax:id="foo"/>
-		      </resource>
-		   </resource>
-		</resource>
-	      </resource>
-	      </resource>
-            </resources>
-            <method name="GET" id="foo"/>
-        </application>
+<application xmlns="http://wadl.dev.java.net/2009/02" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <resources base="https://test.api.openstack.com">
+    <resource id="rax-a-0" path="a" queryType="application/x-www-form-urlencoded">
+      <resource id="rax-a-b-0" path="b" queryType="application/x-www-form-urlencoded">
+        <resource id="rax-a-b-c-0" path="c" queryType="application/x-www-form-urlencoded">
+        </resource>
+      </resource>
+    </resource>
+    <resource id="rax-d-3" path="d" queryType="application/x-www-form-urlencoded">
+      <resource id="rax-d-e-3" path="e" queryType="application/x-www-form-urlencoded">
+      </resource>
+    </resource>
+    <resource id="rax-f-5" path="f" queryType="application/x-www-form-urlencoded">
+    </resource>
+    <resource id="rax-g-6" path="g" queryType="application/x-www-form-urlencoded">
+    </resource>
+    <resource id="rax-h-7" path="h" queryType="application/x-www-form-urlencoded">
+      <resource id="rax-h-i-7" path="i" queryType="application/x-www-form-urlencoded">
+        <resource id="rax-h-i-_j_-7" path="{j}" queryType="application/x-www-form-urlencoded">
+          <param name="j" repeating="false" required="true" style="template" type="xsd:string"></param>
+          <resource id="rax-h-i-_j_-k-7" path="k" queryType="application/x-www-form-urlencoded">
+            <method xmlns:rax="http://docs.rackspace.com/api" name="GET" rax:id="foo">
+            </method>
+            <resource id="rax-h-i-_j_-k-l-7" path="l" queryType="application/x-www-form-urlencoded">
+              <method xmlns:rax="http://docs.rackspace.com/api" name="GET" rax:id="foo">
+              </method>
+            </resource>
+          </resource>
+        </resource>
+      </resource>
+    </resource>
+  </resources>
+  <method id="foo" name="GET"></method>
+</application>
       when("the WADL is normalized")
       val normWADL = wadl.normalize(inWADL, TREE)
       assertWADL(normWADL)
@@ -127,41 +132,46 @@ class NormalizeWADLSpec extends BaseWADLSpec {
 	      </resource>
 	      </resource>
             </resources>
-            <method id="foo"/>
+          <method id="foo" name="GET" />
 	    <resource_type id="rtype">
                <method href="#foo"/>
             </resource_type> 
         </application>
       val outWADL = 
-        <application xmlns="http://wadl.dev.java.net/2009/02"
-            xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-            <resources base="https://test.api.openstack.com">
-              <resource queryType="application/x-www-form-urlencoded" path="a">
-                <resource queryType="application/x-www-form-urlencoded" path="b">
-                  <resource queryType="application/x-www-form-urlencoded" path="c"/>
-                </resource>
-              </resource>
-              <resource queryType="application/x-www-form-urlencoded" path="d">
-                <resource queryType="application/x-www-form-urlencoded" path="e"/>
-              </resource>
-              <resource queryType="application/x-www-form-urlencoded" path="f"/>
-	      <resource queryType="application/x-www-form-urlencoded" path="g"/>
-	      <resource queryType="application/x-www-form-urlencoded" path="h">
-	      <resource queryType="application/x-www-form-urlencoded" path="i">
-		<resource queryType="application/x-www-form-urlencoded" path="{j}">
-		   <param name="j" style="template" type="xsd:string" required="true" repeating="false"/>
-		   <resource queryType="application/x-www-form-urlencoded" path="k">
-		      <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo"/>
-		      <resource queryType="application/x-www-form-urlencoded" path="l">
-  		         <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo"/>
-	              </resource>
-		   </resource>
-		</resource>
-  	       </resource>
-	      </resource>
-            </resources>
-            <method id="foo"/>
-        </application>
+<application xmlns="http://wadl.dev.java.net/2009/02" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <resources base="https://test.api.openstack.com">
+    <resource id="rax-a-0" path="a" queryType="application/x-www-form-urlencoded">
+      <resource id="rax-a-b-0" path="b" queryType="application/x-www-form-urlencoded">
+        <resource id="rax-a-b-c-0" path="c" queryType="application/x-www-form-urlencoded">
+        </resource>
+      </resource>
+    </resource>
+    <resource id="rax-d-3" path="d" queryType="application/x-www-form-urlencoded">
+      <resource id="rax-d-e-3" path="e" queryType="application/x-www-form-urlencoded">
+      </resource>
+    </resource>
+    <resource id="rax-f-5" path="f" queryType="application/x-www-form-urlencoded">
+    </resource>
+    <resource id="rax-g-6" path="g" queryType="application/x-www-form-urlencoded">
+    </resource>
+    <resource id="rax-h-7" path="h" queryType="application/x-www-form-urlencoded">
+      <resource id="rax-h-i-7" path="i" queryType="application/x-www-form-urlencoded">
+        <resource id="rax-h-i-_j_-7" path="{j}" queryType="application/x-www-form-urlencoded">
+          <param name="j" repeating="false" required="true" style="template" type="xsd:string"></param>
+          <resource id="rax-h-i-_j_-k-7" path="k" queryType="application/x-www-form-urlencoded">
+            <method xmlns:rax="http://docs.rackspace.com/api" name="GET" rax:id="foo">
+            </method>
+            <resource id="rax-h-i-_j_-k-l-7" path="l" queryType="application/x-www-form-urlencoded">
+              <method xmlns:rax="http://docs.rackspace.com/api" name="GET" rax:id="foo">
+              </method>
+            </resource>
+          </resource>
+        </resource>
+      </resource>
+    </resource>
+  </resources>
+  <method name="GET" id="foo"></method>
+</application>
       when("the WADL is normalized")
       val normWADL = wadl.normalize(inWADL, TREE, XSD11, true, OMIT)
       then("the resources should be the same except that resource_types and links to resource_types are omitted")
@@ -191,36 +201,40 @@ class NormalizeWADLSpec extends BaseWADLSpec {
             <method id="foo"/>
         </application>
 	val treeWADL = 
-        <application xmlns="http://wadl.dev.java.net/2009/02"
-            xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-            <resources base="https://test.api.openstack.com">
-              <resource id="someId" queryType="application/x-www-form-urlencoded" path="a">
-                <resource  id="someId-2" queryType="application/x-www-form-urlencoded" path="b">
-                  <resource  id="someId-3" queryType="application/x-www-form-urlencoded" path="c">
-	             <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo"/>
+      <application xmlns="http://wadl.dev.java.net/2009/02" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+        <resources base="https://test.api.openstack.com">
+          <resource id="someId" path="a" queryType="application/x-www-form-urlencoded">
+            <resource id="someId-2" path="b" queryType="application/x-www-form-urlencoded">
+              <resource id="someId-3" path="c" queryType="application/x-www-form-urlencoded">
+                <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo">
+                </method>
+              </resource>
+            </resource>
+          </resource>
+          <resource path="d" queryType="application/x-www-form-urlencoded">
+            <resource id="rax-d-e-1" path="e" queryType="application/x-www-form-urlencoded">
+            </resource>
+          </resource>
+          <resource id="rax-f-2" path="f" queryType="application/x-www-form-urlencoded">
+          </resource>
+          <resource path="h" queryType="application/x-www-form-urlencoded">
+            <resource path="i" queryType="application/x-www-form-urlencoded">
+              <resource path="{j}" queryType="application/x-www-form-urlencoded">
+                <param name="j" repeating="false" required="true" style="template" type="xsd:string"></param>
+                <resource id="rax-h-i-_j_-k-3" path="k" queryType="application/x-www-form-urlencoded">
+                  <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo">
+                  </method>
+                  <resource id="rax-h-i-_j_-k-l-4" path="l" queryType="application/x-www-form-urlencoded">
+                    <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo">
+                    </method>
                   </resource>
                 </resource>
               </resource>
-              <resource queryType="application/x-www-form-urlencoded" path="d">
-                <resource queryType="application/x-www-form-urlencoded" path="e"/>
-              </resource>
-              <resource queryType="application/x-www-form-urlencoded" path="f"/>
-	      <resource queryType="application/x-www-form-urlencoded" path="h">
-		 <resource queryType="application/x-www-form-urlencoded" path="i">
-		    <resource queryType="application/x-www-form-urlencoded" path="{j}">
-		       <param name="j" style="template" type="xsd:string" required="true" repeating="false"/>
-		       <resource queryType="application/x-www-form-urlencoded" path="k">
-			  <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo"/>
-			  <resource queryType="application/x-www-form-urlencoded" path="l">
-			     <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo"/>
-			  </resource>
-		       </resource>
-		    </resource>
-		 </resource>
-	      </resource>
-             </resources>
-             <method id="foo"/>
-        </application>
+            </resource>
+          </resource>
+        </resources>
+        <method id="foo"></method>
+      </application>
       when("the WADL is normalized")
       val normWADL = wadl.normalize(inWADL, TREE)
       then("the resources should now be in tree format")
@@ -231,57 +245,61 @@ class NormalizeWADLSpec extends BaseWADLSpec {
 	given("a WADL with resources in path format that uses resource_types")
 	val inWADL =
         <application xmlns="http://wadl.dev.java.net/2009/02"
-            xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-            <resources base="https://test.api.openstack.com">
-              <resource path="a/b/c" type="#rtype"/>
-              <resource path="d/e"/>
-              <resource path="f"/>
-	      <resource path="h/i/{j}/k">
-	        <param name="j" style="template" type="xsd:string" required="true">
-                  <link resource_type="#rtype" rel="self"/>
-	        </param>
-	        <method href="#foo"/>
-	      </resource>
-	      <resource path="h/i/{j}/k/l">
-	        <method href="#foo"/>		
-	      </resource>
-            </resources>
-            <method id="foo"/>
-	    <resource_type id="rtype">
-               <method href="#foo"/>
-            </resource_type> 
+          xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+          <resources base="https://test.api.openstack.com">
+            <resource path="a/b/c" type="#rtype"/>
+            <resource path="d/e"/>
+            <resource path="f"/>
+            <resource path="h/i/{j}/k">
+              <param name="j" style="template" type="xsd:string" required="true">
+                <link resource_type="#rtype" rel="self"/>
+              </param>
+              <method href="#foo"/>
+            </resource>
+            <resource path="h/i/{j}/k/l">
+              <method href="#foo"/>		
+            </resource>
+          </resources>
+          <method id="foo" name="GET"/>
+          <resource_type id="rtype">
+            <method href="#foo"/>
+          </resource_type> 
         </application>
 	val treeWADL = 
-        <application xmlns="http://wadl.dev.java.net/2009/02"
-            xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-            <resources base="https://test.api.openstack.com">
-              <resource queryType="application/x-www-form-urlencoded" path="a">
-                <resource queryType="application/x-www-form-urlencoded" path="b">
-                  <resource queryType="application/x-www-form-urlencoded" path="c">
-	             <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo"/>
+      <application xmlns="http://wadl.dev.java.net/2009/02" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+        <resources base="https://test.api.openstack.com">
+          <resource id="rax-a-b-c-0" path="a" queryType="application/x-www-form-urlencoded">
+            <resource id="rax-a-b-c-0-2" path="b" queryType="application/x-www-form-urlencoded">
+              <resource id="rax-a-b-c-0-3" path="c" queryType="application/x-www-form-urlencoded">
+                <method xmlns:rax="http://docs.rackspace.com/api" name="GET" rax:id="foo">
+                </method>
+              </resource>
+            </resource>
+          </resource>
+          <resource path="d" queryType="application/x-www-form-urlencoded">
+            <resource id="rax-d-e-1" path="e" queryType="application/x-www-form-urlencoded">
+            </resource>
+          </resource>
+          <resource id="rax-f-2" path="f" queryType="application/x-www-form-urlencoded">
+          </resource>
+          <resource path="h" queryType="application/x-www-form-urlencoded">
+            <resource path="i" queryType="application/x-www-form-urlencoded">
+              <resource path="{j}" queryType="application/x-www-form-urlencoded">
+                <param name="j" repeating="false" required="true" style="template" type="xsd:string"></param>
+                <resource id="rax-h-i-_j_-k-3" path="k" queryType="application/x-www-form-urlencoded">
+                  <method xmlns:rax="http://docs.rackspace.com/api" name="GET" rax:id="foo">
+                  </method>
+                  <resource id="rax-h-i-_j_-k-l-4" path="l" queryType="application/x-www-form-urlencoded">
+                    <method xmlns:rax="http://docs.rackspace.com/api" name="GET" rax:id="foo">
+                    </method>
                   </resource>
                 </resource>
               </resource>
-              <resource queryType="application/x-www-form-urlencoded" path="d">
-                <resource queryType="application/x-www-form-urlencoded" path="e"/>
-              </resource>
-              <resource queryType="application/x-www-form-urlencoded" path="f"/>
-	      <resource queryType="application/x-www-form-urlencoded" path="h">
-		 <resource queryType="application/x-www-form-urlencoded" path="i">
-		    <resource queryType="application/x-www-form-urlencoded" path="{j}">
-		       <param name="j" style="template" type="xsd:string" required="true" repeating="false"/>
-		       <resource queryType="application/x-www-form-urlencoded" path="k">
-			  <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo"/>
-			  <resource queryType="application/x-www-form-urlencoded" path="l">
-			     <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo"/>
-			  </resource>
-		       </resource>
-		    </resource>
-		 </resource>
-	      </resource>
-             </resources>
-             <method id="foo"/>
-        </application>
+            </resource>
+          </resource>
+        </resources>
+        <method id="foo" name="GET"></method>
+      </application>
       when("the WADL is normalized")
       val normWADL = wadl.normalize(inWADL, TREE, XSD11, true, OMIT)
       then("the resources should now be in tree format")
@@ -315,38 +333,42 @@ class NormalizeWADLSpec extends BaseWADLSpec {
   <method id="foo"/>
 </application>
 	val treeWADL = 
-<application xmlns="http://wadl.dev.java.net/2009/02"
-      xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-   <resources base="https://test.api.openstack.com">
-      <resource queryType="application/x-www-form-urlencoded" path="a">
-         <resource queryType="application/x-www-form-urlencoded" path="b">
-            <resource queryType="application/x-www-form-urlencoded" path="c">
-               <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo"/>
+      <application xmlns="http://wadl.dev.java.net/2009/02" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+        <resources base="https://test.api.openstack.com">
+          <resource path="a" queryType="application/x-www-form-urlencoded">
+            <resource id="rax-a-b-0" path="b" queryType="application/x-www-form-urlencoded">
+              <resource id="rax-a-b-c-0" path="c" queryType="application/x-www-form-urlencoded">
+                <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo">
+                </method>
+              </resource>
             </resource>
-         </resource>
-      </resource>
-      <resource queryType="application/x-www-form-urlencoded" path="d">
-         <resource queryType="application/x-www-form-urlencoded" path="e">
-            <resource queryType="application/x-www-form-urlencoded" path="f"/>
-         </resource>
-      </resource>
-      <resource queryType="application/x-www-form-urlencoded" path="g"/>
-      <resource queryType="application/x-www-form-urlencoded" path="h">
-         <resource queryType="application/x-www-form-urlencoded" path="i">
-            <resource queryType="application/x-www-form-urlencoded" path="{j}">
-               <param name="j" style="template" type="xsd:string" required="true" repeating="false"/>
-               <resource queryType="application/x-www-form-urlencoded" path="k">
-                  <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo"/>
-                  <resource queryType="application/x-www-form-urlencoded" path="l">
-                     <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo"/>
+          </resource>
+          <resource id="rax-d-2" path="d" queryType="application/x-www-form-urlencoded">
+            <resource path="e" queryType="application/x-www-form-urlencoded">
+              <resource id="rax-d-e-f-2" path="f" queryType="application/x-www-form-urlencoded">
+              </resource>
+            </resource>
+          </resource>
+          <resource id="rax-g-4" path="g" queryType="application/x-www-form-urlencoded">
+          </resource>
+          <resource path="h" queryType="application/x-www-form-urlencoded">
+            <resource path="i" queryType="application/x-www-form-urlencoded">
+              <resource path="{j}" queryType="application/x-www-form-urlencoded">
+                <param name="j" repeating="false" required="true" style="template" type="xsd:string"></param>
+                <resource id="rax-h-i-_j_-k-5" path="k" queryType="application/x-www-form-urlencoded">
+                  <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo">
+                  </method>
+                  <resource id="rax-h-i-_j_-k-l-6" path="l" queryType="application/x-www-form-urlencoded">
+                    <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo">
+                    </method>
                   </resource>
-               </resource>
+                </resource>
+              </resource>
             </resource>
-         </resource>
-      </resource>
-   </resources>
-   <method id="foo"/>
-</application>
+          </resource>
+        </resources>
+        <method id="foo"></method>
+      </application>
       when("the WADL is normalized")
       val normWADL = wadl.normalize(inWADL, TREE)
       then("the resources should now be in tree format")
@@ -383,38 +405,42 @@ class NormalizeWADLSpec extends BaseWADLSpec {
    </resource_type> 
 </application>
 	val treeWADL = 
-<application xmlns="http://wadl.dev.java.net/2009/02"
-             xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-   <resources base="https://test.api.openstack.com">
-      <resource queryType="application/x-www-form-urlencoded" path="a">
-         <resource queryType="application/x-www-form-urlencoded" path="b">
-            <resource queryType="application/x-www-form-urlencoded" path="c">
-               <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo"/>
+      <application xmlns="http://wadl.dev.java.net/2009/02" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+        <resources base="https://test.api.openstack.com">
+          <resource path="a" queryType="application/x-www-form-urlencoded">
+            <resource id="rax-a-b-0" path="b" queryType="application/x-www-form-urlencoded">
+              <resource id="rax-a-b-c-0" path="c" queryType="application/x-www-form-urlencoded">
+                <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo">
+                </method>
+              </resource>
             </resource>
-         </resource>
-      </resource>
-      <resource queryType="application/x-www-form-urlencoded" path="d">
-         <resource queryType="application/x-www-form-urlencoded" path="e">
-            <resource queryType="application/x-www-form-urlencoded" path="f"/>
-         </resource>
-      </resource>
-      <resource queryType="application/x-www-form-urlencoded" path="g"/>
-      <resource queryType="application/x-www-form-urlencoded" path="h">
-         <resource queryType="application/x-www-form-urlencoded" path="i">
-            <resource queryType="application/x-www-form-urlencoded" path="{j}">
-               <param name="j" style="template" type="xsd:string" required="true" repeating="false"/>
-               <resource queryType="application/x-www-form-urlencoded" path="k">
-                  <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo"/>
-                  <resource queryType="application/x-www-form-urlencoded" path="l">
-                     <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo"/>
+          </resource>
+          <resource id="rax-d-2" path="d" queryType="application/x-www-form-urlencoded">
+            <resource path="e" queryType="application/x-www-form-urlencoded">
+              <resource id="rax-d-e-f-2" path="f" queryType="application/x-www-form-urlencoded">
+              </resource>
+            </resource>
+          </resource>
+          <resource id="rax-g-4" path="g" queryType="application/x-www-form-urlencoded">
+          </resource>
+          <resource path="h" queryType="application/x-www-form-urlencoded">
+            <resource path="i" queryType="application/x-www-form-urlencoded">
+              <resource path="{j}" queryType="application/x-www-form-urlencoded">
+                <param name="j" repeating="false" required="true" style="template" type="xsd:string"></param>
+                <resource id="rax-h-i-_j_-k-5" path="k" queryType="application/x-www-form-urlencoded">
+                  <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo">
+                  </method>
+                  <resource id="rax-h-i-_j_-k-l-6" path="l" queryType="application/x-www-form-urlencoded">
+                    <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo">
+                    </method>
                   </resource>
-               </resource>
+                </resource>
+              </resource>
             </resource>
-         </resource>
-      </resource>
-   </resources>
-   <method id="foo"/>
-</application>
+          </resource>
+        </resources>
+        <method id="foo"></method>
+      </application>
       when("the WADL is normalized")
       val normWADL = wadl.normalize(inWADL, TREE, XSD11, true, OMIT)
       then("the resources should now be in tree format with resource_types and links to resource_types omitted")
