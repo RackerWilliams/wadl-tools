@@ -11,7 +11,7 @@
             <let name="ref" value="substring-after(.,'#')"/>
             <let name="attRef" value="if (string-length($doc) != 0) then document(resolve-uri($doc,concat($baseDocURI,'/')))/wadl:application//@id[.=$ref] else //@id[.=$ref]"/>
             <assert test="contains(., '#')">
-                Reference is missing '#'.
+                The reference '<value-of select="."/>' is missing '#'.
             </assert>
             <assert test="$attRef">
                 The reference does not seem to exist.
