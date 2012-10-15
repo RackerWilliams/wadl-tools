@@ -168,7 +168,14 @@
                 <includes>
                     <include>wadl.framework</include>
                 </includes>
-            </resource>            
+            </resource>
+            <resource>
+                <targetPath>xsl</targetPath>
+                <directory>target/generated-resources/xml/xslt/</directory>
+                <includes>
+                    <include>wadl.xsl</include>
+                </includes>
+            </resource>
         </resources>
         <plugins>
             <plugin>

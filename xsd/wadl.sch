@@ -47,25 +47,25 @@
         </rule>
         <rule context="@resource_type" >
             <extends rule="CheckReference"/>
-            <assert test="name($attRef/..)='resource_type'">
+            <assert test="local-name($attRef/..)='resource_type'">
                 The reference should map to a resource_type.
             </assert>
         </rule>
         <rule context="wadl:method/@href">
             <extends rule="CheckReference"/>
-            <assert test="name($attRef/..)='method'">
+            <assert test="local-name($attRef/..)='method'">
                 The reference should map to a method.
             </assert>
         </rule>
         <rule context="wadl:representation/@href">
             <extends rule="CheckReference"/>
-            <assert test="name($attRef/..)='representation'">
+            <assert test="local-name($attRef/..)='representation'">
                 The reference should map to a representation.
             </assert>
         </rule>
         <rule context="wadl:param/@href">
             <extends rule="CheckReference"/>
-            <assert test="name($attRef/..)='param'">
+            <assert test="local-name($attRef/..)='param'">
                 The reference should map to a param.
             </assert>
         </rule>
