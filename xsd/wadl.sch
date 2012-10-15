@@ -14,7 +14,7 @@
                 The reference '<value-of select="."/>' is missing '#'.
             </assert>
             <assert test="$attRef">
-                The reference does not seem to exist.
+                The reference '<value-of select="."/>' does not seem to exist.
             </assert>
         </rule>
         <rule id="CheckReferences" abstract="true">
