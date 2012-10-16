@@ -93,5 +93,37 @@ class BadWADLSpec extends BaseWADLSpec {
       assert(thrown.getMessage().contains("is not available"))
     }
 
+    scenario ("A WADL with a missing code sample should be rejected") {
+	   given("a WADL with a missing code sample")
+	   val inWADL =
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsdxt="http://docs.rackspacecloud.com/xsd-ext/v1.0"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+             <resources base="https://test.api.openstack.com">
+                 <resource path="a/b">
+                     <resource path="c">
+	                    <method href="#foo"/>
+                     </resource>
+                 </resource>
+             </resources>
+             <method id="foo">
+               <request>
+                  <representation>
+                    <doc xml:lang="EN">
+                        <xsdxt:code href="missing_sample.xml"/>
+                    </doc>
+                  </representation>
+               </request>
+             </method>
+        </application>
+      when("the WADL is normalized")
+      val thrown = intercept[Exception] {
+        val normWADL = wadl.normalize(inWADL, TREE)
+      }
+      then("An exception should be thrown with the words 'missing_sample.xml' and 'is not available'.")
+      assert(thrown.getMessage().contains("missing_sample.xml"))
+      assert(thrown.getMessage().contains("is not available"))
+    }
+
   }
 }

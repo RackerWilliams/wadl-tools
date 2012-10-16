@@ -76,7 +76,7 @@
         </rule>
         <rule context="xsdxt:code/@href">
             <assert test="unparsed-text-available(resolve-uri(.,concat($baseDocURI,'/')))">
-                Code sample is not available.
+                The code sample '<value-of select="."/>' is not available.
             </assert>
         </rule>
     </pattern>
