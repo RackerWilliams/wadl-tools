@@ -67,5 +67,31 @@ class BadWADLSpec extends BaseWADLSpec {
       assert(thrown.getMessage().contains("does not seem to exist"))
     }
 
+    scenario ("A WADL with a missing include should be rejected") {
+	   given("a WADL with a missing include")
+	   val inWADL =
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+             <grammars>
+               <include href="schema.xsd"/>
+             </grammars>
+             <resources base="https://test.api.openstack.com">
+                 <resource path="a/b">
+                     <resource path="c">
+	                    <method href="#foo"/>
+                     </resource>
+                 </resource>
+             </resources>
+             <method id="foo"/>
+        </application>
+      when("the WADL is normalized")
+      val thrown = intercept[Exception] {
+        val normWADL = wadl.normalize(inWADL, TREE)
+      }
+      then("An exception should be thrown with the words 'schema.xsd' and 'is not available'.")
+      assert(thrown.getMessage().contains("schema.xsd"))
+      assert(thrown.getMessage().contains("is not available"))
+    }
+
   }
 }

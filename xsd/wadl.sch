@@ -71,7 +71,7 @@
         </rule>
         <rule context="wadl:include/@href">
             <assert test="doc-available(resolve-uri(.,concat($baseDocURI,'/')))">
-                Include file is not available.
+                Included file '<value-of select="."/>' is not available.
             </assert>
         </rule>
         <rule context="xsdxt:code/@href">
