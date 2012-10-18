@@ -18,22 +18,23 @@
             </assert>
         </rule>
         <rule id="CheckReferences" abstract="true">
+            <let name="ids" value="tokenize(normalize-space(.),' ')"/>
             <let name="remoteids" value="
                 for 
-                    $refs in tokenize(normalize-space(.),' ')[not(substring-before(.,'#') = '')] 
+                    $refs in $ids[not(substring-before(.,'#') = '')]
                 return    
                     $refs
                 "/>
             <let name="localids" value="
                 for 
-                $refs in tokenize(normalize-space(.),' ')[substring-before(.,'#') = ''] 
+                $refs in $ids[substring-before(.,'#') = '']
                 return    
                     $refs
                 "/>
             <let name="localAttRef" value="every $id in $localids satisfies (//@id[. = substring-after($id,'#')])"/>
             <let name="remoteAttRef" value="every $id in $remoteids satisfies (document(resolve-uri(substring-before($id,'#'),concat($baseDocURI,'/')))/wadl:application//@id[.= substring-after($id,'#')])"/>
-            <assert test="every $ref in tokenize(normalize-space(.),' ') satisfies contains($ref, '#')">
-                Reference is missing '#'.
+            <assert test="every $ref in $ids satisfies contains($ref, '#')">
+                In the set of references '<value-of select="."/>', the following references '<value-of select="$ids[not(contains(.,'#'))]" separator="' '"/>' are missing '#'.
             </assert>
             <assert test="$remoteAttRef">
                 A reference listed in the type attribute does not seem to exist in another wadl.
