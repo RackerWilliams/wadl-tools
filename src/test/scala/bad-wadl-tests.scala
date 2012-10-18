@@ -125,5 +125,109 @@ class BadWADLSpec extends BaseWADLSpec {
       assert(thrown.getMessage().contains("is not available"))
     }
 
+    scenario ("A WADL with a parameter reference, that does not point to a parameter should be rejected") {
+	   given("a WADL with a parameter reference pointing to a method")
+	   val inWADL =
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+             <resources base="https://test.api.openstack.com">
+                 <resource path="a/b">
+                     <resource path="c">
+	                    <param href="#foo"/>
+                     </resource>
+                 </resource>
+             </resources>
+             <method id="foo"/>
+        </application>
+      when("the WADL is normalized")
+      val thrown = intercept[Exception] {
+        val normWADL = wadl.normalize(inWADL, TREE)
+      }
+      then("An exception should be thrown with the words 'foo' and 'param'")
+      assert(thrown.getMessage().contains("foo"))
+      assert(thrown.getMessage().contains("param"))
+    }
+
+    scenario ("A WADL with a representation reference, that does not point to a representation should be rejected") {
+	   given("a WADL with a representation reference pointing to a method")
+	   val inWADL =
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+             <resources base="https://test.api.openstack.com">
+                 <resource path="a/b">
+                     <resource path="c">
+                       <method name="POST">
+	                      <request>
+                            <representation href="#foo"/>
+                          </request>
+                        </method>
+                     </resource>
+                 </resource>
+             </resources>
+             <method id="foo"/>
+        </application>
+      when("the WADL is normalized")
+      val thrown = intercept[Exception] {
+        val normWADL = wadl.normalize(inWADL, TREE)
+      }
+      then("An exception should be thrown with the words 'foo' and 'representation'")
+      assert(thrown.getMessage().contains("foo"))
+      assert(thrown.getMessage().contains("representation"))
+    }
+
+    scenario ("A WADL with a method reference, that does not point to a method should be rejected") {
+	   given("a WADL with a method reference pointing to a representation")
+	   val inWADL =
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+             <resources base="https://test.api.openstack.com">
+                 <resource path="a/b">
+                     <resource path="c">
+                         <method href="#foo"/>
+                     </resource>
+                 </resource>
+             </resources>
+             <representation id="foo"/>
+        </application>
+      when("the WADL is normalized")
+      val thrown = intercept[Exception] {
+        val normWADL = wadl.normalize(inWADL, TREE)
+      }
+      then("An exception should be thrown with the words 'foo' and 'method'")
+      assert(thrown.getMessage().contains("foo"))
+      assert(thrown.getMessage().contains("method"))
+    }
+
+    scenario ("A WADL with a resource type reference, that does not point to a resource_type should be rejected") {
+	   given("a WADL with a resource type  reference pointing to a representation")
+	   val inWADL =
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+             <resources base="https://test.api.openstack.com">
+                 <resource path="a/b">
+                     <resource path="c">
+                        <method name="GET">
+                            <response status="200">
+                                <representation mediaType="application/xml">
+                                    <param name="location" style="plain" type="xsd:anyURI">
+                                       <link resource_type="#foo"/>
+                                    </param>
+                                </representation>
+                            </response>
+                        </method>
+                     </resource>
+                 </resource>
+             </resources>
+             <representation id="foo"/>
+        </application>
+      when("the WADL is normalized")
+      val thrown = intercept[Exception] {
+        val normWADL = wadl.normalize(inWADL, TREE)
+      }
+      then("An exception should be thrown with the words 'foo' and 'resource_type'")
+      assert(thrown.getMessage().contains("foo"))
+      assert(thrown.getMessage().contains("resource_type"))
+    }
+
   }
 }

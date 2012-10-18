@@ -45,28 +45,28 @@
         <rule context="wadl:resource/@type">
             <extends rule="CheckReferences"/>
         </rule>
-        <rule context="@resource_type" >
+        <rule context="wadl:link/@resource_type" >
             <extends rule="CheckReference"/>
             <assert test="local-name($attRef/..)='resource_type'">
-                The reference should map to a resource_type.
+                The reference '<value-of select="."/>' should point to a resource_type.
             </assert>
         </rule>
         <rule context="wadl:method/@href">
             <extends rule="CheckReference"/>
             <assert test="local-name($attRef/..)='method'">
-                The reference should map to a method.
+                The reference '<value-of select="."/>' should point to a method.
             </assert>
         </rule>
         <rule context="wadl:representation/@href">
             <extends rule="CheckReference"/>
             <assert test="local-name($attRef/..)='representation'">
-                The reference should map to a representation.
+                The reference '<value-of select="."/>' should point to a representation.
             </assert>
         </rule>
         <rule context="wadl:param/@href">
             <extends rule="CheckReference"/>
             <assert test="local-name($attRef/..)='param'">
-                The reference should map to a param.
+                The reference '<value-of select="."/>' point to a param.
             </assert>
         </rule>
         <rule context="wadl:include/@href">
