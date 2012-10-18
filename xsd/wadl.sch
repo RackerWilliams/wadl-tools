@@ -40,7 +40,7 @@
                 A reference listed in the type attribute does not seem to exist in another wadl.
             </assert>
             <assert test="$localAttRef">
-                A reference listed in the type attribute does not seem to exist in this wadl.
+                In the set of references '<value-of select="."/>', the following references '<value-of select="for $id in $localids return if (not(//@id[. = substring-after($id,'#')])) then $id else ()" separator="' '"/>' do not seem to exist in this wadl.
             </assert>
         </rule>
         <rule context="wadl:resource/@type">

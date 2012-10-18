@@ -253,5 +253,29 @@ class BadWADLSpec extends BaseWADLSpec {
       assert(thrown.getMessage().contains("missing '#'"))
     }
 
+    scenario ("A WADL with a resource with a set of references some of which are missing should be rejected") {
+	   given("a WADL with a resource with a set of  references some of which are missing")
+	   val inWADL =
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+             <resources base="https://test.api.openstack.com">
+                 <resource path="a/b">
+                     <resource path="c" type="#foo #bar #not #jar #here">
+                     </resource>
+                 </resource>
+             </resources>
+             <resource_type id="foo"/>
+             <resource_type id="bar"/>
+             <resource_type id="jar"/>
+        </application>
+      when("the WADL is normalized")
+      val thrown = intercept[Exception] {
+        val normWADL = wadl.normalize(inWADL, TREE)
+      }
+      then("An exception should be thrown with the words '#not #here' and ''")
+      assert(thrown.getMessage().contains("#not #here"))
+      assert(thrown.getMessage().contains("do not seem to exist in this wadl"))
+    }
+
   }
 }
