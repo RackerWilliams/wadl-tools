@@ -334,5 +334,37 @@ class BadWADLSpec extends BaseWADLSpec {
       assert(thrown.getMessage().contains("are not pointing to a resource type."))
     }
 
+    scenario ("A WADL with a resource with a set of external references some of which are pointing to the wrong type should be rejected") {
+	   given("a WADL with a resource with a set of external references some of which are pointing to the wrong type")
+      register ("test://path/to/test/other.wadl",
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+             <resource_type id="foo"/>
+             <resource_type id="bar"/>
+             <method id="jar"/>
+        </application>
+      )
+	   val inWADL = ("test://path/to/test/mywadl.wadl",
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+             <resources base="https://test.api.openstack.com">
+                 <resource path="a/b">
+                     <resource path="c" type="other.wadl#foo other.wadl#bar other.wadl#jar">
+                     </resource>
+                 </resource>
+             </resources>
+             <resource_type id="foo"/>
+             <resource_type id="bar"/>
+             <resource_type id="jar"/>
+        </application>)
+      when("the WADL is normalized")
+      val thrown = intercept[Exception] {
+        val normWADL = wadl.normalize(inWADL, TREE, XSD11, true, KEEP)
+      }
+      then("An exception should be thrown with the words 'other.wadl#jar' and 'are not pointing to a resource type.'")
+      assert(thrown.getMessage().contains("'other.wadl#jar'"))
+      assert(thrown.getMessage().contains("are not pointing to a resource type."))
+    }
+
   }
 }
