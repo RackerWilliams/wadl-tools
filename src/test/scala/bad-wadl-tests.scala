@@ -272,9 +272,42 @@ class BadWADLSpec extends BaseWADLSpec {
       val thrown = intercept[Exception] {
         val normWADL = wadl.normalize(inWADL, TREE)
       }
-      then("An exception should be thrown with the words '#not #here' and ''")
+      then("An exception should be thrown with the words '#not #here' and 'do not seem to exist in this wadl'")
       assert(thrown.getMessage().contains("#not #here"))
       assert(thrown.getMessage().contains("do not seem to exist in this wadl"))
+    }
+
+
+    scenario ("A WADL with a resource with a set of external references some of which are missing should be rejected") {
+	   given("a WADL with a resource with a set of external references some of which are missing")
+      register ("test://path/to/test/other.wadl",
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+             <resource_type id="foo"/>
+             <resource_type id="bar"/>
+             <resource_type id="jar"/>
+        </application>
+      )
+	   val inWADL = ("test://path/to/test/mywadl.wadl",
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+             <resources base="https://test.api.openstack.com">
+                 <resource path="a/b">
+                     <resource path="c" type="other.wadl#foo other.wadl#bar other.wadl#not other.wadl#jar other.wadl#here">
+                     </resource>
+                 </resource>
+             </resources>
+             <resource_type id="foo"/>
+             <resource_type id="bar"/>
+             <resource_type id="jar"/>
+        </application>)
+      when("the WADL is normalized")
+      val thrown = intercept[Exception] {
+        val normWADL = wadl.normalize(inWADL, TREE, XSD11, true, KEEP)
+      }
+      then("An exception should be thrown with the words 'other.wadl#not other.wadl#here' and 'do not seem to exist'")
+      assert(thrown.getMessage().contains("other.wadl#not other.wadl#here"))
+      assert(thrown.getMessage().contains("do not seem to exist"))
     }
 
   }

@@ -37,7 +37,7 @@
                 In the set of references '<value-of select="."/>', the following references '<value-of select="$ids[not(contains(.,'#'))]" separator="' '"/>' are missing '#'.
             </assert>
             <assert test="$remoteAttRef">
-                A reference listed in the type attribute does not seem to exist in another wadl.
+                In the set of refereces '<value-of select="."/>', the following external references '<value-of select="for $id in $remoteids return if (not(document(resolve-uri(substring-before($id,'#'),concat($baseDocURI,'/')))/wadl:application//@id[.= substring-after($id,'#')])) then $id else ()" separator="' '"/>' do not seem to exist.
             </assert>
             <assert test="$localAttRef">
                 In the set of references '<value-of select="."/>', the following references '<value-of select="for $id in $localids return if (not(//@id[. = substring-after($id,'#')])) then $id else ()" separator="' '"/>' do not seem to exist in this wadl.
