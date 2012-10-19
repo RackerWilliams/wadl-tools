@@ -45,6 +45,9 @@
         </rule>
         <rule context="wadl:resource/@type">
             <extends rule="CheckReferences"/>
+            <assert test="every $id in $localids satisfies (//@id[(. = substring-after($id,'#')) and (local-name(..)='resource_type')])">
+                In the set of references '<value-of select="."/>', the following references '<value-of select="for $id in $localids return if (//@id[(. = substring-after($id,'#')) and (local-name(..)='resource_type')]) then () else $id" seperator="' '"/>' are not pointing to a resource type.
+            </assert>
         </rule>
         <rule context="wadl:link/@resource_type" >
             <extends rule="CheckReference"/>
