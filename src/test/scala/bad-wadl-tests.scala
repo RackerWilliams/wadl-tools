@@ -46,7 +46,7 @@ class BadWADLSpec extends BaseWADLSpec {
     }
 
     scenario ("A WADL with a missing link should be rejected") {
-	   given("a WADL with a link missing a #")
+	   given("a WADL with a missing link")
 	   val inWADL =
         <application xmlns="http://wadl.dev.java.net/2009/02"
                      xmlns:xsd="http://www.w3.org/2001/XMLSchema">
@@ -64,6 +64,56 @@ class BadWADLSpec extends BaseWADLSpec {
       }
       then("An exception should be thrown with the words 'foo' and 'does not seem to exist'.")
       assert(thrown.getMessage().contains("foo"))
+      assert(thrown.getMessage().contains("does not seem to exist"))
+    }
+
+    scenario ("A WADL with a missing external link should be rejected (missing file)") {
+	   given("a WADL with a link missing external link")
+	   val inWADL =
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+             <resources base="https://test.api.openstack.com">
+                 <resource path="a/b">
+                     <resource path="c">
+	                    <method href="other.wadl#foo"/>
+                     </resource>
+                 </resource>
+             </resources>
+        </application>
+      when("the WADL is normalized")
+      val thrown = intercept[Exception] {
+        val normWADL = wadl.normalize(inWADL, TREE)
+      }
+      then("An exception should be thrown with the words 'other.wadl#foo' and 'does not seem to exist'.")
+      assert(thrown.getMessage().contains("other.wadl#foo"))
+      assert(thrown.getMessage().contains("does not seem to exist"))
+    }
+
+    scenario ("A WADL with a missing external link should be rejected") {
+	   given("a WADL with a link missing external link")
+      register ("test://path/to/test/other.wadl",
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+             <method id="bar"/>
+        </application>
+      )
+	   val inWADL = ("test://path/to/test/mywadl.wadl",
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+             <resources base="https://test.api.openstack.com">
+                 <resource path="a/b">
+                     <resource path="c">
+	                    <method href="other.wadl#foo"/>
+                     </resource>
+                 </resource>
+             </resources>
+        </application>)
+      when("the WADL is normalized")
+      val thrown = intercept[Exception] {
+        val normWADL = wadl.normalize(inWADL, TREE, XSD11, true, KEEP)
+      }
+      then("An exception should be thrown with the words 'other.wadl#foo' and 'does not seem to exist'.")
+      assert(thrown.getMessage().contains("other.wadl#foo"))
       assert(thrown.getMessage().contains("does not seem to exist"))
     }
 
