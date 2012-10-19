@@ -117,6 +117,34 @@ class BadWADLSpec extends BaseWADLSpec {
       assert(thrown.getMessage().contains("does not seem to exist"))
     }
 
+    scenario ("A WADL with an external link of the wrong type should be rejected") {
+	   given("a WADL with an external link of the wrong type")
+      register ("test://path/to/test/other.wadl",
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+             <resource_type id="foo"/>
+        </application>
+      )
+	   val inWADL = ("test://path/to/test/mywadl.wadl",
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+             <resources base="https://test.api.openstack.com">
+                 <resource path="a/b">
+                     <resource path="c">
+	                    <method href="other.wadl#foo"/>
+                     </resource>
+                 </resource>
+             </resources>
+        </application>)
+      when("the WADL is normalized")
+      val thrown = intercept[Exception] {
+        val normWADL = wadl.normalize(inWADL, TREE, XSD11, true, KEEP)
+      }
+      then("An exception should be thrown with the words 'other.wadl#foo' and 'method'")
+      assert(thrown.getMessage().contains("other.wadl#foo"))
+      assert(thrown.getMessage().contains("method"))
+    }
+
     scenario ("A WADL with a missing include should be rejected") {
 	   given("a WADL with a missing include")
 	   val inWADL =
