@@ -141,7 +141,7 @@ This XSLT flattens or expands the path in the path attributes of the resource el
 		<xsl:with-param name="path" select="current-grouping-key()"/>
 	      </xsl:apply-templates>	      
 	      <xsl:if test="count(wadl:tokens/wadl:token) = $token-number">
-		  <xsl:apply-templates select="*[not(self::wadl:resource) and not(self::wadl:param[@style = 'template'])]" mode="tree-format"/>
+	          <xsl:apply-templates select="current-group()[count(wadl:tokens/wadl:token) = $token-number]/*[not(self::wadl:resource) and not(self::wadl:param[@style = 'template'])]" mode="tree-format"/>    
 		  <xsl:call-template name="group">
 		    <xsl:with-param name="token-number" select="1"/>
 		    <xsl:with-param name="resources" select="wadl:resource"/>
