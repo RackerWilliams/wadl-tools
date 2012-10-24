@@ -1210,7 +1210,36 @@ class NormalizeWADLSpec extends BaseWADLSpec {
       canon(outWADL) should equal (canon(normWADL))
     }
 
-
+    scenario ("The original WADL is in Path format with more than one resource having the same path and both those resources having methods") {
+      given("a WADL with resources with more than one resource having the same path and both those resources having methods")
+      val inWADL =
+	  <application xmlns="http://wadl.dev.java.net/2009/02" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	    <resources base="https://test.api.openstack.com">
+	      <resource id="someId" path="a/b" queryType="application/x-www-form-urlencoded">
+		<method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo"/>
+	      </resource>
+	      <resource id="someOtherId" path="a/b" queryType="application/x-www-form-urlencoded">
+		<method xmlns:rax="http://docs.rackspace.com/api" rax:id="bar"/>
+	      </resource>
+	    </resources>
+	  </application>
+      val outWADL = 
+	<application xmlns="http://wadl.dev.java.net/2009/02"
+		     xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	   <resources base="https://test.api.openstack.com">
+	      <resource path="a" queryType="application/x-www-form-urlencoded" id="someId">
+		 <resource path="b" queryType="application/x-www-form-urlencoded" id="someId-2">
+		    <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo"/>
+		    <method xmlns:rax="http://docs.rackspace.com/api" rax:id="bar"/>
+		 </resource>
+	      </resource>
+	   </resources>
+	</application>
+      when("the WADL is normalized to tree format")
+      val normWADL = wadl.normalize(inWADL, TREE, XSD11, true, OMIT)
+      then("the resources should be the wadl should be in tree format with the resources combined")
+      canon(outWADL) should equal (canon(normWADL))
+      }
 
   }
 
