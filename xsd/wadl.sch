@@ -4,11 +4,11 @@
     <title>WADL Assertions</title>
     <ns prefix="wadl" uri="http://wadl.dev.java.net/2009/02"/>
     <ns prefix="xsdxt" uri="http://docs.rackspacecloud.com/xsd-ext/v1.0"/>
-    <let name="baseDocURI" value="string-join(tokenize(document-uri(/),'/')[position() ne last()], '/')"/>
     <pattern id="References">
         <rule id="CheckReference" abstract="true">
             <let name="doc" value="substring-before(.,'#')"/>
             <let name="ref" value="substring-after(.,'#')"/>
+            <let name="baseDocURI" value="string-join(tokenize(base-uri(..),'/')[position() ne last()], '/')"/>
             <let name="attRef" value="if (string-length($doc) != 0) then document(resolve-uri($doc,concat($baseDocURI,'/')))/wadl:application//@id[.=$ref] else //@id[.=$ref]"/>
             <assert test="contains(., '#')">
                 The reference '<value-of select="."/>' is missing '#'.
@@ -18,6 +18,7 @@
             </assert>
         </rule>
         <rule id="CheckReferences" abstract="true">
+            <let name="baseDocURI" value="string-join(tokenize(base-uri(..),'/')[position() ne last()], '/')"/>
             <let name="ids" value="tokenize(normalize-space(.),' ')"/>
             <let name="remoteids" value="
                 for 
@@ -77,12 +78,12 @@
             </assert>
         </rule>
         <rule context="wadl:include/@href">
-            <assert test="doc-available(resolve-uri(.,concat($baseDocURI,'/')))">
+            <assert test="doc-available(resolve-uri(.,base-uri(..)))">
                 Included file '<value-of select="."/>' is not available.
             </assert>
         </rule>
         <rule context="xsdxt:code/@href">
-            <assert test="unparsed-text-available(resolve-uri(.,concat($baseDocURI,'/')))">
+            <assert test="unparsed-text-available(resolve-uri(.,base-uri(..)))">
                 The code sample '<value-of select="."/>' is not available.
             </assert>
         </rule>

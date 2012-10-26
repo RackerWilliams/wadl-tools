@@ -39,9 +39,9 @@
         <xsl:variable name="newNextLinks" as="xs:string*" select="($nextLinks, wadl:nextLinks($doc,($excludes, $doc_uri)))"/>
         <xsl:variable name="newExcludes" as="xs:string*" select="($excludes, $doc_uri)"/>
 
-        <xsl:message>Checking: <xsl:value-of select="$doc_uri"/></xsl:message>
-        <xsl:message>Next: <xsl:value-of select="$newNextLinks" separator=", "/></xsl:message>
-        <xsl:message>Excluding: <xsl:value-of select="$newExcludes" separator=", "/></xsl:message>
+        <xsl:message>[INFO] Checking: <xsl:value-of select="$doc_uri"/></xsl:message>
+        <xsl:message>[INFO] Next: <xsl:value-of select="$newNextLinks" separator=", "/></xsl:message>
+        <xsl:message>[INFO] Excluding: <xsl:value-of select="$newExcludes" separator=", "/></xsl:message>
 
 
         <svrl:active-pattern>
@@ -53,7 +53,7 @@
             <xsl:apply-templates select="$doc/*"/>
         </svrl:active-pattern>
 
-        <xsl:apply-templates select="$doc" mode="M4"/>
+        <xsl:apply-templates select="$doc" mode="M3"/>
 
         <!-- Test next document -->
         <xsl:if test="$newNextLinks">

@@ -548,5 +548,181 @@ class BadWADLSpec extends BaseWADLSpec {
       assert(thrown.getMessage().contains("test://path/to/test/other.wadl"))
     }
 
+    scenario ("A WADL with a resource with a set of external references, the external wadl itself contains missing external resources") {
+	   given("a WADL with a resource with a set of external references, the external wadl itself contains missing external resources")
+      register ("test://path/another.wadl",
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+           <method id="myMethod2"/>
+        </application>
+      )
+      register ("test://path/to/test/foo/other.wadl",
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+             <resource_type id="foo">
+                 <resource path="bar">
+                     <method href="../../../another.wadl#myMethod"/>
+                 </resource>
+             </resource_type>
+             <resource_type id="bar"/>
+             <resource_type id="jar"/>
+        </application>
+      )
+	   val inWADL = ("test://path/to/test/mywadl.wadl",
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+             <resources base="https://test.api.openstack.com">
+                 <resource path="a/b">
+                     <resource path="c" type="foo/other.wadl#foo foo/other.wadl#bar foo/other.wadl#jar">
+                     </resource>
+                 </resource>
+             </resources>
+             <resource_type id="foo"/>
+             <resource_type id="bar"/>
+             <resource_type id="jar"/>
+        </application>)
+      when("the WADL is normalized")
+      val thrown = intercept[Exception] {
+        val normWADL = wadl.normalize(inWADL, TREE, XSD11, true, KEEP)
+      }
+      then("An exception should be thrown with the words 'myMethod' and 'does not seem to exist'.")
+      assert(thrown.getMessage().contains("myMethod"))
+      assert(thrown.getMessage().contains("does not seem to exist"))
+      and("The exception should point to the file in error")
+      assert(thrown.getMessage().contains("test://path/to/test/foo/other.wadl"))
+    }
+
+    scenario ("A WADL with a resource with a set of external references, the external wadl itself contains missing external resources (missing file)") {
+	   given("a WADL with a resource with a set of external references, the external wadl itself contains missing external resources")
+      register ("test://path/to/test/foo/other.wadl",
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+             <resource_type id="foo">
+                 <resource path="bar">
+                     <method href="../../../another.wadl#myMethod"/>
+                 </resource>
+             </resource_type>
+             <resource_type id="bar"/>
+             <resource_type id="jar"/>
+        </application>
+      )
+	   val inWADL = ("test://path/to/test/mywadl.wadl",
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+             <resources base="https://test.api.openstack.com">
+                 <resource path="a/b">
+                     <resource path="c" type="foo/other.wadl#foo foo/other.wadl#bar foo/other.wadl#jar">
+                     </resource>
+                 </resource>
+             </resources>
+             <resource_type id="foo"/>
+             <resource_type id="bar"/>
+             <resource_type id="jar"/>
+        </application>)
+      when("the WADL is normalized")
+      val thrown = intercept[Exception] {
+        val normWADL = wadl.normalize(inWADL, TREE, XSD11, true, KEEP)
+      }
+      then("An exception should be thrown with the words 'myMethod' and 'does not seem to exist'.")
+      assert(thrown.getMessage().contains("myMethod"))
+      assert(thrown.getMessage().contains("does not seem to exist"))
+      and("The exception should point to the file in error")
+      assert(thrown.getMessage().contains("test://path/to/test/foo/other.wadl"))
+    }
+
+    scenario ("A WADL with a resource with a set of external references, the external wadl itself contains missing external resources (two WADLs down)") {
+	   given("a WADL with a resource with a set of external references, the external wadl itself contains missing external resources")
+      register ("test://path/yet/another/wadl.wadl",
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+             <method id="doGet2" name="GET"/>
+        </application>
+      )
+      register ("test://path/another.wadl",
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+           <resource_type id="barType">
+                <method href="yet/another/wadl.wadl#doGet"/>
+           </resource_type>
+        </application>
+      )
+      register ("test://path/to/test/foo/other.wadl",
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+             <resource_type id="foo">
+                 <resource path="bar" type="../../../another.wadl#barType"/>
+             </resource_type>
+             <resource_type id="bar"/>
+             <resource_type id="jar"/>
+        </application>
+      )
+	   val inWADL = ("test://path/to/test/mywadl.wadl",
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+             <resources base="https://test.api.openstack.com">
+                 <resource path="a/b">
+                     <resource path="c" type="foo/other.wadl#foo foo/other.wadl#bar foo/other.wadl#jar">
+                     </resource>
+                 </resource>
+             </resources>
+             <resource_type id="foo"/>
+             <resource_type id="bar"/>
+             <resource_type id="jar"/>
+        </application>)
+      when("the WADL is normalized")
+      val thrown = intercept[Exception] {
+        val normWADL = wadl.normalize(inWADL, TREE, XSD11, true, KEEP)
+      }
+      then("An exception should be thrown with the words 'doGet' and 'does not seem to exist'.")
+      assert(thrown.getMessage().contains("doGet"))
+      assert(thrown.getMessage().contains("does not seem to exist"))
+      and("The exception should point to the file in error")
+      assert(thrown.getMessage().contains("test://path/another.wadl"))
+    }
+
+    scenario ("A WADL with a resource with a set of external references, the external wadl itself contains missing external resources (two WADLs down, missing file)") {
+	   given("a WADL with a resource with a set of external references, the external wadl itself contains missing external resources")
+      register ("test://path/another.wadl",
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+           <resource_type id="barType">
+                <method href="yet/another/wadl.wadl#doGet"/>
+           </resource_type>
+        </application>
+      )
+      register ("test://path/to/test/foo/other.wadl",
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+             <resource_type id="foo">
+                 <resource path="bar" type="../../../another.wadl#barType"/>
+             </resource_type>
+             <resource_type id="bar"/>
+             <resource_type id="jar"/>
+        </application>
+      )
+	   val inWADL = ("test://path/to/test/mywadl.wadl",
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+             <resources base="https://test.api.openstack.com">
+                 <resource path="a/b">
+                     <resource path="c" type="foo/other.wadl#foo foo/other.wadl#bar foo/other.wadl#jar">
+                     </resource>
+                 </resource>
+             </resources>
+             <resource_type id="foo"/>
+             <resource_type id="bar"/>
+             <resource_type id="jar"/>
+        </application>)
+      when("the WADL is normalized")
+      val thrown = intercept[Exception] {
+        val normWADL = wadl.normalize(inWADL, TREE, XSD11, true, KEEP)
+      }
+      then("An exception should be thrown with the words 'doGet' and 'does not seem to exist'.")
+      assert(thrown.getMessage().contains("doGet"))
+      assert(thrown.getMessage().contains("does not seem to exist"))
+      and("The exception should point to the file in error")
+      assert(thrown.getMessage().contains("test://path/another.wadl"))
+    }
+
   }
 }
