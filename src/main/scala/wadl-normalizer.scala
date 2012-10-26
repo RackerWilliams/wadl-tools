@@ -97,7 +97,8 @@ class WADLNormalizer(private var transformerFactory : TransformerFactory) {
                                "normalizeWadl1.xsl" -> new StreamSource(getClass().getResourceAsStream("/xsl/normalizeWadl1.xsl")),
                                "normalizeWadl2.xsl" -> new StreamSource(getClass().getResourceAsStream("/xsl/normalizeWadl2.xsl")),
                                "normalizeWadl3.xsl" -> new StreamSource(getClass().getResourceAsStream("/xsl/normalizeWadl3.xsl")),
-                               "normalizeWadl4.xsl" -> new StreamSource(getClass().getResourceAsStream("/xsl/normalizeWadl4.xsl")))
+                               "normalizeWadl4.xsl" -> new StreamSource(getClass().getResourceAsStream("/xsl/normalizeWadl4.xsl")),
+                               "wadl.xsl" -> new StreamSource(getClass().getResourceAsStream("/xsl/wadl.xsl")))
 
   //
   //  Set input URL resolver
@@ -112,7 +113,7 @@ class WADLNormalizer(private var transformerFactory : TransformerFactory) {
   //
   //  The schematron templates must use a private transformer factory.
   //
-  val schematronTemplates : Templates = saxTransformerFactory.newTemplates(new StreamSource(getClass().getResourceAsStream("/xsl/wadl.xsl")))
+  val schematronTemplates : Templates = saxTransformerFactory.newTemplates(new StreamSource(getClass().getResourceAsStream("/xsl/wadl-links.xsl")))
 
   def this() = this(null)
 

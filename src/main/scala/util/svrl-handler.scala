@@ -8,6 +8,7 @@ import org.xml.sax.Locator
 class SVRLHandler extends DefaultHandler {
   private var buffer : StringBuilder = null
   private var lastText : String = null
+  private var lastDoc : String = null
 
   override def characters (ch : Array[Char], start : Int, length : Int) : Unit = {
     if (buffer != null) {
@@ -20,6 +21,7 @@ class SVRLHandler extends DefaultHandler {
     if (uri == "http://purl.oclc.org/dsdl/svrl") {
       localName match {
         case "text" => handleTextStart(uri, localName, qName, attributes)
+        case "active-pattern" => handleActivePatternStart(uri, localName, qName, attributes)
         case _ => ; //Ignore
       }
     }
@@ -45,7 +47,16 @@ class SVRLHandler extends DefaultHandler {
     buffer = null
   }
 
+  private def handleActivePatternStart(uri : String, localName : String, qName : String,
+                                     attributes : Attributes) : Unit = {
+    lastDoc = attributes.getValue("document")
+  }
+
   private def handleFailedAssertEnd(uri : String, localName : String, qName : String) : Unit = {
-    throw new SAXParseException (lastText, null)
+    if (lastDoc != null) {
+      throw new SAXParseException (lastDoc + " : "+ lastText, null)
+    } else {
+      throw new SAXParseException (lastText, null)
+    }
   }
 }

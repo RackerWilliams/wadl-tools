@@ -43,6 +43,8 @@ class BadWADLSpec extends BaseWADLSpec {
       then("An exception should be thrown with the words foo and #")
       assert(thrown.getMessage().contains("foo"))
       assert(thrown.getMessage().contains("#"))
+      and("The exception should point to the file in error")
+      assert(thrown.getMessage().contains("test://test/mywadl.wadl"))
     }
 
     scenario ("A WADL with a missing link should be rejected") {
@@ -65,6 +67,8 @@ class BadWADLSpec extends BaseWADLSpec {
       then("An exception should be thrown with the words 'foo' and 'does not seem to exist'.")
       assert(thrown.getMessage().contains("foo"))
       assert(thrown.getMessage().contains("does not seem to exist"))
+      and("The exception should point to the file in error")
+      assert(thrown.getMessage().contains("test://test/mywadl.wadl"))
     }
 
     scenario ("A WADL with a missing external link should be rejected (missing file)") {
@@ -87,6 +91,8 @@ class BadWADLSpec extends BaseWADLSpec {
       then("An exception should be thrown with the words 'other.wadl#foo' and 'does not seem to exist'.")
       assert(thrown.getMessage().contains("other.wadl#foo"))
       assert(thrown.getMessage().contains("does not seem to exist"))
+      and("The exception should point to the file in error")
+      assert(thrown.getMessage().contains("test://test/mywadl.wadl"))
     }
 
     scenario ("A WADL with a missing external link should be rejected") {
@@ -115,6 +121,8 @@ class BadWADLSpec extends BaseWADLSpec {
       then("An exception should be thrown with the words 'other.wadl#foo' and 'does not seem to exist'.")
       assert(thrown.getMessage().contains("other.wadl#foo"))
       assert(thrown.getMessage().contains("does not seem to exist"))
+      and("The exception should point to the file in error")
+      assert(thrown.getMessage().contains("test://path/to/test/mywadl.wadl"))
     }
 
     scenario ("A WADL with an external link of the wrong type should be rejected") {
@@ -143,6 +151,8 @@ class BadWADLSpec extends BaseWADLSpec {
       then("An exception should be thrown with the words 'other.wadl#foo' and 'method'")
       assert(thrown.getMessage().contains("other.wadl#foo"))
       assert(thrown.getMessage().contains("method"))
+      and("The exception should point to the file in error")
+      assert(thrown.getMessage().contains("test://path/to/test/mywadl.wadl"))
     }
 
     scenario ("A WADL with a missing include should be rejected") {
@@ -169,6 +179,8 @@ class BadWADLSpec extends BaseWADLSpec {
       then("An exception should be thrown with the words 'schema.xsd' and 'is not available'.")
       assert(thrown.getMessage().contains("schema.xsd"))
       assert(thrown.getMessage().contains("is not available"))
+      and("The exception should point to the file in error")
+      assert(thrown.getMessage().contains("test://test/mywadl.wadl"))
     }
 
     scenario ("A WADL with a missing code sample should be rejected") {
@@ -201,6 +213,8 @@ class BadWADLSpec extends BaseWADLSpec {
       then("An exception should be thrown with the words 'missing_sample.xml' and 'is not available'.")
       assert(thrown.getMessage().contains("missing_sample.xml"))
       assert(thrown.getMessage().contains("is not available"))
+      and("The exception should point to the file in error")
+      assert(thrown.getMessage().contains("test://test/mywadl.wadl"))
     }
 
     scenario ("A WADL with a parameter reference, that does not point to a parameter should be rejected") {
@@ -224,6 +238,8 @@ class BadWADLSpec extends BaseWADLSpec {
       then("An exception should be thrown with the words 'foo' and 'param'")
       assert(thrown.getMessage().contains("foo"))
       assert(thrown.getMessage().contains("param"))
+      and("The exception should point to the file in error")
+      assert(thrown.getMessage().contains("test://test/mywadl.wadl"))
     }
 
     scenario ("A WADL with a representation reference, that does not point to a representation should be rejected") {
@@ -251,6 +267,8 @@ class BadWADLSpec extends BaseWADLSpec {
       then("An exception should be thrown with the words 'foo' and 'representation'")
       assert(thrown.getMessage().contains("foo"))
       assert(thrown.getMessage().contains("representation"))
+      and("The exception should point to the file in error")
+      assert(thrown.getMessage().contains("test://test/mywadl.wadl"))
     }
 
     scenario ("A WADL with a method reference, that does not point to a method should be rejected") {
@@ -274,6 +292,8 @@ class BadWADLSpec extends BaseWADLSpec {
       then("An exception should be thrown with the words 'foo' and 'method'")
       assert(thrown.getMessage().contains("foo"))
       assert(thrown.getMessage().contains("method"))
+      and("The exception should point to the file in error")
+      assert(thrown.getMessage().contains("test://test/mywadl.wadl"))
     }
 
     scenario ("A WADL with a resource type reference, that does not point to a resource_type should be rejected") {
@@ -305,6 +325,8 @@ class BadWADLSpec extends BaseWADLSpec {
       then("An exception should be thrown with the words 'foo' and 'resource_type'")
       assert(thrown.getMessage().contains("foo"))
       assert(thrown.getMessage().contains("resource_type"))
+      and("The exception should point to the file in error")
+      assert(thrown.getMessage().contains("test://test/mywadl.wadl"))
     }
 
     scenario ("A WADL with a resource with a set of references some of which are missing '#' should be rejected") {
@@ -329,6 +351,8 @@ class BadWADLSpec extends BaseWADLSpec {
       then("An exception should be thrown with the words 'foo jar' and 'missing '#''")
       assert(thrown.getMessage().contains("foo jar"))
       assert(thrown.getMessage().contains("missing '#'"))
+      and("The exception should point to the file in error")
+      assert(thrown.getMessage().contains("test://test/mywadl.wadl"))
     }
 
     scenario ("A WADL with a resource with a set of references some of which are missing should be rejected") {
@@ -353,6 +377,8 @@ class BadWADLSpec extends BaseWADLSpec {
       then("An exception should be thrown with the words '#not #here' and 'do not seem to exist in this wadl'")
       assert(thrown.getMessage().contains("#not #here"))
       assert(thrown.getMessage().contains("do not seem to exist in this wadl"))
+      and("The exception should point to the file in error")
+      assert(thrown.getMessage().contains("test://test/mywadl.wadl"))
     }
 
 
@@ -386,6 +412,8 @@ class BadWADLSpec extends BaseWADLSpec {
       then("An exception should be thrown with the words 'other.wadl#not other.wadl#here' and 'do not seem to exist'")
       assert(thrown.getMessage().contains("other.wadl#not other.wadl#here"))
       assert(thrown.getMessage().contains("do not seem to exist"))
+      and("The exception should point to the file in error")
+      assert(thrown.getMessage().contains("test://path/to/test/mywadl.wadl"))
     }
 
     scenario ("A WADL with a resource with a set of references some of which are pointing to the wrong type be rejected") {
@@ -410,6 +438,8 @@ class BadWADLSpec extends BaseWADLSpec {
       then("An exception should be thrown with the words '#jar' and 'are not pointing to a resource type.'")
       assert(thrown.getMessage().contains("'#jar'"))
       assert(thrown.getMessage().contains("are not pointing to a resource type."))
+      and("The exception should point to the file in error")
+      assert(thrown.getMessage().contains("test://test/mywadl.wadl"))
     }
 
     scenario ("A WADL with a resource with a set of external references some of which are pointing to the wrong type should be rejected") {
@@ -442,6 +472,8 @@ class BadWADLSpec extends BaseWADLSpec {
       then("An exception should be thrown with the words 'other.wadl#jar' and 'are not pointing to a resource type.'")
       assert(thrown.getMessage().contains("'other.wadl#jar'"))
       assert(thrown.getMessage().contains("are not pointing to a resource type."))
+      and("The exception should point to the file in error")
+      assert(thrown.getMessage().contains("test://path/to/test/mywadl.wadl"))
     }
 
     scenario ("A WADL with a resource with a set of external references some of which are missing, should be rejected (missing file)") {
@@ -474,6 +506,8 @@ class BadWADLSpec extends BaseWADLSpec {
       then("An exception should be thrown with the words 'another.wadl#not another.wadl#here' and 'do not seem to exist'")
       assert(thrown.getMessage().contains("another.wadl#not another.wadl#here"))
       assert(thrown.getMessage().contains("do not seem to exist"))
+      and("The exception should point to the file in error")
+      assert(thrown.getMessage().contains("test://path/to/test/mywadl.wadl"))
     }
 
   }
