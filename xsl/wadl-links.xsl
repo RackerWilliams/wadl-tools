@@ -53,7 +53,7 @@
             <xsl:apply-templates select="$doc/*"/>
         </svrl:active-pattern>
 
-        <xsl:apply-templates select="$doc" mode="M3"/>
+        <xsl:apply-templates select="$doc" mode="M4"/>
 
         <!-- Test next document -->
         <xsl:if test="$newNextLinks">
