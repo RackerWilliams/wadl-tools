@@ -25,7 +25,7 @@
                 The reference '<value-of select="."/>' does not seem to exist.
             </assert>
             <assert test="document($refURI)/xsd:schema">
-                The reference '<value-of select="."/>' does not appear to be a schema.
+                The reference '<value-of select="."/>' does not appear to be a valid XSD schema.
             </assert>
         </rule>
         <rule id="CheckReferences" abstract="true">
