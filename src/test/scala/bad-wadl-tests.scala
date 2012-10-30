@@ -946,7 +946,7 @@ class BadWADLSpec extends BaseWADLSpec {
       val thrown = intercept[Exception] {
         val normWADL = wadl.normalize(inWADL, TREE, XSD11, true, KEEP)
       }
-      then("An exception should be thrown with the words 'b.xsd' and 'does not seem to exist'.")
+      then("An exception should be thrown with the words 'c.xsd' and 'does not seem to exist'.")
       assert(thrown.getMessage().contains("c.xsd"))
       assert(thrown.getMessage().contains("does not seem to exist"))
       and("The exception should point to the file in error")
