@@ -37,14 +37,10 @@
 
 	<xsl:param name="xsd.output.path"/>
 
-    <xsl:param name="samples.path" select="replace(base-uri(/),'(.*)/.*\.wadl', '$1')"/>
-
     <xsl:param name="checksum"/>
 
     <!-- Need this to re-establish context within for-each -->
     <xsl:variable name="root" select="/"/>
-
-    <xsl:variable name="wadl-uri" select="replace(base-uri(.),'(.*/).*\.wadl', '$1')"/>
 
     <xsl:variable name="wadl-base-file-name" select="replace(base-uri(.),'^.*/(.*)\.[a-zA-Z]*$','$1')"/>
 
@@ -213,7 +209,7 @@
             name="content"
             as="xs:string"
             select="if (@href)
-                    then unparsed-text(concat($samples.path, '/',@href))
+                    then unparsed-text(resolve-uri(@href, base-uri()))
                     else xs:string(.)"/>
         <xsl:variable
             name="type"
@@ -268,7 +264,7 @@
             <title><xsl:value-of select="parent::rax:examples/@title"/><xsl:choose>
                 <xsl:when test="@language = 'xml'">: XML</xsl:when>
                 <xsl:when test="@language = 'javascript'">: JSON</xsl:when>                
-            </xsl:choose></title><programlisting language="{@language}" xmlns="http://docbook.org/ns/docbook"><xsl:copy-of select="unparsed-text(concat($samples.path, '/',@href))"/></programlisting></example></xsl:template>
+            </xsl:choose></title><programlisting language="{@language}" xmlns="http://docbook.org/ns/docbook"><xsl:copy-of select="unparsed-text(resolve-uri(@href,base-uri()))"/></programlisting></example></xsl:template>
     <xsl:template match="/">
         <xsl:if test="$flattenXsds = 'false'">
 	<xsl:message>[INFO] Not flattening xsds. Adjusting paths to xsds.</xsl:message>
