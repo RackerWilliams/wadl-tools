@@ -138,6 +138,10 @@ class WADLNormalizer(private var transformerFactory : TransformerFactory) {
                     flattenXSDs : Boolean,
 		              resource_types : ResourceType) : Unit = {
 
+    //
+    //  We purposly do the identity transform using xalan instead of
+    //  Saxon, because of SaxonEE license issue.
+    //
     val idTransform = TransformerFactory.newInstance("org.apache.xalan.processor.TransformerFactoryImpl",null).newTransformer()
     val wadlResult = new DOMResult()
 
@@ -149,7 +153,7 @@ class WADLNormalizer(private var transformerFactory : TransformerFactory) {
 
 
     //
-    //  Do Schematron template transformation
+    //  Do Schematron template transformation, check for broken links
     //
     val schTransform = schematronTemplates.newTransformer
     val schResult = new SAXResult(new SVRLHandler)
@@ -157,10 +161,17 @@ class WADLNormalizer(private var transformerFactory : TransformerFactory) {
     schTransform.transform (new DOMSource(wadl, in.getSystemId()), schResult)
 
     //
-    //  Perform the WADL normalization
+    //  Secondary check, do XSD transformation, fill in default values
+    //
+    val validWadlResult = new DOMResult()
+    wadlSchema.newValidator().validate(new DOMSource(wadl, in.getSystemId()), validWadlResult)
+    val validWadl = validWadlResult.getNode()
+
+    //
+    //  Perform the WADL normalization, on valid WADL
     //
     val transformer = newTransformer(format, xsdVersion, flattenXSDs, resource_types)
-    transformer.transform (new DOMSource(wadl, in.getSystemId()), out)
+    transformer.transform (new DOMSource(validWadl, in.getSystemId()), out)
   }
 
   //
