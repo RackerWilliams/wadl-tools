@@ -150,7 +150,7 @@ class WADLNormalizer(private var transformerFactory : TransformerFactory) {
                     flattenXSDs : Boolean,
 		              resource_types : ResourceType) : Unit = {
 
-    val idTransform = transformerFactory.newTransformer()
+    val idTransform = TransformerFactory.newInstance("org.apache.xalan.processor.TransformerFactoryImpl",null).newTransformer()
     val wadlResult = new DOMResult()
 
     //
