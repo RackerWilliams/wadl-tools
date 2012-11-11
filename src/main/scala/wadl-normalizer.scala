@@ -130,8 +130,8 @@ class WADLNormalizer(private var transformerFactory : TransformerFactory) {
 
   //
   // Normalize a WADL given a source and result, this validates the
-  // input WADL against the WADL schema only if the Source supports
-  // this, we always check against schematron schema though.
+  // input WADL against the WADL schema and schematron rules. These
+  // must all pass before the WADL is normalized.
   //
   def normalize(in: Source, out: Result,
                     format : Format,
