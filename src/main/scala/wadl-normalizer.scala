@@ -92,6 +92,7 @@ class WADLNormalizer(private var transformerFactory : TransformerFactory) {
                                "normalizeWadl2.xsl" -> new StreamSource(getClass().getResourceAsStream("/xsl/normalizeWadl2.xsl")),
                                "normalizeWadl3.xsl" -> new StreamSource(getClass().getResourceAsStream("/xsl/normalizeWadl3.xsl")),
                                "normalizeWadl4.xsl" -> new StreamSource(getClass().getResourceAsStream("/xsl/normalizeWadl4.xsl")),
+                               "normalizeWadl5.xsl" -> new StreamSource(getClass().getResourceAsStream("/xsl/normalizeWadl5.xsl")),
                                "wadl.xsl" -> new StreamSource(getClass().getResourceAsStream("/xsl/wadl.xsl")))
 
   //
