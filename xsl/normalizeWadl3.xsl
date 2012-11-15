@@ -40,7 +40,7 @@ This XSLT flattens or expands the path in the path attributes of the resource el
         </xsl:copy>
     </xsl:template>
 
-    <xsl:template match="@path[starts-with(.,'/') or ends-with(.,'/')]" mode="keep-format">
+    <xsl:template match="@path[(starts-with(.,'/') or ends-with(.,'/')) and not(. = '/')]" mode="keep-format">
         <xsl:attribute name="path"><xsl:value-of select="replace(replace(.,'^(.+)/$','$1'),'^/(.+)$','$1')"/></xsl:attribute>
     </xsl:template>
 
@@ -176,11 +176,18 @@ This XSLT flattens or expands the path in the path attributes of the resource el
         <resource>
             <xsl:copy-of select="@*"/>
             <tokens>
-                <xsl:for-each select="tokenize(replace(replace(@path,'^(.+)/$','$1'),'^/(.+)$','$1'),'/')">
+	      <xsl:choose>
+		<xsl:when test="@path = '/'">
+		  <token>/</token>
+		</xsl:when>
+		<xsl:otherwise>
+		  <xsl:for-each select="tokenize(replace(replace(@path,'^(.+)/$','$1'),'^/(.+)$','$1'),'/')">
                     <token>
-                        <xsl:value-of select="."/>
+		      <xsl:value-of select="."/>
                     </token>
-                </xsl:for-each>
+		  </xsl:for-each>
+		</xsl:otherwise>
+	      </xsl:choose>
             </tokens>
             <xsl:apply-templates select="node()" mode="tokenize-paths"/>
         </resource>
@@ -214,7 +221,7 @@ This XSLT flattens or expands the path in the path attributes of the resource el
                 <xsl:for-each select="ancestor-or-self::wadl:resource">
                     <xsl:sort order="ascending" select="position()"/>
                     <xsl:value-of select="replace(replace(@path,'^(.+)/$','$1'),'^/(.+)$','$1')"/>
-                    <xsl:if test="not(position() = last())">/</xsl:if>
+                    <xsl:if test="not(position() = last()) and not(@path = '/')">/</xsl:if>
                 </xsl:for-each>
             </xsl:attribute>
             <xsl:attribute name="id">
