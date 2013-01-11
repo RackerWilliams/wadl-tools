@@ -34,6 +34,8 @@
 
     <xsl:param name="flattenXsds">true</xsl:param>
 
+    <xsl:param name="passThroughPathsToXsds">1</xsl:param>
+    
     <xsl:param name="debug">0</xsl:param>
     <xsl:param name="format">-format</xsl:param>
 
@@ -421,12 +423,15 @@
                 -->
                 <xsl:variable name="baseURI" select="base-uri()"/>
                 <xsl:choose>
-                    <xsl:when test="$baseURI">
-                        <xsl:value-of select="resolve-uri(@href, $baseURI)"/>
-                    </xsl:when>
-                    <xsl:otherwise>
-                        <xsl:value-of select="@href"/>
-                    </xsl:otherwise>
+		  <xsl:when test="$passThroughPathsToXsds = '1'">
+		    <xsl:value-of select="@href"/>
+		  </xsl:when>
+		  <xsl:when test="$baseURI">
+		    <xsl:value-of select="resolve-uri(@href, $baseURI)"/>
+		  </xsl:when>
+		  <xsl:otherwise>
+		    <xsl:value-of select="@href"/>
+		  </xsl:otherwise>
                 </xsl:choose>
             </xsl:attribute>
         </xsl:copy>
