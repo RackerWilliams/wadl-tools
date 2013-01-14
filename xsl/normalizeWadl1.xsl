@@ -34,7 +34,7 @@
 
     <xsl:param name="flattenXsds">true</xsl:param>
 
-    <xsl:param name="passThroughPathsToXsds">1</xsl:param>
+    <xsl:param name="passThroughPathsToXsds">0</xsl:param>
     
     <xsl:param name="debug">0</xsl:param>
     <xsl:param name="format">-format</xsl:param>
