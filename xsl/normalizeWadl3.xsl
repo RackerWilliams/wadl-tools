@@ -171,6 +171,16 @@ This XSLT flattens or expands the path in the path attributes of the resource el
             <xsl:apply-templates select="node() | @*" mode="tokenize-paths"/>
         </xsl:copy>
     </xsl:template>
+    
+    
+    <xsl:template match="wadl:resources" mode="tokenize-paths">
+        <xsl:copy>
+            <xsl:apply-templates select="node() | @*" mode="tokenize-paths">
+                <!-- Sort so that we don't miss any methods when a/b comes before a -->
+                <xsl:sort select="@path"/> 
+            </xsl:apply-templates>
+        </xsl:copy>
+    </xsl:template>
 
     <xsl:template match="wadl:resource" mode="tokenize-paths">
         <resource>
@@ -189,7 +199,10 @@ This XSLT flattens or expands the path in the path attributes of the resource el
 		</xsl:otherwise>
 	      </xsl:choose>
             </tokens>
-            <xsl:apply-templates select="node()" mode="tokenize-paths"/>
+            <xsl:apply-templates select="node()" mode="tokenize-paths">
+                <!-- Sort so that we don't miss any methods when a/b comes before a -->
+                <xsl:sort select="@path"/> 
+            </xsl:apply-templates>
         </resource>
     </xsl:template>
 

@@ -310,71 +310,132 @@ class NormalizeWADLSpec extends BaseWADLSpec {
     scenario ("The original WADL is in mixed path/tree format"){
 	given("a WADL with resources in mixed path/tree format")
 	val inWADL =
-<application xmlns="http://wadl.dev.java.net/2009/02"
-    xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<application xmlns="http://wadl.dev.java.net/2009/02">
+  <grammars/>
   <resources base="https://test.api.openstack.com">
-    <resource path="a/b">
-      <resource path="c">
-	<method href="#foo"/>
+    <resource path="a">
+      <resource path="b/c">
+	<method name="GET">
+	  <response status="200 203"/>
+	</method>
+	<resource path="d/e">
+	  <method name="GET">
+	    <response status="200 203"/>
+	  </method>
+	</resource>
+	<resource path="d">
+	  <method name="POST">
+	    <response status="200 203"/>
+	  </method>
+	</resource>
       </resource>
-    </resource>
-    <resource path="d">
-      <resource path="e/f"/>
-    </resource>
-    <resource path="g"/>
-    <resource path="h/i/{j}/k">
-      <param name="j" style="template" type="xsd:string" required="true"/>
-      <method href="#foo"/>
-    </resource>
-    <resource path="h/i/{j}/k/l">
-      <method href="#foo"/>		
-    </resource>
+      <resource path="b">
+	<method name="POST">
+	  <response status="200 203"/>
+	</method>
+      </resource>
+    </resource>	
   </resources>
-  <method id="foo"/>
 </application>
 	val treeWADL = 
-      <application xmlns="http://wadl.dev.java.net/2009/02" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-        <resources base="https://test.api.openstack.com">
-          <resource path="a" queryType="application/x-www-form-urlencoded">
-            <resource id="rax-a-b-0" path="b" queryType="application/x-www-form-urlencoded">
-              <resource id="rax-a-b-c-0" path="c" queryType="application/x-www-form-urlencoded">
-                <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo">
-                </method>
-              </resource>
-            </resource>
-          </resource>
-          <resource id="rax-d-2" path="d" queryType="application/x-www-form-urlencoded">
-            <resource path="e" queryType="application/x-www-form-urlencoded">
-              <resource id="rax-d-e-f-2" path="f" queryType="application/x-www-form-urlencoded">
-              </resource>
-            </resource>
-          </resource>
-          <resource id="rax-g-4" path="g" queryType="application/x-www-form-urlencoded">
-          </resource>
-          <resource path="h" queryType="application/x-www-form-urlencoded">
-            <resource path="i" queryType="application/x-www-form-urlencoded">
-              <resource path="{j}" queryType="application/x-www-form-urlencoded">
-                <param name="j" repeating="false" required="true" style="template" type="xsd:string"></param>
-                <resource id="rax-h-i-_j_-k-5" path="k" queryType="application/x-www-form-urlencoded">
-                  <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo">
+<application xmlns="http://wadl.dev.java.net/2009/02"
+             xmlns:xs="http://www.w3.org/2001/XMLSchema">
+   <grammars/>
+   <resources base="https://test.api.openstack.com">
+      <resource path="a" id="rax-a-0" queryType="application/x-www-form-urlencoded">
+         <resource path="b" id="rax-a-b-0" queryType="application/x-www-form-urlencoded">
+            <method name="POST">
+               <response status="200 203"/>
+            </method>
+            <resource path="c" id="rax-a-b-c-1" queryType="application/x-www-form-urlencoded">
+               <method name="GET">
+                  <response status="200 203"/>
+               </method>
+               <resource path="d" id="rax-a-b-c-d-1" queryType="application/x-www-form-urlencoded">
+                  <method name="POST">
+                     <response status="200 203"/>
                   </method>
-                  <resource id="rax-h-i-_j_-k-l-6" path="l" queryType="application/x-www-form-urlencoded">
-                    <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo">
-                    </method>
+                  <resource path="e" id="rax-a-b-c-d-e-2" queryType="application/x-www-form-urlencoded">
+                     <method name="GET">
+                        <response status="200 203"/>
+                     </method>
                   </resource>
-                </resource>
-              </resource>
+               </resource>
             </resource>
-          </resource>
-        </resources>
-        <method id="foo"></method>
-      </application>
+         </resource>
+      </resource>
+   </resources>
+</application>
       when("the WADL is normalized")
       val normWADL = wadl.normalize(inWADL, TREE)
       then("the resources should now be in tree format")
       canon(treeWADL) should equal (canon(normWADL))
     }
 
+
+    scenario ("The original WADL is in mixed path/tree format with unsorted paths"){
+	given("a WADL with resources in mixed path/tree format with unsorted paths")
+	val inWADL =
+<application xmlns="http://wadl.dev.java.net/2009/02">
+  <grammars/>
+  <resources base="https://test.api.openstack.com">
+    <resource path="a">
+      <resource path="b/c">
+	<method name="GET">
+	  <response status="200 203"/>
+	</method>
+	<resource path="d/e">
+	  <method name="GET">
+	    <response status="200 203"/>
+	  </method>
+	</resource>
+	<resource path="d">
+	  <method name="POST">
+	    <response status="200 203"/>
+	  </method>
+	</resource>
+      </resource>
+      <resource path="b">
+	<method name="POST">
+	  <response status="200 203"/>
+	</method>
+      </resource>
+    </resource>	
+  </resources>
+</application>
+	val treeWADL = 
+  <application xmlns="http://wadl.dev.java.net/2009/02" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <grammars></grammars>
+    <resources base="https://test.api.openstack.com">
+      <resource id="rax-a-0" path="a" queryType="application/x-www-form-urlencoded">
+	<resource id="rax-a-b-0" path="b" queryType="application/x-www-form-urlencoded">
+	  <method name="POST">
+	    <response status="200 203"></response>
+	  </method>
+	  <resource id="rax-a-b-c-1" path="c" queryType="application/x-www-form-urlencoded">
+	    <method name="GET">
+	      <response status="200 203"></response>
+	    </method>
+	    <resource id="rax-a-b-c-d-1" path="d" queryType="application/x-www-form-urlencoded">
+	      <method name="POST">
+		<response status="200 203"></response>
+	      </method>
+	      <resource id="rax-a-b-c-d-e-2" path="e" queryType="application/x-www-form-urlencoded">
+		<method name="GET">
+		  <response status="200 203"></response>
+		</method>
+	      </resource>
+	    </resource>
+	  </resource>
+	</resource>
+      </resource>
+    </resources>
+  </application>
+      when("the WADL is normalized")
+      val normWADL = wadl.normalize(inWADL, TREE)
+      then("the resources should now be in tree format")
+      canon(treeWADL) should equal (canon(normWADL))
+    }
 
     scenario ("The original WADL is in mixed path/tree format and resource_types should be omitted"){
 	given("a WADL with resources in mixed path/tree format that uses resource_types")
