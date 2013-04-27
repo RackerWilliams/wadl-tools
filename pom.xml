@@ -119,7 +119,7 @@
     </profiles>
 
     <scm>
-        <connection>scm:git:ssh://git@github.com/rackspace/wadl-tools.git</connection>
+        <connection>scm:git:ssh://git@github.com/rackerlabs/wadl-tools.git</connection>
     </scm>
 
     <distributionManagement>
