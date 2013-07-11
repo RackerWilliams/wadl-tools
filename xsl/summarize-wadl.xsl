@@ -54,11 +54,13 @@
                     <xsl:when test="not(substring-before($type,'#') = '')">
                         <xsl:apply-templates select="document(substring-before($type,'#'),$context)//wadl:resource_type[@id = substring-after(.,'#')]/wadl:method" mode="#current">
                             <xsl:with-param name="path" select="$path"/>
+                            <xsl:with-param name="id" select="$id"/>
                         </xsl:apply-templates>
                     </xsl:when>
                     <xsl:otherwise>
                         <xsl:apply-templates select="$context//wadl:resource_type[@id = substring-after($type,'#')]/wadl:method" mode="#current">
                             <xsl:with-param name="path" select="$path"/>
+                            <xsl:with-param name="id" select="$id"/>
                         </xsl:apply-templates>
                     </xsl:otherwise>
                 </xsl:choose>
@@ -70,18 +72,19 @@
         <xsl:param name="path">
             <xsl:for-each select="ancestor-or-self::wadl:resource/@path"><xsl:value-of select="."/><xsl:if test="not(ends-with(.,'/')) and not(position() = last())">/</xsl:if></xsl:for-each>
         </xsl:param>
+        <xsl:param name="id" select="parent::wadl:resource/@id"/>
         <xsl:variable name="href" select="@href"/>
        <xsl:choose>
            <xsl:when test="not(substring-before(@href,'#') = '')">
                <xsl:apply-templates select="document(substring-before(@href,'#'),.)//wadl:method[@id = substring-after($href,'#')]">
                    <xsl:with-param name="path" select="$path"/>
-                   <xsl:with-param name="id" select="parent::wadl:resource/@id"/>   
+                   <xsl:with-param name="id" select="$id"/>   
                </xsl:apply-templates>
            </xsl:when>
            <xsl:otherwise>
                <xsl:apply-templates select="//wadl:method[@id = substring-after($href,'#')]">
                    <xsl:with-param name="path" select="$path"/>
-                   <xsl:with-param name="id" select="parent::wadl:resource/@id"/>   
+                   <xsl:with-param name="id" select="$id"/>   
                </xsl:apply-templates>               
            </xsl:otherwise>
        </xsl:choose>
@@ -91,19 +94,20 @@
         <xsl:param name="path">
             <xsl:for-each select="ancestor-or-self::wadl:resource/@path"><xsl:value-of select="."/><xsl:if test="not(ends-with(.,'/')) and not(position() = last())">/</xsl:if></xsl:for-each>
         </xsl:param>
+        <xsl:param name="id" select="parent::wadl:resource/@id"/>
         <xsl:variable name="href" select="@href"/>
         
         <xsl:choose>
             <xsl:when test="not(substring-before(@href,'#') = '')">
                 <xsl:apply-templates select="document(substring-before(@href,'#'),.)//wadl:method[@id = substring-after($href,'#')]" mode="toc">
                     <xsl:with-param name="path" select="$path"/>
-                    <xsl:with-param name="id" select="parent::wadl:resource/@id"/>   
+                    <xsl:with-param name="id" select="$id"/>   
                 </xsl:apply-templates>
             </xsl:when>
             <xsl:otherwise>
                 <xsl:apply-templates select="//wadl:method[@id = substring-after($href,'#')]" mode="toc">
                     <xsl:with-param name="path" select="$path"/>
-                    <xsl:with-param name="id" select="parent::wadl:resource/@id"/>   
+                    <xsl:with-param name="id" select="$id"/>   
                 </xsl:apply-templates>
             </xsl:otherwise>
         </xsl:choose>
