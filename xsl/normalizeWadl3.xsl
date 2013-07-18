@@ -115,7 +115,7 @@ This XSLT flattens or expands the path in the path attributes of the resource el
 			not(concat($opencurly,@name,$closecurly) = $path )">
  	</xsl:when>
 	<xsl:otherwise>
-	  <xsl:copy  copy-namespaces="no">
+	  <xsl:copy  copy-namespaces="yes">
         <xsl:if test="@type and not(contains(@type,':'))">
 	      <xsl:namespace name="" select="namespace-uri-from-QName(resolve-QName(@type, .))"/> 
         </xsl:if>
