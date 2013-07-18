@@ -79,7 +79,7 @@ class NormalizeWADLSpec extends BaseWADLSpec {
     <resource id="rax-h-7" path="h" queryType="application/x-www-form-urlencoded">
       <resource id="rax-h-i-7" path="i" queryType="application/x-www-form-urlencoded">
         <resource id="rax-h-i-_j_-7" path="{j}" queryType="application/x-www-form-urlencoded">
-          <param name="j" repeating="false" required="true" style="template" type="xsd:string"></param>
+          <param xmlns:rax="http://docs.rackspace.com/api" name="j" repeating="false" required="true" style="template" type="xsd:string"></param>
           <resource id="rax-h-i-_j_-k-7" path="k" queryType="application/x-www-form-urlencoded">
             <method xmlns:rax="http://docs.rackspace.com/api" name="GET" rax:id="foo">
             </method>
@@ -157,7 +157,7 @@ class NormalizeWADLSpec extends BaseWADLSpec {
     <resource id="rax-h-7" path="h" queryType="application/x-www-form-urlencoded">
       <resource id="rax-h-i-7" path="i" queryType="application/x-www-form-urlencoded">
         <resource id="rax-h-i-_j_-7" path="{j}" queryType="application/x-www-form-urlencoded">
-          <param name="j" repeating="false" required="true" style="template" type="xsd:string"></param>
+          <param xmlns:rax="http://docs.rackspace.com/api" name="j" repeating="false" required="true" style="template" type="xsd:string"></param>
           <resource id="rax-h-i-_j_-k-7" path="k" queryType="application/x-www-form-urlencoded">
             <method xmlns:rax="http://docs.rackspace.com/api" name="GET" rax:id="foo">
             </method>
@@ -220,7 +220,7 @@ class NormalizeWADLSpec extends BaseWADLSpec {
           <resource path="h" queryType="application/x-www-form-urlencoded">
             <resource path="i" queryType="application/x-www-form-urlencoded">
               <resource path="{j}" queryType="application/x-www-form-urlencoded">
-                <param name="j" repeating="false" required="true" style="template" type="xsd:string"></param>
+                <param xmlns:rax="http://docs.rackspace.com/api" name="j" repeating="false" required="true" style="template" type="xsd:string"></param>
                 <resource id="rax-h-i-_j_-k-3" path="k" queryType="application/x-www-form-urlencoded">
                   <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo">
                   </method>
@@ -285,7 +285,7 @@ class NormalizeWADLSpec extends BaseWADLSpec {
           <resource path="h" queryType="application/x-www-form-urlencoded">
             <resource path="i" queryType="application/x-www-form-urlencoded">
               <resource path="{j}" queryType="application/x-www-form-urlencoded">
-                <param name="j" repeating="false" required="true" style="template" type="xsd:string"></param>
+                <param xmlns:rax="http://docs.rackspace.com/api" name="j" repeating="false" required="true" style="template" type="xsd:string"></param>
                 <resource id="rax-h-i-_j_-k-3" path="k" queryType="application/x-www-form-urlencoded">
                   <method xmlns:rax="http://docs.rackspace.com/api" name="GET" rax:id="foo">
                   </method>
@@ -487,7 +487,7 @@ class NormalizeWADLSpec extends BaseWADLSpec {
           <resource path="h" queryType="application/x-www-form-urlencoded">
             <resource path="i" queryType="application/x-www-form-urlencoded">
               <resource path="{j}" queryType="application/x-www-form-urlencoded">
-                <param name="j" repeating="false" required="true" style="template" type="xsd:string"></param>
+                <param xmlns:rax="http://docs.rackspace.com/api" name="j" repeating="false" required="true" style="template" type="xsd:string"></param>
                 <resource id="rax-h-i-_j_-k-5" path="k" queryType="application/x-www-form-urlencoded">
                   <method xmlns:rax="http://docs.rackspace.com/api" rax:id="foo">
                   </method>
