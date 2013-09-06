@@ -193,26 +193,10 @@
     <xsl:template match="rax:examples|xsdxt:samples" 
         xmlns:xsdxt="http://docs.rackspacecloud.com/xsd-ext/v1.0" 
         xmlns:rax="http://docs.rackspace.com/api" mode="normalizeWadl2" priority="11">  
-<!--        <example xmlns="http://docbook.org/ns/docbook">
-            <title><xsl:value-of select="@title"/></title>
--->            <xsl:apply-templates mode="normalizeWadl2"/>
-<!--        </example>-->
-    </xsl:template>
-
-    <xsl:template match="xsdxt:sample" 
-        xmlns:xsdxt="http://docs.rackspacecloud.com/xsd-ext/v1.0" 
-        mode="normalizeWadl2">
-            <xsl:apply-templates select="xsdxt:code" mode="normalizeWadl2"/>
+          <xsl:apply-templates mode="normalizeWadl2"/>
     </xsl:template>
     
     <xsl:template match="xsdxt:code" mode="normalizeWadl2">
-        <!--
-            In order to create a DocBook example from a sample of code there are,
-            three variables we must determine: the media type of the example,
-            a human readable title, and the content of the example itself.
-
-            We try to determine as much as we can from context.
-        -->
         <xsl:variable
             name="content"
             as="xs:string"
@@ -226,35 +210,7 @@
                     else if (ancestor::wadl:representation/@mediaType)
                     then ancestor::wadl:representation/@mediaType
                     else 'application/xml'"/> <!-- xml is the default -->
-        <xsl:variable
-            name="title"
-            as="xs:string"
-            select="if (ancestor::xsdxt:sample/@title) then ancestor::xsdxt:sample/@title
-                    else if (ancestor::wadl:doc/@title) then ancestor::wadl:doc/@title
-                    else ''"/> <!-- a defualt title will be computed below in this case -->
-        <example xmlns="http://docbook.org/ns/docbook" role="wadl">
-            <title>
-            <xsl:choose>
-                    <xsl:when test="string-length($title) != 0"><xsl:value-of select="$title"/></xsl:when>
-                    <xsl:otherwise>
-                        <xsl:if test="ancestor::wadl:method/wadl:doc/@title">
-                            <xsl:value-of select="ancestor::wadl:method/wadl:doc/@title"/>
-                        </xsl:if>
-                        <xsl:choose>
-                            <xsl:when test="ancestor::wadl:response"> Response</xsl:when>
-                            <xsl:when test="ancestor::wadl:request"> Request</xsl:when>
-            </xsl:choose>
-                        <xsl:choose>
-                            <xsl:when test="$type = 'application/xml'">: XML</xsl:when>
-                            <xsl:when test="$type = 'application/json'">: JSON</xsl:when>
-                            <xsl:when test="$type = 'application/atom+xml'">: ATOM</xsl:when>
-                            <xsl:otherwise>: <xsl:value-of select="$type"/></xsl:otherwise>
-                        </xsl:choose>
-                    </xsl:otherwise>
-                </xsl:choose>
-            </title>
-            <!-- Try to keep an example together if possible -->
-            <xsl:processing-instruction name="dbfo">keep-together="auto"</xsl:processing-instruction>
+            <xsdxt:code>
             <programlisting xmlns="http://docbook.org/ns/docbook">
                 <xsl:attribute name="language">
                     <xsl:choose>
@@ -264,15 +220,19 @@
                 </xsl:attribute>
                 <xsl:value-of select="$content"/>
             </programlisting>
-            </example>
+            </xsdxt:code>
     </xsl:template>
 
+    <!-- handle some legacy stuff. Probably never used anymore -->
     <xsl:template match="rax:example" 
-        xmlns:rax="http://docs.rackspace.com/api" mode="normalizeWadl2"><example xmlns="http://docbook.org/ns/docbook" role="wadl">
-            <title><xsl:value-of select="parent::rax:examples/@title"/><xsl:choose>
+        xmlns:rax="http://docs.rackspace.com/api" mode="normalizeWadl2">
+        <xsl:variable name="title">
+            <xsl:value-of select="parent::rax:examples/@title"/><xsl:choose>
                 <xsl:when test="@language = 'xml'">: XML</xsl:when>
                 <xsl:when test="@language = 'javascript'">: JSON</xsl:when>                
-            </xsl:choose></title><programlisting language="{@language}" xmlns="http://docbook.org/ns/docbook"><xsl:copy-of select="unparsed-text(resolve-uri(@href,base-uri()))"/></programlisting></example></xsl:template>
+            </xsl:choose></xsl:variable>
+        <xsdxt:code title="{$title}"><programlisting language="{@language}" xmlns="http://docbook.org/ns/docbook"><xsl:copy-of select="unparsed-text(resolve-uri(@href,base-uri()))"/></programlisting></xsdxt:code></xsl:template>
+
     <xsl:template match="/">
         <xsl:if test="$flattenXsds = 'false'">
 	<xsl:message>[INFO] Not flattening xsds. Adjusting paths to xsds.</xsl:message>
