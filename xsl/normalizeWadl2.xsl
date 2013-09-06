@@ -136,7 +136,7 @@ Resolves hrefs on method and resource_type elements.
         <xsl:param name="baseID" select="''"/>
         <xsl:choose>
             <!--
-                Rename a resource id in a resource_type, by appending
+                Rename a resource @id in a resource_type, by appending
                 the id of the implementing resource.
             -->
             <xsl:when test="local-name(.) = 'id' and local-name(..) = 'resource' and $baseID and $baseID != ''">
