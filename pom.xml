@@ -276,6 +276,11 @@
               <artifactId>maven-surefire-plugin</artifactId>
               <!-- override the version inherited from the parent -->
               <version>2.16</version>
+              <configuration>
+                <includes>
+                  <include>**/*.class</include>
+                </includes>
+              </configuration>
             </plugin>
 
             <plugin>
