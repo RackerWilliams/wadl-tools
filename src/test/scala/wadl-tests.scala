@@ -564,6 +564,7 @@ class NormalizeWADLSpec extends BaseWADLSpec {
                      </method>
                      <rax:log href="my_log.txt"/>
                 </resource>
+		<rax:foo/>
               </resource>
            </resources>
         </application>)
@@ -572,6 +573,8 @@ class NormalizeWADLSpec extends BaseWADLSpec {
       Then ("The extension elemest should be preserved and the relative href should be expanded")
       assert (normWADL, "//wadl:resource[@path='resource']/rax:log")
       assert (normWADL, "//wadl:resource[@path='resource']/rax:log/@href = 'test://path/to/test/my_log.txt'")
+      assert (normWADL, "count(//rax:log) = 3")
+      assert (normWADL, "count(//rax:foo) = 1")
     }
 
     scenario ("The original WADL contains paths prefixed with / to be converted to TREE format"){

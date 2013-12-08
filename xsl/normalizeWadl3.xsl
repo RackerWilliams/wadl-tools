@@ -136,11 +136,13 @@ This XSLT flattens or expands the path in the path attributes of the resource el
                     <xsl:when test="@id"><xsl:attribute name="id" select="@id"/></xsl:when>	
                     <xsl:when test="count(wadl:tokens/wadl:token) = $token-number"><xsl:attribute name="id" select="raxf:generate-resource-id(.)"/></xsl:when>
                 </xsl:choose>
-                <xsl:apply-templates select="wadl:param[@style = 'template']|*[not(namespace-uri() = 'http://wadl.dev.java.net/2009/02')]" mode="tree-format">
+                <xsl:apply-templates select="wadl:param[@style = 'template']" mode="tree-format">
                     <xsl:with-param name="path" select="current-grouping-key()"/>
                 </xsl:apply-templates>	      
                 <xsl:if test="count(wadl:tokens/wadl:token) = $token-number">
-                    <xsl:apply-templates select="current-group()[count(wadl:tokens/wadl:token) = $token-number]/*[not(self::wadl:resource) and not(self::wadl:param[@style = 'template'])]" mode="tree-format"/>    
+                    <xsl:apply-templates select="current-group()[count(wadl:tokens/wadl:token) = $token-number]/*[not(self::wadl:resource) and 
+                                                                                                                  not(self::wadl:param[@style = 'template']) and
+                                                                                                                  namespace-uri() = 'http://wadl.dev.java.net/2009/02']" mode="tree-format"/>    
                     <xsl:call-template name="group">
                         <xsl:with-param name="token-number" select="1"/>
                         <xsl:with-param name="resources" select="wadl:resource"/>
@@ -150,6 +152,9 @@ This XSLT flattens or expands the path in the path attributes of the resource el
                     <xsl:with-param name="token-number" select="$token-number + 1"/>
                     <xsl:with-param name="resources" select="current-group()"/>
                 </xsl:call-template>
+                <xsl:apply-templates select="*[not(namespace-uri() = 'http://wadl.dev.java.net/2009/02')]" mode="tree-format">
+                    <xsl:with-param name="path" select="current-grouping-key()"/>
+                </xsl:apply-templates>	      
             </resource>
         </xsl:for-each-group>
     </xsl:template>
