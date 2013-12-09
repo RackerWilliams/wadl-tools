@@ -157,6 +157,7 @@ Resolves hrefs on method and resource_type elements.
 			<xsl:when test="starts-with(@href,'#')">
 				<xsl:apply-templates select="key('ids',substring-after(@href,'#'))" mode="copy-nw2">
 					<xsl:with-param name="generated-id" select="generate-id(.)"/>
+					<xsl:with-param name="foreign-attrs" select="@*[not(namespace-uri() = 'http://wadl.dev.java.net/2009/02') and not(local-name() = 'href')]"/>
 				</xsl:apply-templates>
 			</xsl:when>
 			<xsl:otherwise>
@@ -184,18 +185,18 @@ Resolves hrefs on method and resource_type elements.
 
 	<xsl:template match="wadl:method|wadl:representation" mode="copy-nw2">
 		<xsl:param name="generated-id"/>
+		<xsl:param name="foreign-attrs"/>
 		<xsl:copy>
 			<xsl:copy-of select="@*[not(local-name() = 'id')]"/>
+			<xsl:copy-of select="$foreign-attrs"/>
 			<xsl:attribute name="rax:id" select="@id"/>
-			<!-- <xsl:attribute name="id"> -->
-			<!-- 	<xsl:value-of select="concat(@id, '-', $generated-id)"/> -->
-			<!-- </xsl:attribute> -->
 			<xsl:apply-templates select="*|comment()|processing-instruction()|text()"  mode="normalizeWadl2"/>
 		</xsl:copy>
 	</xsl:template>
 	
 	<xsl:template match="wadl:param" mode="copy-nw2 normalizeWadl2">
 		<xsl:param name="generated-id"/>
+		<xsl:param name="foreign-attrs"/>
 		<xsl:variable name="type-nsuri" select="namespace-uri-for-prefix(substring-before(@type,':'),.)"/>
 		<xsl:variable name="type" select="substring-after(@type,':')"/>
 		<xsl:choose>
