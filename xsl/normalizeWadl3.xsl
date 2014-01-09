@@ -130,30 +130,31 @@ This XSLT flattens or expands the path in the path attributes of the resource el
         <xsl:param name="resources"/>
         <xsl:for-each-group select="$resources" group-by="wadl:tokens/wadl:token[$token-number]">
             <resource path="{current-grouping-key()}">
-	      <xsl:copy-of select="self::wadl:resource/@*[not(local-name(.) = 'path') and not(local-name(.) = 'id')]"/>
+                <xsl:copy-of select="self::wadl:resource/@*[not(local-name(.) = 'path') and not(local-name(.) = 'id')]"/>
                 <xsl:choose>
                     <xsl:when test="@id and not($token-number = 1)"><xsl:attribute name="id" select="concat(@id,'-', $token-number )"/></xsl:when>
                     <xsl:when test="@id"><xsl:attribute name="id" select="@id"/></xsl:when>	
                     <xsl:when test="count(wadl:tokens/wadl:token) = $token-number"><xsl:attribute name="id" select="raxf:generate-resource-id(.)"/></xsl:when>
                 </xsl:choose>
-	      <!-- Possible Bug: Should I be copying header params down in tree format? -->
-	      <xsl:apply-templates select="wadl:param[@style = 'template']|*[not(namespace-uri() = 'http://wadl.dev.java.net/2009/02')]" mode="tree-format">
-		<xsl:with-param name="path" select="current-grouping-key()"/>
-	      </xsl:apply-templates>	      
-	      <xsl:if test="count(wadl:tokens/wadl:token) = $token-number">
-	          <xsl:apply-templates select="current-group()[count(wadl:tokens/wadl:token) = $token-number]/*[not(self::wadl:resource) and not(self::wadl:param[@style = 'template'])]" mode="tree-format"/>    
-		  <xsl:call-template name="group">
-		    <xsl:with-param name="token-number" select="1"/>
-		    <xsl:with-param name="resources" select="wadl:resource"/>
-		  </xsl:call-template>
+                <xsl:apply-templates select="wadl:param[@style = 'template']" mode="tree-format">
+                    <xsl:with-param name="path" select="current-grouping-key()"/>
+                </xsl:apply-templates>	      
+                <xsl:if test="count(wadl:tokens/wadl:token) = $token-number">
+                    <xsl:apply-templates select="current-group()[count(wadl:tokens/wadl:token) = $token-number]/*[not(self::wadl:resource) and 
+                                                                                                                  not(self::wadl:param[@style = 'template']) and
+                                                                                                                  namespace-uri() = 'http://wadl.dev.java.net/2009/02']" mode="tree-format"/>    
+                    <xsl:call-template name="group">
+                        <xsl:with-param name="token-number" select="1"/>
+                        <xsl:with-param name="resources" select="wadl:resource"/>
+                    </xsl:call-template>
                 </xsl:if>
                 <xsl:call-template name="group">
                     <xsl:with-param name="token-number" select="$token-number + 1"/>
                     <xsl:with-param name="resources" select="current-group()"/>
                 </xsl:call-template>
-		<!-- <xsl:if test="count(wadl:tokens/wadl:token) = $token-number"> -->
-		<!--   <xsl:apply-templates select="wadl:resource" mode="tree-format"/> -->
-		<!-- </xsl:if> -->
+                <xsl:apply-templates select="*[not(namespace-uri() = 'http://wadl.dev.java.net/2009/02')]" mode="tree-format">
+                    <xsl:with-param name="path" select="current-grouping-key()"/>
+                </xsl:apply-templates>	      
             </resource>
         </xsl:for-each-group>
     </xsl:template>

@@ -562,16 +562,29 @@ class NormalizeWADLSpec extends BaseWADLSpec {
                      <method name="DELETE">
                         <response status="200"/>
                      </method>
+		     <method href="#blah"  rax:wooga="booga"/>
+		     <method href="#blah2"/>
                      <rax:log href="my_log.txt"/>
                 </resource>
+		<rax:foo/>
               </resource>
            </resources>
+           <method name="PUT" id="blah">
+             <response status="200"/>
+           </method>		
+           <method name="HEAD" id="blah2" rax:wooga="booga">
+             <response status="200"/>
+           </method>		
         </application>)
       When ("The wadl is normalized")
       val normWADL  = wadl.normalize(inWADL, TREE, XSD11, false, OMIT)
       Then ("The extension elemest should be preserved and the relative href should be expanded")
       assert (normWADL, "//wadl:resource[@path='resource']/rax:log")
       assert (normWADL, "//wadl:resource[@path='resource']/rax:log/@href = 'test://path/to/test/my_log.txt'")
+      assert (normWADL, "count(//rax:log) = 3")
+      assert (normWADL, "count(//rax:foo) = 1")
+      assert (normWADL, "//wadl:resource[@path='resource']/wadl:method[@rax:id='blah'  and @rax:wooga = 'booga']")
+      assert (normWADL, "//wadl:resource[@path='resource']/wadl:method[@rax:id='blah2' and @rax:wooga = 'booga']")
     }
 
     scenario ("The original WADL contains paths prefixed with / to be converted to TREE format"){
