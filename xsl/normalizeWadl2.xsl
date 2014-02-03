@@ -139,7 +139,7 @@ Resolves hrefs on method and resource_type elements.
                 Rename a resource @id in a resource_type, by appending
                 the id of the implementing resource.
             -->
-            <xsl:when test="local-name(.) = 'id' and local-name(..) = 'resource' and $baseID and $baseID != ''">
+            <xsl:when test="local-name(.) = 'id' and (parent::wadl:resource or parent::wadl:method) and $baseID and $baseID != ''">
                 <xsl:attribute name="id" select="concat($baseID,'_',.)"/>
             </xsl:when>
             <xsl:otherwise>

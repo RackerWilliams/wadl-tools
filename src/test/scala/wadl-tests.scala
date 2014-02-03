@@ -1052,6 +1052,26 @@ class NormalizeWADLSpec extends BaseWADLSpec {
       canon(wadl.normalize(inWADL, TREE, XSD11, true, OMIT)) should equal (canon(wadl.normalize(inWADL2, TREE, XSD11, true, OMIT)))
     }
 
+    scenario ("The original WADL duplicates methods by pulling in resource_types more than once"){
+	   Given("a WADL that reuses resource_types")
+      val inWADL =
+	<application xmlns="http://wadl.dev.java.net/2009/02"
+                xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	  <resources base="https://test.api.openstack.com">
+	    <resource path="a" type="#foo" id="blah"/>	    
+	    <resource path="b" type="#foo" id="woog"/>	    
+	  </resources>
+	  <resource_type id="foo">
+	    <method name="GET" id="getFoo">
+	      <response status="200 203"/>
+	    </method>
+	  </resource_type>
+	</application>
+      Then("the normalized wadl should not contain duplicate ids")
+      val normWADL  = wadl.normalize(inWADL, TREE)
+      assert (normWADL, "count(//wadl:method[@id = 'getFoo']) = 1")
+    }
+
     scenario ("The original WADL contains paths ending with / to be converted to PATH format"){
 	   Given("a WADL with / ending paths in mixed mode")
       val inWADL =
