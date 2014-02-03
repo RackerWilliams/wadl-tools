@@ -20,7 +20,7 @@ This XSLT flattens or expands the path in the path attributes of the resource el
    limitations under the License.
 -->
 
-<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:wadl="http://wadl.dev.java.net/2009/02" xmlns="http://wadl.dev.java.net/2009/02" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:raxf="http://docs.rackspace.com/functions" exclude-result-prefixes="wadl xsd raxf" version="2.0">
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:wadl="http://wadl.dev.java.net/2009/02" xmlns="http://wadl.dev.java.net/2009/02" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:raxf="http://docs.rackspace.com/functions" xmlns:rax="http://docs.rackspace.com/api" exclude-result-prefixes="wadl xsd raxf rax" version="2.0">
 
     <xsl:output indent="yes"/>
 
@@ -216,8 +216,20 @@ This XSLT flattens or expands the path in the path attributes of the resource el
     </xsl:template>
 
     <xsl:template match="node() | @*" mode="copy">
+        <xsl:param name="rax-roles"/>
+        <xsl:variable name="rax-roles-method">
+            <xsl:choose>
+                <xsl:when test="distinct-values(tokenize(normalize-space(concat(@rax:roles, ' ', string-join($rax-roles, ' '))), ' ')) = '#all'">#all</xsl:when>
+                <xsl:otherwise><xsl:value-of select="distinct-values(tokenize(normalize-space(concat(@rax:roles, ' ', string-join($rax-roles, ' '))), ' '))"/></xsl:otherwise>
+            </xsl:choose>
+        </xsl:variable>
+        
         <xsl:copy>
-            <xsl:apply-templates select="node()|@*" mode="copy"/>
+            <xsl:apply-templates select="@*" mode="copy"/>  
+            <xsl:if test="$rax-roles-method != ''">
+                <xsl:attribute name="rax:roles" select="$rax-roles-method"/>
+            </xsl:if>
+            <xsl:apply-templates select="node()" mode="copy"/>  
         </xsl:copy>
     </xsl:template>
 
@@ -228,6 +240,7 @@ This XSLT flattens or expands the path in the path attributes of the resource el
     </xsl:template>
 
     <xsl:template match="wadl:resource[wadl:method]" mode="path-format">
+        <xsl:variable name="rax-roles" select="for $roles in (ancestor-or-self::*/@rax:roles) return concat($roles, ' ') "/>
 
         <resource>
             <xsl:copy-of select="@*"/>
@@ -246,7 +259,9 @@ This XSLT flattens or expands the path in the path attributes of the resource el
             </xsl:attribute>
             <xsl:apply-templates select="wadl:doc" mode="copy"/>
             <xsl:apply-templates select="ancestor-or-self::wadl:resource/wadl:param[@style = 'template' or @style = 'header']|wadl:param[@style = 'query']" mode="copy"/>
-            <xsl:apply-templates select="wadl:method" mode="copy"/>
+            <xsl:apply-templates select="wadl:method" mode="copy">
+                <xsl:with-param name="rax-roles" select="$rax-roles"/>
+            </xsl:apply-templates>
         </resource>
         <xsl:apply-templates mode="path-format"/>
     </xsl:template>

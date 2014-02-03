@@ -1318,6 +1318,46 @@ class NormalizeWADLSpec extends BaseWADLSpec {
       canon(outWADL) should equal (canon(normWADL))
       }
 
+
+    scenario ("The original WADL is in a tree format with rax:roles attributes that should be copied down the tree in path format") {
+      Given("a WADL with resources in tree format with rax:roles")
+      val inWADL =
+	<application xmlns="http://wadl.dev.java.net/2009/02"
+                xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                xmlns:rax="http://docs.rackspace.com/api">
+	  <resources base="https://test.api.openstack.com">
+	    <resource path="a" rax:roles="role1">
+	      <resource path="b" rax:roles="role2">
+		<resource path="c" id="rc" rax:roles="role3">
+		  <method href="#foo" rax:roles="role4"/>		
+		</resource>
+		<resource path="e">
+		  <method href="#bar"/>		
+		</resource>
+	      </resource>
+	    </resource>
+	</resources>
+	<method name="GET" id="foo" rax:roles="override">
+	  <response status="200 203"/>
+	</method>
+	<method name="GET" id="bar" rax:roles="role5">
+	  <response status="200 203"/>
+	</method>
+	</application>
+      When("the WADL is normalized")
+      val normWADL = wadl.normalize(inWADL, PATH)
+      Then("the paths roles should be copied down")
+      assert (normWADL, "//wadl:method[@rax:id = 'foo' and contains(@rax:roles, 'role1')]")
+      assert (normWADL, "//wadl:method[@rax:id = 'foo' and  contains(@rax:roles, 'role2')]")
+      assert (normWADL, "//wadl:method[@rax:id = 'foo' and  contains(@rax:roles, 'role3')]")
+      assert (normWADL, "//wadl:method[@rax:id = 'foo' and  contains(@rax:roles, 'role4')]")
+      assert (normWADL, "//wadl:method[@rax:id = 'foo' and  not(contains(@rax:roles, 'override'))]")
+      assert (normWADL, "//wadl:method[@rax:id = 'bar' and  contains(@rax:roles, 'role1')]")
+      assert (normWADL, "//wadl:method[@rax:id = 'bar' and  contains(@rax:roles, 'role2')]")
+      assert (normWADL, "//wadl:method[@rax:id = 'bar' and  not(contains(@rax:roles, 'role3'))]")
+      assert (normWADL, "//wadl:method[@rax:id = 'bar' and  contains(@rax:roles, 'role5')]")
+    }
+
   }
 
 }
