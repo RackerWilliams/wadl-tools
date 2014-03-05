@@ -81,7 +81,7 @@
         
     <xsl:template match="resource">           
         <json:object>
-            <json:string name="name"><xsl:value-of select="normalize-space(doc/@title)"/></json:string>
+            <json:string name="name"><xsl:value-of select="normalize-space((doc/@title)[1])"/></json:string>
             <json:string name="description"><xsl:apply-templates select="doc" mode="xml2markdown"/></json:string>
             <json:string name="uriTemplate"><xsl:value-of select="if(normalize-space(@path) = '') then '/' else @path"/><xsl:for-each select=".//param[@style = 'query']"><xsl:if test="position() = 1">{?</xsl:if><xsl:value-of select="@name"/><xsl:if test="@repeating = 'true'">*</xsl:if><xsl:choose><xsl:when test="not(position() = last())">,</xsl:when><xsl:otherwise>}</xsl:otherwise></xsl:choose></xsl:for-each>
             </json:string>
@@ -118,7 +118,7 @@
     <xsl:template match="method">
         <json:object>
             <json:string name="method"><xsl:value-of select="normalize-space(@name)"/></json:string>
-            <json:string name="name"><xsl:value-of select="normalize-space(doc/@title)"/></json:string>
+            <json:string name="name"><xsl:value-of select="normalize-space((doc/@title)[1])"/></json:string>
             <json:string name="description"><xsl:apply-templates select="doc" mode="xml2markdown"></xsl:apply-templates></json:string>
             <json:object name="parameters">
                 <xsl:apply-templates select="param[@style = 'query']|ancestor::resource/param[@style = 'query']"/>
