@@ -3,7 +3,7 @@ package com.rackspace.cloud.api.wadl.test
 import scala.xml._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.matchers.ShouldMatchers._
+import org.scalatest.Matchers._
 
 import com.rackspace.cloud.api.wadl.WADLFormat._
 import com.rackspace.cloud.api.wadl.XSDVersion._
