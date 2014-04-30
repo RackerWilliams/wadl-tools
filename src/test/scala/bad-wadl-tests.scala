@@ -12,8 +12,10 @@ import com.rackspace.cloud.api.wadl.Converters._
 
 import org.xml.sax.SAXParseException
 
+import com.typesafe.scalalogging.slf4j.LazyLogging
+
 @RunWith(classOf[JUnitRunner])
-class BadWADLSpec extends BaseWADLSpec {
+class BadWADLSpec extends BaseWADLSpec with LazyLogging {
   //
   //  Register some common prefixes, you'll need the for XPath
   //  assertions.
@@ -223,7 +225,7 @@ class BadWADLSpec extends BaseWADLSpec {
     val sampleXMLFilePath = (new File(localDir, "src/test/test-samples/hello.xml")).toURI.toString
     val sampleJSONFilePath = (new File(localDir, "src/test/test-samples/hello.json")).toURI.toString
 
-    println ("TEST: "+localWADLURI)
+    logger.debug ("TEST: "+localWADLURI)
     scenario ("A WADL with a valid code sample should be accepted") {
 	   Given("a WADL with a missing code sample")
 	   val inWADL = (localWADLURI,
