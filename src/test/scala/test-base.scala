@@ -59,7 +59,7 @@ class SchemaAsserter(xsdSource : URL, useSaxon : Boolean = false) {
       validator.validate(new StreamSource(node))
     } catch {
       case se : SAXException => throw new TestFailedException("Validation Error on instance document: "+node, se, 4)
-      case unknown => throw new TestFailedException ("Unkown validation error! ", unknown, 4)
+      case unknown : Throwable => throw new TestFailedException ("Unkown validation error! ", unknown, 4)
     }
   }
 }
@@ -87,7 +87,7 @@ trait XPathAssertions extends NamespaceContext {
     } catch {
       case xpe : XPathException => throw new TestFailedException("Error in XPath! ", xpe, 4)
       case tf  : TestFailedException => throw tf
-      case unknown => throw new TestFailedException ("Unkown XPath assert error! "+node, unknown, 4)
+      case unknown : Throwable => throw new TestFailedException ("Unkown XPath assert error! "+node, unknown, 4)
     } 
   }
 
