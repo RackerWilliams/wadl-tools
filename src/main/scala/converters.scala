@@ -1,9 +1,14 @@
 package com.rackspace.cloud.api.wadl
 
+import com.rackspace.cloud.api.wadl.util.LogErrorListener
+
 import scala.xml._
 import javax.xml.transform._
 import javax.xml.transform.stream._
 import java.io.ByteArrayInputStream
+
+import net.sf.saxon.Controller
+import net.sf.saxon.serialize.MessageWarner
 
 //
 //  Converters
@@ -27,4 +32,15 @@ object Converters {
   //  Convert a byte array stream result to a NodeSeq
   //
   implicit def byteArrayStreamResult2NodeSeq(sr : StreamResult) : NodeSeq = XML.loadString (sr.getOutputStream().toString())
+
+
+  //
+  //  Adds log error listener to a Saxon controller
+  //
+  implicit def toLogController(c : Controller) = new {
+    def addLogErrorListener : Unit = {
+      c.asInstanceOf[Transformer].setErrorListener (new LogErrorListener)
+      c.setMessageEmitter(new MessageWarner())
+    }
+  }
 }

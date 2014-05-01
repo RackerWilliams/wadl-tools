@@ -45,6 +45,8 @@ import org.xml.sax.SAXParseException
 
 import com.typesafe.scalalogging.slf4j.LazyLogging
 
+import net.sf.saxon.Controller
+
 class WADLNormalizer(private var transformerFactory : TransformerFactory) extends LazyLogging {
 
   if (transformerFactory == null) {
@@ -57,7 +59,7 @@ class WADLNormalizer(private var transformerFactory : TransformerFactory) extend
     //
     transformerFactory.setAttribute("http://saxon.sf.net/feature/generateByteCode",false)
   } catch {
-    case i : IllegalArgumentException => { /* ignore */ }
+    case i : IllegalArgumentException => { logger.warn("Ignoring illegal argument when disabling generateByteCode in saxon", i) /* ignore */ }
   }
 
   //
@@ -116,7 +118,7 @@ class WADLNormalizer(private var transformerFactory : TransformerFactory) extend
 
   def newTransformer : Transformer = {
     val transformer = templates.newTransformer
-    transformer.setErrorListener (new LogErrorCapture)
+    transformer.asInstanceOf[Controller].addLogErrorListener
     transformer
   }
 
@@ -165,8 +167,7 @@ class WADLNormalizer(private var transformerFactory : TransformerFactory) extend
     val schTransform = schematronTemplates.newTransformer
     val schResult = new SAXResult(new SVRLHandler)
 
-    schTransform.setErrorListener (new LogErrorCapture)
-    schTransform.asInstanceOf[net.sf.saxon.Controller].setMessageEmitter(new net.sf.saxon.serialize.MessageWarner())
+    schTransform.asInstanceOf[Controller].addLogErrorListener
     schTransform.transform (new DOMSource(wadl, in.getSystemId()), schResult)
 
 
@@ -267,37 +268,4 @@ class WADLNormalizer(private var transformerFactory : TransformerFactory) extend
 		          resource_types : ResourceType = KEEP) : NodeSeq = {
     normalize(("test://test/mywadl.wadl", in), format, xsdVersion, flattenXSDs, resource_types)
   }
-
-}
-
-private object LogErrorCapture {
-  val trace   = "^\\[TRACE\\]\\s+(.*)".r
-  val debug   = "^\\[DEBUG\\]\\s+(.*)".r
-  val info    = "^\\[INFO\\]\\s+(.*)".r
-  val warning = "^\\[WARNING\\]\\s+(.*)".r
-  val error   = "^\\[ERROR\\]\\s+(.*)".r
-}
-
-import LogErrorCapture._
-
-private class LogErrorCapture extends ErrorListener with LazyLogging {
-  def error (exception : TransformerException) : Unit = {
-    logger.error (exception.getMessage())
-  }
-
-  def fatalError (exception : TransformerException) : Unit = {
-    logger.error (exception.getMessage())
-  }
-
-  def warning (exception : TransformerException) : Unit = {
-    exception.getMessage() match {
-      case trace(m) => logger.trace(m)
-      case debug(m) =>  logger.debug(m)
-      case info(m) => logger.info(m)
-      case warning(m) => logger.warn(m)
-      case error(m) => logger.error(m)
-      case s : String => logger.warn(s)
-    }
-  }
-
 }
