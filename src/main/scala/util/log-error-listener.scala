@@ -17,23 +17,24 @@ import LogErrorListener._
 
 class LogErrorListener extends ErrorListener with LazyLogging {
 
-  override def error (exception : TransformerException) : Unit = {
-    logger.error (exception.getMessage())
-  }
-
-  override def fatalError (exception : TransformerException) : Unit = {
-    logger.error (exception.getMessage())
-  }
-
-  override def warning (exception : TransformerException) : Unit = {
-    exception.getMessage() match {
+  private def logException(e : TransformerException, default : => Unit) : Unit = {
+    e.getMessage() match {
       case trace(m) => logger.trace(m)
       case debug(m) =>  logger.debug(m)
       case info(m) => logger.info(m)
       case warning(m) => logger.warn(m)
       case error(m) => logger.error(m)
-      case s : String => logger.warn(s)
+      case s : String => default
     }
   }
+
+  override def error (exception : TransformerException) : Unit =
+    logException(exception, logger.error(exception.getMessage()))
+
+  override def fatalError (exception : TransformerException) : Unit =
+    logException(exception, logger.error(exception.getMessage()))
+
+  override def warning (exception : TransformerException) : Unit =
+    logException(exception, logger.warn(exception.getMessage()))
 
 }
