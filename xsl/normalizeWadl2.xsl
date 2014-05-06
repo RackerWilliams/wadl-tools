@@ -29,14 +29,13 @@ Resolves hrefs on method and resource_type elements.
 	<xsl:variable name="normalizeWadl2">
 		<xsl:choose>
 			<xsl:when test="$strip-ids != 0">
-				<xsl:document>Now we prune the generated rax:id that is appended to all ids where we can do it safely.
-					But apparently this mode isn't ever used.
-				</xsl:document>
+				<!-- Now we prune the generated rax:id that is appended to all ids where we can do it safely.
+					But apparently this mode isn't ever used. -->
 				<xsl:apply-templates select="$processed" mode="strip-ids"/>
 			</xsl:when>
 			<xsl:otherwise>
-				<xsl:document>When we moved ids to rax:ids on methods, we were overzealous. Here we fix that when the methods 
-				are the descendants of a wadl:resource_type.</xsl:document>
+				<!-- When we moved ids to rax:ids on methods, we were overzealous. Here we fix that when the methods 
+				are the descendants of a wadl:resource_type.-->
 				<xsl:apply-templates select="$processed" mode="fix-ids"/>
 			</xsl:otherwise>
 		</xsl:choose>	
