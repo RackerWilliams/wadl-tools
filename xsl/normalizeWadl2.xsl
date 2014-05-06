@@ -29,11 +29,14 @@ Resolves hrefs on method and resource_type elements.
 	<xsl:variable name="normalizeWadl2">
 		<xsl:choose>
 			<xsl:when test="$strip-ids != 0">
-				<!-- Now we prune the generated id that is appended to all ids where we can do it safely -->
+				<!-- Now we prune the generated rax:id that is appended to all ids where we can do it safely.
+					But apparently this mode isn't ever used. -->
 				<xsl:apply-templates select="$processed" mode="strip-ids"/>
 			</xsl:when>
 			<xsl:otherwise>
-				<xsl:copy-of select="$processed"/>
+				<!-- When we moved ids to rax:ids on methods, we were overzealous. Here we fix that when the methods 
+				are the descendants of a wadl:resource_type.-->
+				<xsl:apply-templates select="$processed" mode="fix-ids"/>
 			</xsl:otherwise>
 		</xsl:choose>	
 	</xsl:variable>
@@ -106,6 +109,16 @@ Resolves hrefs on method and resource_type elements.
 		<xsl:copy>
 			<xsl:apply-templates select="node() | @*" mode="strip-ids"/>
 		</xsl:copy>
+	</xsl:template>
+
+	<xsl:template match="node() | @*" mode="fix-ids">
+		<xsl:copy>
+			<xsl:apply-templates select="node() | @*" mode="fix-ids"/>
+		</xsl:copy>
+	</xsl:template>
+
+	<xsl:template match="@rax:id[parent::wadl:method and ancestor::wadl:resource_type]" mode="fix-ids">
+		<xsl:attribute name="id" select="."/>
 	</xsl:template>
 
 	<xsl:template match="*[@rax:id]" mode="strip-ids">
@@ -190,6 +203,16 @@ Resolves hrefs on method and resource_type elements.
 			<xsl:copy-of select="@*[not(local-name() = 'id')]"/>
 			<xsl:copy-of select="$foreign-attrs"/>
 			<xsl:attribute name="rax:id" select="@id"/>
+			<xsl:apply-templates select="*|comment()|processing-instruction()|text()"  mode="normalizeWadl2"/>
+		</xsl:copy>
+	</xsl:template>
+
+	<xsl:template match="wadl:method[not(@href) and (ancestor::wadl:resource or ancestor::wadl:resource_type)]" mode="normalizeWadl2">
+		<xsl:copy>
+			<xsl:copy-of select="@*[not(local-name() = 'id' and namespace-uri(.) = '')]"/>
+			<xsl:if test="@id">
+				<xsl:attribute name="rax:id" select="@id"/>
+			</xsl:if>
 			<xsl:apply-templates select="*|comment()|processing-instruction()|text()"  mode="normalizeWadl2"/>
 		</xsl:copy>
 	</xsl:template>
