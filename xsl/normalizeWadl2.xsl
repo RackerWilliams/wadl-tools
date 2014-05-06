@@ -193,6 +193,16 @@ Resolves hrefs on method and resource_type elements.
 			<xsl:apply-templates select="*|comment()|processing-instruction()|text()"  mode="normalizeWadl2"/>
 		</xsl:copy>
 	</xsl:template>
+
+	<xsl:template match="wadl:method[not(@href) and (ancestor::wadl:resource or ancestor::wadl:resource_type)]" mode="normalizeWadl2">
+		<xsl:copy>
+			<xsl:copy-of select="@*[not(local-name() = 'id' and namespace-uri(.) = '')]"/>
+			<xsl:if test="@id">
+				<xsl:attribute name="rax:id" select="@id"/>
+			</xsl:if>
+			<xsl:apply-templates select="*|comment()|processing-instruction()|text()"  mode="normalizeWadl2"/>
+		</xsl:copy>
+	</xsl:template>
 	
 	<xsl:template match="wadl:param" mode="copy-nw2 normalizeWadl2">
 		<xsl:param name="generated-id"/>
