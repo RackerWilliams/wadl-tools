@@ -29,11 +29,15 @@ Resolves hrefs on method and resource_type elements.
 	<xsl:variable name="normalizeWadl2">
 		<xsl:choose>
 			<xsl:when test="$strip-ids != 0">
-				<!-- Now we prune the generated id that is appended to all ids where we can do it safely -->
+				<xsl:document>Now we prune the generated rax:id that is appended to all ids where we can do it safely.
+					But apparently this mode isn't ever used.
+				</xsl:document>
 				<xsl:apply-templates select="$processed" mode="strip-ids"/>
 			</xsl:when>
 			<xsl:otherwise>
-				<xsl:copy-of select="$processed"/>
+				<xsl:document>When we moved ids to rax:ids on methods, we were overzealous. Here we fix that when the methods 
+				are the descendants of a wadl:resource_type.</xsl:document>
+				<xsl:apply-templates select="$processed" mode="fix-ids"/>
 			</xsl:otherwise>
 		</xsl:choose>	
 	</xsl:variable>
@@ -106,6 +110,16 @@ Resolves hrefs on method and resource_type elements.
 		<xsl:copy>
 			<xsl:apply-templates select="node() | @*" mode="strip-ids"/>
 		</xsl:copy>
+	</xsl:template>
+
+	<xsl:template match="node() | @*" mode="fix-ids">
+		<xsl:copy>
+			<xsl:apply-templates select="node() | @*" mode="fix-ids"/>
+		</xsl:copy>
+	</xsl:template>
+
+	<xsl:template match="@rax:id[parent::wadl:method and ancestor::wadl:resource_type]" mode="fix-ids">
+		<xsl:attribute name="id" select="."/>
 	</xsl:template>
 
 	<xsl:template match="*[@rax:id]" mode="strip-ids">
