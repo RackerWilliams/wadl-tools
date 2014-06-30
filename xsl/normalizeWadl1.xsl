@@ -211,8 +211,8 @@
             <programlisting xmlns="http://docbook.org/ns/docbook">
                 <xsl:attribute name="language">
                     <xsl:choose>
-                        <xsl:when test="$type = 'application/xml'">xml</xsl:when>
-                        <xsl:when test="$type = 'application/json'">javascript</xsl:when>
+                        <xsl:when test="ends-with($type, 'xml')">xml</xsl:when>
+                        <xsl:when test="ends-with($type, 'json')">javascript</xsl:when>
                     </xsl:choose>
                 </xsl:attribute>
                 <xsl:value-of select="$content"/>
