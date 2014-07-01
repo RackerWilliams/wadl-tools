@@ -37,6 +37,7 @@
     <properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
       <oxygen.framework.version>1.0.1</oxygen.framework.version>
+      <rackspace.keystore>/path/to/keystore.ImportKey</rackspace.keystore>
     </properties>
 
     <dependencies>
@@ -154,7 +155,7 @@
                                             jar="target/wadl-tools-oxygen-framework-${oxygen.framework.version}.jar"
                                             alias="docs"
                                             storepass="password"
-                                            keystore="/Users/david.cramer/rax/certificates/keystore.ImportKey"/>
+                                            keystore="${rackspace.keystore}"/>
                                     </target>
                                 </configuration>
                                 <goals>
