@@ -118,8 +118,20 @@ Resolves hrefs on method and resource_type elements.
 	</xsl:template>
 
 	<xsl:template match="@rax:id[parent::wadl:method and ancestor::wadl:resource_type]" mode="fix-ids">
-		<xsl:attribute name="id" select="."/>
+       <xsl:variable name="myId" select="." as="xsd:string"/>
+       <xsl:choose>
+           <xsl:when test="ancestor::wadl:application/wadl:method[@id=$myId]">
+               <xsl:copy/>
+           </xsl:when>
+           <xsl:otherwise>
+               <xsl:attribute name="id" select="."/>
+           </xsl:otherwise>
+       </xsl:choose>
 	</xsl:template>
+
+   <xsl:template match="@rax:id[parent::wadl:application]" mode="fix-ids">
+       <xsl:attribute name="id" select="."/>
+   </xsl:template>
 
 	<xsl:template match="*[@rax:id]" mode="strip-ids">
 		<xsl:copy>
