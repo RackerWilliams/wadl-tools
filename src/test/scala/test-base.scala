@@ -17,6 +17,7 @@ import java.io.File
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.net.URL
+import java.net.URI
 import org.apache.xml.security.c14n.Canonicalizer
 import org.scalatest.FeatureSpec
 import org.scalatest.GivenWhenThen
@@ -115,7 +116,15 @@ trait TransformHandler {
     //  don't think that we need it.
     //
     def resolve(href : String, base : String) = {
-      val source = sourceMap getOrElse (href, defaultResolver.resolve(href, base))
+      val ref = {
+        if (base == null || base.isEmpty()) {
+          href
+        } else {
+          val baseURI = new URI(base)
+          baseURI.resolve(href).toString()
+        }
+      }
+      val source = sourceMap getOrElse (ref, defaultResolver.resolve(href, base))
       if (source.isInstanceOf[StreamSource]) {
         source.asInstanceOf[StreamSource].getInputStream().reset()
       }

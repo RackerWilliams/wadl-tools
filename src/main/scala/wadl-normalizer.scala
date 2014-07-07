@@ -47,6 +47,9 @@ import com.typesafe.scalalogging.slf4j.LazyLogging
 
 import net.sf.saxon.Controller
 
+import org.w3c.dom.Document
+import org.w3c.dom.Element
+
 class WADLNormalizer(private var transformerFactory : TransformerFactory) extends LazyLogging {
 
   if (transformerFactory == null) {
@@ -145,7 +148,8 @@ class WADLNormalizer(private var transformerFactory : TransformerFactory) extend
                     format : Format,
                     xsdVersion : Version,
                     flattenXSDs : Boolean,
-		              resource_types : ResourceType) : Unit = {
+		              resource_types : ResourceType,
+                    keepSCHReport : Boolean) : Unit = {
 
     //
     //  We purposly do the identity transform using xalan instead of
@@ -165,10 +169,12 @@ class WADLNormalizer(private var transformerFactory : TransformerFactory) extend
     //  Do Schematron template transformation, check for broken links
     //
     val schTransform = schematronTemplates.newTransformer
+    val schReport = new DOMResult()
     val schResult = new SAXResult(new SVRLHandler)
 
     schTransform.asInstanceOf[Controller].addLogErrorListener
-    schTransform.transform (new DOMSource(wadl, in.getSystemId()), schResult)
+    schTransform.transform (new DOMSource(wadl, in.getSystemId()), schReport)
+    idTransform.transform(new DOMSource(schReport.getNode), schResult)
 
 
     //
@@ -182,7 +188,25 @@ class WADLNormalizer(private var transformerFactory : TransformerFactory) extend
     //  Perform the WADL normalization, on valid WADL
     //
     val transformer = newTransformer(format, xsdVersion, flattenXSDs, resource_types)
-    transformer.transform (new DOMSource(validWadl, in.getSystemId()), out)
+    if (keepSCHReport) {
+      val normWADLResult = new DOMResult()
+      transformer.transform (new DOMSource(validWadl, in.getSystemId()), normWADLResult)
+      val wadlDocument = normWADLResult.getNode.asInstanceOf[Document]
+      val wadlRoot = wadlDocument.getDocumentElement()
+      val reportRoot = wadlDocument.importNode (schReport.getNode.asInstanceOf[Document].getDocumentElement, true)
+      wadlRoot.appendChild(reportRoot)
+      idTransform.transform(new DOMSource(wadlDocument), out)
+    } else {
+      transformer.transform (new DOMSource(validWadl, in.getSystemId()), out)
+    }
+  }
+
+  def normalize(in: Source, out: Result,
+                    format : Format,
+                    xsdVersion : Version,
+                    flattenXSDs : Boolean,
+		              resource_types : ResourceType) : Unit = {
+    normalize(in, out, format, xsdVersion, flattenXSDs, resource_types, false)
   }
 
   //
@@ -193,10 +217,11 @@ class WADLNormalizer(private var transformerFactory : TransformerFactory) extend
                 format : Format,
                 xsdVersion : Version,
                 flattenXSDs : Boolean,
-		          resource_types : ResourceType) : Unit = {
+		          resource_types : ResourceType,
+                keepSCHReport : Boolean) : Unit = {
     normalize (new StreamSource(in._2.asInstanceOf[InputStream],in._1.asInstanceOf[String]), out,
                format, xsdVersion, flattenXSDs,
-               resource_types)
+               resource_types, keepSCHReport)
   }
 
   //
@@ -207,9 +232,10 @@ class WADLNormalizer(private var transformerFactory : TransformerFactory) extend
                 format : Format,
                 xsdVersion : Version,
                 flattenXSDs : Boolean,
-		          resource_types : ResourceType) : Unit = {
+		          resource_types : ResourceType,
+                 keepSCHReport : Boolean) : Unit = {
     normalize (("test://test/mywadl.wadl",in), out, format, xsdVersion,
-               flattenXSDs, resource_types)
+               flattenXSDs, resource_types, keepSCHReport)
   }
 
   //
@@ -220,10 +246,11 @@ class WADLNormalizer(private var transformerFactory : TransformerFactory) extend
                 format : Format,
                 xsdVersion : Version,
                 flattenXSDs : Boolean,
-		          resource_types : ResourceType) : Unit = {
+		          resource_types : ResourceType,
+                keepSCHReport : Boolean) : Unit = {
     normalize (new StreamSource(in), out,
                format, xsdVersion, flattenXSDs,
-               resource_types)
+               resource_types, keepSCHReport)
   }
 
   //
@@ -234,10 +261,11 @@ class WADLNormalizer(private var transformerFactory : TransformerFactory) extend
                 format : Format,
                 xsdVersion : Version,
                 flattenXSDs : Boolean,
-		          resource_types : ResourceType) : Unit = {
+		          resource_types : ResourceType,
+                keepSCHReport : Boolean) : Unit = {
     normalize (new StreamSource(in), out,
                format, xsdVersion, flattenXSDs,
-               resource_types)
+               resource_types, keepSCHReport)
   }
 
   //
@@ -249,11 +277,24 @@ class WADLNormalizer(private var transformerFactory : TransformerFactory) extend
                 format : Format,
                 xsdVersion : Version,
                 flattenXSDs : Boolean,
+		          resource_types : ResourceType,
+                keepSCHReport : Boolean) : NodeSeq = {
+    val bytesOut = new ByteArrayOutputStream()
+    normalize(in, new StreamResult(bytesOut),
+              format, xsdVersion, flattenXSDs,
+              resource_types, keepSCHReport);
+    XML.loadString (bytesOut.toString())
+  }
+
+  def normalize(in : (String, NodeSeq),
+                format : Format,
+                xsdVersion : Version,
+                flattenXSDs : Boolean,
 		          resource_types : ResourceType) : NodeSeq = {
     val bytesOut = new ByteArrayOutputStream()
     normalize(in, new StreamResult(bytesOut),
               format, xsdVersion, flattenXSDs,
-              resource_types);
+              resource_types, false);
     XML.loadString (bytesOut.toString())
   }
 
@@ -265,7 +306,8 @@ class WADLNormalizer(private var transformerFactory : TransformerFactory) extend
                 format : Format = DONT,
                 xsdVersion : Version = XSD11,
                 flattenXSDs : Boolean = false,
-		          resource_types : ResourceType = KEEP) : NodeSeq = {
-    normalize(("test://test/mywadl.wadl", in), format, xsdVersion, flattenXSDs, resource_types)
+		          resource_types : ResourceType = KEEP,
+                keepSCHReport : Boolean = false) : NodeSeq = {
+    normalize(("test://test/mywadl.wadl", in), format, xsdVersion, flattenXSDs, resource_types, keepSCHReport)
   }
 }
