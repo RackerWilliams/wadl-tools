@@ -97,6 +97,723 @@ class BadWADLSpec extends BaseWADLSpec with LazyLogging {
       assert(thrown.getMessage().contains("test://test/mywadl.wadl"))
     }
 
+    scenario ("A WADL with a missing external link should be rejected rax:preprocess") {
+	   Given("a WADL with a link missing external link")
+	   val inWADL =
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                     xmlns:rax="http://docs.rackspace.com/api">
+             <resources base="https://test.api.openstack.com">
+                 <resource path="a/b">
+                     <resource path="c">
+	                    <method name="POST">
+                            <request>
+                                <representation mediaType="application/xml">
+                                    <rax:preprocess href="xsl/beginStart.xsl"/>
+                                </representation>
+                            </request>
+                       </method>
+                     </resource>
+                 </resource>
+             </resources>
+        </application>
+      When("the WADL is normalized")
+      val thrown = intercept[Exception] {
+        val normWADL = wadl.normalize(inWADL, TREE)
+      }
+      Then("An exception should be thrown with the words 'beginStart.xsl' and 'does not seem to exist'.")
+      assert(thrown.getMessage().contains("beginStart.xsl"))
+      assert(thrown.getMessage().contains("does not seem to exist"))
+      And("The exception should point to the file in error")
+      assert(thrown.getMessage().contains("test://test/mywadl.wadl"))
+    }
+
+    scenario ("A WADL with valid external link which contains a missing external link should be rejected rax:preprocess") {
+	   Given("a WADL with a link missing external link")
+	   val inWADL =
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                     xmlns:rax="http://docs.rackspace.com/api">
+             <resources base="https://test.api.openstack.com">
+                 <resource path="a/b">
+                     <resource path="c">
+	                    <method name="POST">
+                            <request>
+                                <representation mediaType="application/xml">
+                                    <rax:preprocess href="xsl/beginStart.xsl"/>
+                                </representation>
+                            </request>
+                       </method>
+                     </resource>
+                 </resource>
+             </resources>
+        </application>
+      register("test://test/xsl/beginStart.xsl",
+               <xsl:stylesheet
+               xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+               xmlns:tst="http://www.rackspace.com/repose/wadl/checker/step/test"
+               xmlns="http://www.rackspace.com/repose/wadl/checker/step/test"
+               version="1.0">
+
+               <xsl:include href="beginStart2.xsl"/>
+
+               <xsl:template match="node() | @*">
+                 <xsl:copy>
+                   <xsl:apply-templates select="@* | node()"/>
+                 </xsl:copy>
+               </xsl:template>
+
+               <xsl:template match="tst:stepType">
+                 <xsl:choose>
+                   <xsl:when test=". = 'BEGIN'">
+                     <stepType>START</stepType>
+                   </xsl:when>
+                   <xsl:otherwise>
+                     <stepType><xsl:value-of select="."/></stepType>
+                   </xsl:otherwise>
+                 </xsl:choose>
+               </xsl:template>
+
+               </xsl:stylesheet>)
+      When("the WADL is normalized")
+      val thrown = intercept[Exception] {
+        val normWADL = wadl.normalize(inWADL, TREE)
+      }
+      Then("An exception should be thrown with the words 'beginStart2.xsl' and 'does not seem to exist'.")
+      assert(thrown.getMessage().contains("beginStart2.xsl"))
+      assert(thrown.getMessage().contains("does not seem to exist"))
+      And("The exception should point to the file in error")
+      assert(thrown.getMessage().contains("test://test/xsl/beginStart.xsl"))
+    }
+
+    scenario ("A WADL with valid external link which contains an invalid XSLT should be rejected rax:preprocess") {
+	   Given("a WADL with a link missing external link")
+	   val inWADL =
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                     xmlns:rax="http://docs.rackspace.com/api">
+             <resources base="https://test.api.openstack.com">
+                 <resource path="a/b">
+                     <resource path="c">
+	                    <method name="POST">
+                            <request>
+                                <representation mediaType="application/xml">
+                                    <rax:preprocess href="xsl/beginStart.xsl"/>
+                                </representation>
+                            </request>
+                       </method>
+                     </resource>
+                 </resource>
+             </resources>
+        </application>
+      register("test://test/xsl/beginStart.xsl",
+               <xsl:stylesheet
+               xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+               xmlns:tst="http://www.rackspace.com/repose/wadl/checker/step/test"
+               xmlns="http://www.rackspace.com/repose/wadl/checker/step/test"
+               version="1.0">
+
+               <xsl:include href="beginStart2.xsl"/>
+
+               <xsl:template match="node() | @*">
+                 <xsl:copy>
+                   <xsl:apply-templates select="@* | node()"/>
+                 </xsl:copy>
+               </xsl:template>
+
+               <xsl:template match="tst:stepType">
+                 <xsl:choose>
+                   <xsl:when test=". = 'BEGIN'">
+                     <stepType>START</stepType>
+                   </xsl:when>
+                   <xsl:otherwise>
+                     <stepType><xsl:value-of select="."/></stepType>
+                   </xsl:otherwise>
+                 </xsl:choose>
+               </xsl:template>
+
+               </xsl:stylesheet>)
+      register("test://test/xsl/beginStart2.xsl", <foo />)
+      When("the WADL is normalized")
+      val thrown = intercept[Exception] {
+        val normWADL = wadl.normalize(inWADL, TREE)
+      }
+      Then("An exception should be thrown with the words 'beginStart2.xsl' and 'does not appear to be a valid XSLT.'.")
+      assert(thrown.getMessage().contains("beginStart2.xsl"))
+      assert(thrown.getMessage().contains("does not appear to be a valid XSLT."))
+      And("The exception should point to the file in error")
+      assert(thrown.getMessage().contains("test://test/xsl/beginStart.xsl"))
+    }
+
+    scenario ("A WADL with valid external link which contains a missing external link should be rejected rax:preprocess (import)") {
+	   Given("a WADL with a link missing external link")
+	   val inWADL =
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                     xmlns:rax="http://docs.rackspace.com/api">
+             <resources base="https://test.api.openstack.com">
+                 <resource path="a/b">
+                     <resource path="c">
+	                    <method name="POST">
+                            <request>
+                                <representation mediaType="application/xml">
+                                    <rax:preprocess href="xsl/beginStart.xsl"/>
+                                </representation>
+                            </request>
+                       </method>
+                     </resource>
+                 </resource>
+             </resources>
+        </application>
+      register("test://test/xsl/beginStart.xsl",
+               <xsl:stylesheet
+               xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+               xmlns:tst="http://www.rackspace.com/repose/wadl/checker/step/test"
+               xmlns="http://www.rackspace.com/repose/wadl/checker/step/test"
+               version="1.0">
+
+               <xsl:import href="beginStart2.xsl"/>
+
+               <xsl:template match="node() | @*">
+                 <xsl:copy>
+                   <xsl:apply-templates select="@* | node()"/>
+                 </xsl:copy>
+               </xsl:template>
+
+               <xsl:template match="tst:stepType">
+                 <xsl:choose>
+                   <xsl:when test=". = 'BEGIN'">
+                     <stepType>START</stepType>
+                   </xsl:when>
+                   <xsl:otherwise>
+                     <stepType><xsl:value-of select="."/></stepType>
+                   </xsl:otherwise>
+                 </xsl:choose>
+               </xsl:template>
+
+               </xsl:stylesheet>)
+      When("the WADL is normalized")
+      val thrown = intercept[Exception] {
+        val normWADL = wadl.normalize(inWADL, TREE)
+      }
+      Then("An exception should be thrown with the words 'beginStart2.xsl' and 'does not seem to exist'.")
+      assert(thrown.getMessage().contains("beginStart2.xsl"))
+      assert(thrown.getMessage().contains("does not seem to exist"))
+      And("The exception should point to the file in error")
+      assert(thrown.getMessage().contains("test://test/xsl/beginStart.xsl"))
+    }
+
+    scenario ("A WADL with valid external link which contains an invalid XSLT should be rejected rax:preprocess (import)") {
+	   Given("a WADL with a link missing external link")
+	   val inWADL =
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                     xmlns:rax="http://docs.rackspace.com/api">
+             <resources base="https://test.api.openstack.com">
+                 <resource path="a/b">
+                     <resource path="c">
+	                    <method name="POST">
+                            <request>
+                                <representation mediaType="application/xml">
+                                    <rax:preprocess href="xsl/beginStart.xsl"/>
+                                </representation>
+                            </request>
+                       </method>
+                     </resource>
+                 </resource>
+             </resources>
+        </application>
+      register("test://test/xsl/beginStart.xsl",
+               <xsl:stylesheet
+               xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+               xmlns:tst="http://www.rackspace.com/repose/wadl/checker/step/test"
+               xmlns="http://www.rackspace.com/repose/wadl/checker/step/test"
+               version="1.0">
+
+               <xsl:import href="beginStart2.xsl"/>
+
+               <xsl:template match="node() | @*">
+                 <xsl:copy>
+                   <xsl:apply-templates select="@* | node()"/>
+                 </xsl:copy>
+               </xsl:template>
+
+               <xsl:template match="tst:stepType">
+                 <xsl:choose>
+                   <xsl:when test=". = 'BEGIN'">
+                     <stepType>START</stepType>
+                   </xsl:when>
+                   <xsl:otherwise>
+                     <stepType><xsl:value-of select="."/></stepType>
+                   </xsl:otherwise>
+                 </xsl:choose>
+               </xsl:template>
+
+               </xsl:stylesheet>)
+      register("test://test/xsl/beginStart2.xsl", <foo />)
+      When("the WADL is normalized")
+      val thrown = intercept[Exception] {
+        val normWADL = wadl.normalize(inWADL, TREE)
+      }
+      Then("An exception should be thrown with the words 'beginStart2.xsl' and 'does not appear to be a valid XSLT.'.")
+      assert(thrown.getMessage().contains("beginStart2.xsl"))
+      assert(thrown.getMessage().contains("does not appear to be a valid XSLT."))
+      And("The exception should point to the file in error")
+      assert(thrown.getMessage().contains("test://test/xsl/beginStart.xsl"))
+    }
+
+    scenario ("A WADL with valid external link which contains a missing external link should be rejected rax:preprocess (schema)") {
+	   Given("a WADL with a link missing external link")
+	   val inWADL =
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                     xmlns:rax="http://docs.rackspace.com/api">
+             <resources base="https://test.api.openstack.com">
+                 <resource path="a/b">
+                     <resource path="c">
+	                    <method name="POST">
+                            <request>
+                                <representation mediaType="application/xml">
+                                    <rax:preprocess href="xsl/beginStart.xsl"/>
+                                </representation>
+                            </request>
+                       </method>
+                     </resource>
+                 </resource>
+             </resources>
+        </application>
+      register("test://test/xsl/beginStart.xsl",
+               <xsl:stylesheet
+               xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+               xmlns:tst="http://www.rackspace.com/repose/wadl/checker/step/test"
+               xmlns="http://www.rackspace.com/repose/wadl/checker/step/test"
+               version="1.0">
+
+               <xsl:import-schema schemaLocation="../xsd/my.xsd"/>
+
+               <xsl:template match="node() | @*">
+                 <xsl:copy>
+                   <xsl:apply-templates select="@* | node()"/>
+                 </xsl:copy>
+               </xsl:template>
+
+               <xsl:template match="tst:stepType">
+                 <xsl:choose>
+                   <xsl:when test=". = 'BEGIN'">
+                     <stepType>START</stepType>
+                   </xsl:when>
+                   <xsl:otherwise>
+                     <stepType><xsl:value-of select="."/></stepType>
+                   </xsl:otherwise>
+                 </xsl:choose>
+               </xsl:template>
+
+               </xsl:stylesheet>)
+      When("the WADL is normalized")
+      val thrown = intercept[Exception] {
+        val normWADL = wadl.normalize(inWADL, TREE)
+      }
+      Then("An exception should be thrown with the words 'my.xsd' and 'does not seem to exist'.")
+      assert(thrown.getMessage().contains("my.xsd"))
+      assert(thrown.getMessage().contains("does not seem to exist"))
+      And("The exception should point to the file in error")
+      assert(thrown.getMessage().contains("test://test/xsl/beginStart.xsl"))
+    }
+
+
+    scenario ("A WADL with valid external link which contains an invalid XSD should be rejected rax:preprocess (schema)") {
+	   Given("a WADL with a link missing external link")
+	   val inWADL =
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                     xmlns:rax="http://docs.rackspace.com/api">
+             <resources base="https://test.api.openstack.com">
+                 <resource path="a/b">
+                     <resource path="c">
+	                    <method name="POST">
+                            <request>
+                                <representation mediaType="application/xml">
+                                    <rax:preprocess href="xsl/beginStart.xsl"/>
+                                </representation>
+                            </request>
+                       </method>
+                     </resource>
+                 </resource>
+             </resources>
+        </application>
+      register("test://test/xsl/beginStart.xsl",
+               <xsl:stylesheet
+               xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+               xmlns:tst="http://www.rackspace.com/repose/wadl/checker/step/test"
+               xmlns="http://www.rackspace.com/repose/wadl/checker/step/test"
+               version="1.0">
+
+               <xsl:import-schema schemaLocation="../xsd/my.xsd"/>
+
+               <xsl:template match="node() | @*">
+                 <xsl:copy>
+                   <xsl:apply-templates select="@* | node()"/>
+                 </xsl:copy>
+               </xsl:template>
+
+               <xsl:template match="tst:stepType">
+                 <xsl:choose>
+                   <xsl:when test=". = 'BEGIN'">
+                     <stepType>START</stepType>
+                   </xsl:when>
+                   <xsl:otherwise>
+                     <stepType><xsl:value-of select="."/></stepType>
+                   </xsl:otherwise>
+                 </xsl:choose>
+               </xsl:template>
+
+               </xsl:stylesheet>)
+      register("test://test/xsd/my.xsd", <foo />)
+      When("the WADL is normalized")
+      val thrown = intercept[Exception] {
+        val normWADL = wadl.normalize(inWADL, TREE)
+      }
+      Then("An exception should be thrown with the words 'my.xsd' and 'does not appear to be a valid XSD schema.'.")
+      assert(thrown.getMessage().contains("my.xsd"))
+      assert(thrown.getMessage().contains("does not appear to be a valid XSD schema."))
+      And("The exception should point to the file in error")
+      assert(thrown.getMessage().contains("test://test/xsl/beginStart.xsl"))
+    }
+
+
+    scenario ("A WADL with valid external link which contains an valid XSD which itself contains a missing link should be rejected rax:preprocess (schema)") {
+	   Given("a WADL with a link missing external link")
+	   val inWADL =
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                     xmlns:rax="http://docs.rackspace.com/api">
+             <resources base="https://test.api.openstack.com">
+                 <resource path="a/b">
+                     <resource path="c">
+	                    <method name="POST">
+                            <request>
+                                <representation mediaType="application/xml">
+                                    <rax:preprocess href="xsl/beginStart.xsl"/>
+                                </representation>
+                            </request>
+                       </method>
+                     </resource>
+                 </resource>
+             </resources>
+        </application>
+      register("test://test/xsl/beginStart.xsl",
+               <xsl:stylesheet
+               xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+               xmlns:tst="http://www.rackspace.com/repose/wadl/checker/step/test"
+               xmlns="http://www.rackspace.com/repose/wadl/checker/step/test"
+               version="1.0">
+
+               <xsl:import-schema schemaLocation="../xsd/my.xsd"/>
+
+               <xsl:template match="node() | @*">
+                 <xsl:copy>
+                   <xsl:apply-templates select="@* | node()"/>
+                 </xsl:copy>
+               </xsl:template>
+
+               <xsl:template match="tst:stepType">
+                 <xsl:choose>
+                   <xsl:when test=". = 'BEGIN'">
+                     <stepType>START</stepType>
+                   </xsl:when>
+                   <xsl:otherwise>
+                     <stepType><xsl:value-of select="."/></stepType>
+                   </xsl:otherwise>
+                 </xsl:choose>
+               </xsl:template>
+
+               </xsl:stylesheet>)
+      register("test://test/xsd/my.xsd",
+             <schema elementFormDefault="qualified"
+                        attributeFormDefault="unqualified"
+                        xmlns="http://www.w3.org/2001/XMLSchema"
+                        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                        targetNamespace="test://schema/a/other">
+                    <include schemaLocation="foo.xsd"/>
+                </schema>)
+      When("the WADL is normalized")
+      val thrown = intercept[Exception] {
+        val normWADL = wadl.normalize(inWADL, TREE)
+      }
+      Then("An exception should be thrown with the words 'foo.xsd' and 'does not seem to exist'.")
+      assert(thrown.getMessage().contains("foo.xsd"))
+      assert(thrown.getMessage().contains("does not seem to exist"))
+      And("The exception should point to the file in error")
+      assert(thrown.getMessage().contains("test://test/xsd/my.xsd"))
+    }
+
+    scenario ("A WADL with valid external link which contains an valid XSD which references a bad schema should be rejected rax:preprocess (schema)") {
+	   Given("a WADL with a link missing external link")
+	   val inWADL =
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                     xmlns:rax="http://docs.rackspace.com/api">
+             <resources base="https://test.api.openstack.com">
+                 <resource path="a/b">
+                     <resource path="c">
+	                    <method name="POST">
+                            <request>
+                                <representation mediaType="application/xml">
+                                    <rax:preprocess href="xsl/beginStart.xsl"/>
+                                </representation>
+                            </request>
+                       </method>
+                     </resource>
+                 </resource>
+             </resources>
+        </application>
+      register("test://test/xsl/beginStart.xsl",
+               <xsl:stylesheet
+               xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+               xmlns:tst="http://www.rackspace.com/repose/wadl/checker/step/test"
+               xmlns="http://www.rackspace.com/repose/wadl/checker/step/test"
+               version="1.0">
+
+               <xsl:import-schema schemaLocation="../xsd/my.xsd"/>
+
+               <xsl:template match="node() | @*">
+                 <xsl:copy>
+                   <xsl:apply-templates select="@* | node()"/>
+                 </xsl:copy>
+               </xsl:template>
+
+               <xsl:template match="tst:stepType">
+                 <xsl:choose>
+                   <xsl:when test=". = 'BEGIN'">
+                     <stepType>START</stepType>
+                   </xsl:when>
+                   <xsl:otherwise>
+                     <stepType><xsl:value-of select="."/></stepType>
+                   </xsl:otherwise>
+                 </xsl:choose>
+               </xsl:template>
+
+               </xsl:stylesheet>)
+      register("test://test/xsd/my.xsd",
+             <schema elementFormDefault="qualified"
+                        attributeFormDefault="unqualified"
+                        xmlns="http://www.w3.org/2001/XMLSchema"
+                        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                        targetNamespace="test://schema/a/other">
+                    <include schemaLocation="foo.xsd"/>
+                </schema>)
+      register("test://test/xsd/foo.xsd", <foo />)
+      When("the WADL is normalized")
+      val thrown = intercept[Exception] {
+        val normWADL = wadl.normalize(inWADL, TREE)
+      }
+      Then("An exception should be thrown with the words 'foo.xsd' and 'does not appear to be a valid XSD schema.'.")
+      assert(thrown.getMessage().contains("foo.xsd"))
+      assert(thrown.getMessage().contains("does not appear to be a valid XSD schema."))
+      And("The exception should point to the file in error")
+      assert(thrown.getMessage().contains("test://test/xsd/my.xsd"))
+    }
+
+
+    scenario ("A WADL with a missing external link should be rejected rax:preprocess, embedded XSLT (include)") {
+	   Given("a WADL with a link missing external link")
+	   val inWADL =
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                     xmlns:rax="http://docs.rackspace.com/api">
+             <resources base="https://test.api.openstack.com">
+                 <resource path="a/b">
+                     <resource path="c">
+	                    <method name="POST">
+                            <request>
+                                <representation mediaType="application/xml">
+                                    <rax:preprocess>
+                                        <xsl:stylesheet
+                                            xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                                            xmlns:tst="http://www.rackspace.com/repose/wadl/checker/step/test"
+                                            xmlns="http://www.rackspace.com/repose/wadl/checker/step/test"
+                                            version="1.0">
+
+                                            <xsl:include href="xsl/beginStart.xsl"/>
+
+                                        </xsl:stylesheet>
+                                    </rax:preprocess>
+                                </representation>
+                            </request>
+                       </method>
+                     </resource>
+                 </resource>
+             </resources>
+        </application>
+      When("the WADL is normalized")
+      val thrown = intercept[Exception] {
+        val normWADL = wadl.normalize(inWADL, TREE)
+      }
+      Then("An exception should be thrown with the words 'beginStart.xsl' and 'does not seem to exist'.")
+      assert(thrown.getMessage().contains("beginStart.xsl"))
+      assert(thrown.getMessage().contains("does not seem to exist"))
+      And("The exception should point to the file in error")
+      assert(thrown.getMessage().contains("test://test/mywadl.wadl"))
+    }
+
+    scenario ("A WADL with a missing external link should be rejected rax:preprocess, embedded XSLT (import)") {
+	   Given("a WADL with a link missing external link")
+	   val inWADL =
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                     xmlns:rax="http://docs.rackspace.com/api">
+             <resources base="https://test.api.openstack.com">
+                 <resource path="a/b">
+                     <resource path="c">
+	                    <method name="POST">
+                            <request>
+                                <representation mediaType="application/xml">
+                                    <rax:preprocess>
+                                        <xsl:stylesheet
+                                            xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                                            xmlns:tst="http://www.rackspace.com/repose/wadl/checker/step/test"
+                                            xmlns="http://www.rackspace.com/repose/wadl/checker/step/test"
+                                            version="1.0">
+
+                                            <xsl:import href="xsl/beginStart.xsl"/>
+
+                                        </xsl:stylesheet>
+                                    </rax:preprocess>
+                                </representation>
+                            </request>
+                       </method>
+                     </resource>
+                 </resource>
+             </resources>
+        </application>
+      When("the WADL is normalized")
+      val thrown = intercept[Exception] {
+        val normWADL = wadl.normalize(inWADL, TREE)
+      }
+      Then("An exception should be thrown with the words 'beginStart.xsl' and 'does not seem to exist'.")
+      assert(thrown.getMessage().contains("beginStart.xsl"))
+      assert(thrown.getMessage().contains("does not seem to exist"))
+      And("The exception should point to the file in error")
+      assert(thrown.getMessage().contains("test://test/mywadl.wadl"))
+    }
+
+    scenario ("A WADL with link of the wrong type should be rejected (rax:preprocess)") {
+	   Given("a WADL with a link missing external link")
+	   val inWADL =
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                     xmlns:rax="http://docs.rackspace.com/api">
+             <resources base="https://test.api.openstack.com">
+                 <resource path="a/b">
+                     <resource path="c">
+	                    <method name="POST">
+                            <request>
+                                <representation mediaType="application/xml">
+                                    <rax:preprocess href="xsl/beginStart.xsl"/>
+                                </representation>
+                            </request>
+                       </method>
+                     </resource>
+                 </resource>
+             </resources>
+        </application>
+      register ("test://test/xsl/beginStart.xsl", <foo />)
+      When("the WADL is normalized")
+      val thrown = intercept[Exception] {
+        val normWADL = wadl.normalize(inWADL, TREE)
+      }
+      Then("An exception should be thrown with the words 'beginStart.xsl' and 'does not appear to be a valid XSLT.'.")
+      assert(thrown.getMessage().contains("beginStart.xsl"))
+      assert(thrown.getMessage().contains("does not appear to be a valid XSLT."))
+      And("The exception should point to the file in error")
+      assert(thrown.getMessage().contains("test://test/mywadl.wadl"))
+    }
+
+    scenario ("A WADL with a link of the wrong type should be rejected rax:preprocess, embedded XSLT (import)") {
+	   Given("a WADL with a link missing external link")
+	   val inWADL =
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                     xmlns:rax="http://docs.rackspace.com/api">
+             <resources base="https://test.api.openstack.com">
+                 <resource path="a/b">
+                     <resource path="c">
+	                    <method name="POST">
+                            <request>
+                                <representation mediaType="application/xml">
+                                    <rax:preprocess>
+                                        <xsl:stylesheet
+                                            xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                                            xmlns:tst="http://www.rackspace.com/repose/wadl/checker/step/test"
+                                            xmlns="http://www.rackspace.com/repose/wadl/checker/step/test"
+                                            version="1.0">
+
+                                            <xsl:import href="xsl/beginStart.xsl"/>
+
+                                        </xsl:stylesheet>
+                                    </rax:preprocess>
+                                </representation>
+                            </request>
+                       </method>
+                     </resource>
+                 </resource>
+             </resources>
+        </application>
+      register ("test://test/xsl/beginStart.xsl", <foo />)
+      When("the WADL is normalized")
+      val thrown = intercept[Exception] {
+        val normWADL = wadl.normalize(inWADL, TREE)
+      }
+      Then("An exception should be thrown with the words 'beginStart.xsl' and 'does not appear to be a valid XSLT.'.")
+      assert(thrown.getMessage().contains("beginStart.xsl"))
+      assert(thrown.getMessage().contains("does not appear to be a valid XSLT."))
+      And("The exception should point to the file in error")
+      assert(thrown.getMessage().contains("test://test/mywadl.wadl"))
+    }
+
+    scenario ("A WADL with a link of the wrong type should be rejected rax:preprocess, embedded XSLT (include)") {
+	   Given("a WADL with a link missing external link")
+	   val inWADL =
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                     xmlns:rax="http://docs.rackspace.com/api">
+             <resources base="https://test.api.openstack.com">
+                 <resource path="a/b">
+                     <resource path="c">
+	                    <method name="POST">
+                            <request>
+                                <representation mediaType="application/xml">
+                                    <rax:preprocess>
+                                        <xsl:stylesheet
+                                            xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                                            xmlns:tst="http://www.rackspace.com/repose/wadl/checker/step/test"
+                                            xmlns="http://www.rackspace.com/repose/wadl/checker/step/test"
+                                            version="1.0">
+
+                                            <xsl:include href="xsl/beginStart.xsl"/>
+
+                                        </xsl:stylesheet>
+                                    </rax:preprocess>
+                                </representation>
+                            </request>
+                       </method>
+                     </resource>
+                 </resource>
+             </resources>
+        </application>
+      register ("test://test/xsl/beginStart.xsl", <foo />)
+      When("the WADL is normalized")
+      val thrown = intercept[Exception] {
+        val normWADL = wadl.normalize(inWADL, TREE)
+      }
+      Then("An exception should be thrown with the words 'beginStart.xsl' and 'does not appear to be a valid XSLT.'.")
+      assert(thrown.getMessage().contains("beginStart.xsl"))
+      assert(thrown.getMessage().contains("does not appear to be a valid XSLT."))
+      And("The exception should point to the file in error")
+      assert(thrown.getMessage().contains("test://test/mywadl.wadl"))
+    }
+
+
     scenario ("A WADL with a missing external link should be rejected") {
 	   Given("a WADL with a link missing external link")
       register ("test://path/to/test/other.wadl",

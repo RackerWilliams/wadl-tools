@@ -23,6 +23,7 @@ class WADLKeepReportSpec extends BaseWADLSpec with LazyLogging {
   register ("xsd", "http://www.w3.org/2001/XMLSchema")
   register ("wadl","http://wadl.dev.java.net/2009/02")
   register ("svrl","http://purl.oclc.org/dsdl/svrl")
+  register ("rax","http://docs.rackspace.com/api")
 
   feature ("The WADL normalizer should keep schematron report if it's told to do so") {
 
@@ -44,6 +45,332 @@ class WADLKeepReportSpec extends BaseWADLSpec with LazyLogging {
       Then("The normalized wadl should contain a report with the correct document referenced")
       assert(normWADL, "/wadl:application/svrl:schematron-output/svrl:active-pattern[@name='References']/@document = 'test://path/to/test/mywadl.wadl'")
     }
+
+    scenario ("A WADL with rax:preprocess link should reference the transform") {
+	   Given("a WADL with a rax:preprocess link")
+	   val inWADL = ("test://path/to/test/mywadl.wadl",
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                     xmlns:rax="http://docs.rackspace.com/api">
+             <resources base="https://test.api.openstack.com">
+                 <resource path="a/b">
+                     <resource path="c">
+                        <method name="POST">
+                            <request>
+                                <representation mediaType="application/xml">
+                                    <rax:preprocess href="xsl/beginStart.xsl"/>
+                                </representation>
+                            </request>
+                        </method>
+                     </resource>
+                 </resource>
+             </resources>
+        </application>)
+      register("test://path/to/test/xsl/beginStart.xsl",
+               <xsl:stylesheet
+               xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+               xmlns:tst="http://www.rackspace.com/repose/wadl/checker/step/test"
+               xmlns="http://www.rackspace.com/repose/wadl/checker/step/test"
+               version="1.0">
+
+               <xsl:template match="node() | @*">
+                 <xsl:copy>
+                   <xsl:apply-templates select="@* | node()"/>
+                 </xsl:copy>
+               </xsl:template>
+
+               <xsl:template match="tst:stepType">
+                 <xsl:choose>
+                   <xsl:when test=". = 'BEGIN'">
+                     <stepType>START</stepType>
+                   </xsl:when>
+                   <xsl:otherwise>
+                     <stepType><xsl:value-of select="."/></stepType>
+                   </xsl:otherwise>
+                 </xsl:choose>
+               </xsl:template>
+
+               </xsl:stylesheet>)
+      When("the WADL is normalized")
+      val normWADL = wadl.normalize(inWADL, TREE, XSD11, true, KEEP, true)
+      Then("The normalized wadl should contain a report with the correct document referenced")
+      assert(normWADL, "/wadl:application/svrl:schematron-output/svrl:active-pattern[@name='References']/@document = 'test://path/to/test/mywadl.wadl'")
+      assert(normWADL, "/wadl:application/svrl:schematron-output/svrl:active-pattern[@name='References']/@document = 'test://path/to/test/xsl/beginStart.xsl'")
+    }
+
+    scenario ("A WADL with rax:preprocess link which itself contains a reference to another transform (import)") {
+	   Given("a WADL with a rax:preprocess link")
+	   val inWADL = ("test://path/to/test/mywadl.wadl",
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                     xmlns:rax="http://docs.rackspace.com/api">
+             <resources base="https://test.api.openstack.com">
+                 <resource path="a/b">
+                     <resource path="c">
+                        <method name="POST">
+                            <request>
+                                <representation mediaType="application/xml">
+                                    <rax:preprocess href="xsl/beginStart.xsl"/>
+                                </representation>
+                            </request>
+                        </method>
+                     </resource>
+                 </resource>
+             </resources>
+        </application>)
+      register("test://path/to/test/xsl/beginStart.xsl",
+               <xsl:stylesheet
+               xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+               xmlns:tst="http://www.rackspace.com/repose/wadl/checker/step/test"
+               xmlns="http://www.rackspace.com/repose/wadl/checker/step/test"
+               version="1.0">
+
+               <xsl:import href="beginStart2.xsl"/>
+
+               <xsl:template match="node() | @*">
+                 <xsl:copy>
+                   <xsl:apply-templates select="@* | node()"/>
+                 </xsl:copy>
+               </xsl:template>
+
+               <xsl:template match="tst:stepType">
+                 <xsl:choose>
+                   <xsl:when test=". = 'BEGIN'">
+                     <stepType>START</stepType>
+                   </xsl:when>
+                   <xsl:otherwise>
+                     <stepType><xsl:value-of select="."/></stepType>
+                   </xsl:otherwise>
+                 </xsl:choose>
+               </xsl:template>
+
+               </xsl:stylesheet>)
+      register("test://path/to/test/xsl/beginStart2.xsl",
+               <xsl:stylesheet
+               xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+               xmlns:tst="http://www.rackspace.com/repose/wadl/checker/step/test"
+               xmlns="http://www.rackspace.com/repose/wadl/checker/step/test"
+               version="1.0">
+
+               </xsl:stylesheet>)
+      When("the WADL is normalized")
+      val normWADL = wadl.normalize(inWADL, TREE, XSD11, true, KEEP, true)
+      Then("The normalized wadl should contain a report with the correct document referenced")
+      assert(normWADL, "/wadl:application/svrl:schematron-output/svrl:active-pattern[@name='References']/@document = 'test://path/to/test/mywadl.wadl'")
+      assert(normWADL, "/wadl:application/svrl:schematron-output/svrl:active-pattern[@name='References']/@document = 'test://path/to/test/xsl/beginStart.xsl'")
+      assert(normWADL, "/wadl:application/svrl:schematron-output/svrl:active-pattern[@name='References']/@document = 'test://path/to/test/xsl/beginStart2.xsl'")
+    }
+
+
+    scenario ("A WADL with rax:preprocess link which itself contains a reference to another transform (include)") {
+	   Given("a WADL with a rax:preprocess link")
+	   val inWADL = ("test://path/to/test/mywadl.wadl",
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                     xmlns:rax="http://docs.rackspace.com/api">
+             <resources base="https://test.api.openstack.com">
+                 <resource path="a/b">
+                     <resource path="c">
+                        <method name="POST">
+                            <request>
+                                <representation mediaType="application/xml">
+                                    <rax:preprocess href="xsl/beginStart.xsl"/>
+                                </representation>
+                            </request>
+                        </method>
+                     </resource>
+                 </resource>
+             </resources>
+        </application>)
+      register("test://path/to/test/xsl/beginStart.xsl",
+               <xsl:stylesheet
+               xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+               xmlns:tst="http://www.rackspace.com/repose/wadl/checker/step/test"
+               xmlns="http://www.rackspace.com/repose/wadl/checker/step/test"
+               version="1.0">
+
+               <xsl:include href="beginStart2.xsl"/>
+
+               <xsl:template match="node() | @*">
+                 <xsl:copy>
+                   <xsl:apply-templates select="@* | node()"/>
+                 </xsl:copy>
+               </xsl:template>
+
+               <xsl:template match="tst:stepType">
+                 <xsl:choose>
+                   <xsl:when test=". = 'BEGIN'">
+                     <stepType>START</stepType>
+                   </xsl:when>
+                   <xsl:otherwise>
+                     <stepType><xsl:value-of select="."/></stepType>
+                   </xsl:otherwise>
+                 </xsl:choose>
+               </xsl:template>
+
+               </xsl:stylesheet>)
+      register("test://path/to/test/xsl/beginStart2.xsl",
+               <xsl:stylesheet
+               xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+               xmlns:tst="http://www.rackspace.com/repose/wadl/checker/step/test"
+               xmlns="http://www.rackspace.com/repose/wadl/checker/step/test"
+               version="1.0">
+
+               </xsl:stylesheet>)
+      When("the WADL is normalized")
+      val normWADL = wadl.normalize(inWADL, TREE, XSD11, true, KEEP, true)
+      Then("The normalized wadl should contain a report with the correct document referenced")
+      assert(normWADL, "/wadl:application/svrl:schematron-output/svrl:active-pattern[@name='References']/@document = 'test://path/to/test/mywadl.wadl'")
+      assert(normWADL, "/wadl:application/svrl:schematron-output/svrl:active-pattern[@name='References']/@document = 'test://path/to/test/xsl/beginStart.xsl'")
+      assert(normWADL, "/wadl:application/svrl:schematron-output/svrl:active-pattern[@name='References']/@document = 'test://path/to/test/xsl/beginStart2.xsl'")
+    }
+
+    scenario ("A WADL with rax:preprocess link which itself contains a reference to another transform which includes a schema") {
+	   Given("a WADL with a rax:preprocess link")
+	   val inWADL = ("test://path/to/test/mywadl.wadl",
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                     xmlns:rax="http://docs.rackspace.com/api">
+             <resources base="https://test.api.openstack.com">
+                 <resource path="a/b">
+                     <resource path="c">
+                        <method name="POST">
+                            <request>
+                                <representation mediaType="application/xml">
+                                    <rax:preprocess href="xsl/beginStart.xsl"/>
+                                </representation>
+                            </request>
+                        </method>
+                     </resource>
+                 </resource>
+             </resources>
+        </application>)
+      register("test://path/to/test/xsl/beginStart.xsl",
+               <xsl:stylesheet
+               xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+               xmlns:tst="http://www.rackspace.com/repose/wadl/checker/step/test"
+               xmlns="http://www.rackspace.com/repose/wadl/checker/step/test"
+               version="1.0">
+
+               <xsl:include href="beginStart2.xsl"/>
+
+               <xsl:template match="node() | @*">
+                 <xsl:copy>
+                   <xsl:apply-templates select="@* | node()"/>
+                 </xsl:copy>
+               </xsl:template>
+
+               <xsl:template match="tst:stepType">
+                 <xsl:choose>
+                   <xsl:when test=". = 'BEGIN'">
+                     <stepType>START</stepType>
+                   </xsl:when>
+                   <xsl:otherwise>
+                     <stepType><xsl:value-of select="."/></stepType>
+                   </xsl:otherwise>
+                 </xsl:choose>
+               </xsl:template>
+
+               </xsl:stylesheet>)
+      register("test://path/to/test/xsl/beginStart2.xsl",
+               <xsl:stylesheet
+               xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+               xmlns:tst="http://www.rackspace.com/repose/wadl/checker/step/test"
+               xmlns="http://www.rackspace.com/repose/wadl/checker/step/test"
+               version="1.0">
+                  <xsl:import-schema schemaLocation="../xsd/mytest-other.xsd"/>
+               </xsl:stylesheet>)
+      register ("test://path/to/test/xsd/mytest-other.xsd",
+                <schema elementFormDefault="qualified"
+                        attributeFormDefault="unqualified"
+                        xmlns="http://www.w3.org/2001/XMLSchema"
+                        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                        targetNamespace="test://schema/a/other">
+                    <element name="other" type="xsd:string"/>
+                </schema>
+      )
+      When("the WADL is normalized")
+      val normWADL = wadl.normalize(inWADL, TREE, XSD11, true, KEEP, true)
+      Then("The normalized wadl should contain a report with the correct document referenced")
+      assert(normWADL, "/wadl:application/svrl:schematron-output/svrl:active-pattern[@name='References']/@document = 'test://path/to/test/mywadl.wadl'")
+      assert(normWADL, "/wadl:application/svrl:schematron-output/svrl:active-pattern[@name='References']/@document = 'test://path/to/test/xsl/beginStart.xsl'")
+      assert(normWADL, "/wadl:application/svrl:schematron-output/svrl:active-pattern[@name='References']/@document = 'test://path/to/test/xsl/beginStart2.xsl'")
+      assert(normWADL, "/wadl:application/svrl:schematron-output/svrl:active-pattern[@name='References']/@document = 'test://path/to/test/xsd/mytest-other.xsd'")
+    }
+
+
+    scenario ("A WADL with rax:preprocess which contains an embeded transform  a reference to another transform which includes a schema") {
+	   Given("a WADL with a rax:preprocess link")
+	   val inWADL = ("test://path/to/test/mywadl.wadl",
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                     xmlns:rax="http://docs.rackspace.com/api">
+             <resources base="https://test.api.openstack.com">
+                 <resource path="a/b">
+                     <resource path="c">
+                        <method name="POST">
+                            <request>
+                                <representation mediaType="application/xml">
+                                    <rax:preprocess>
+               <xsl:stylesheet
+               xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+               xmlns:tst="http://www.rackspace.com/repose/wadl/checker/step/test"
+               xmlns="http://www.rackspace.com/repose/wadl/checker/step/test"
+               version="1.0">
+
+               <xsl:include href="xsl/beginStart2.xsl"/>
+
+               <xsl:template match="node() | @*">
+                 <xsl:copy>
+                   <xsl:apply-templates select="@* | node()"/>
+                 </xsl:copy>
+               </xsl:template>
+
+               <xsl:template match="tst:stepType">
+                 <xsl:choose>
+                   <xsl:when test=". = 'BEGIN'">
+                     <stepType>START</stepType>
+                   </xsl:when>
+                   <xsl:otherwise>
+                     <stepType><xsl:value-of select="."/></stepType>
+                   </xsl:otherwise>
+                 </xsl:choose>
+               </xsl:template>
+
+               </xsl:stylesheet>
+                                    </rax:preprocess>
+                                </representation>
+                            </request>
+                        </method>
+                     </resource>
+                 </resource>
+             </resources>
+        </application>)
+      register("test://path/to/test/xsl/beginStart2.xsl",
+               <xsl:stylesheet
+               xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+               xmlns:tst="http://www.rackspace.com/repose/wadl/checker/step/test"
+               xmlns="http://www.rackspace.com/repose/wadl/checker/step/test"
+               version="1.0">
+                  <xsl:import-schema schemaLocation="../xsd/mytest-other.xsd"/>
+               </xsl:stylesheet>)
+      register ("test://path/to/test/xsd/mytest-other.xsd",
+                <schema elementFormDefault="qualified"
+                        attributeFormDefault="unqualified"
+                        xmlns="http://www.w3.org/2001/XMLSchema"
+                        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                        targetNamespace="test://schema/a/other">
+                    <element name="other" type="xsd:string"/>
+                </schema>
+      )
+      When("the WADL is normalized")
+      val normWADL = wadl.normalize(inWADL, TREE, XSD11, true, KEEP, true)
+      Then("The normalized wadl should contain a report with the correct document referenced")
+      assert(normWADL, "/wadl:application/svrl:schematron-output/svrl:active-pattern[@name='References']/@document = 'test://path/to/test/mywadl.wadl'")
+      assert(normWADL, "/wadl:application/svrl:schematron-output/svrl:active-pattern[@name='References']/@document = 'test://path/to/test/xsl/beginStart2.xsl'")
+      assert(normWADL, "/wadl:application/svrl:schematron-output/svrl:active-pattern[@name='References']/@document = 'test://path/to/test/xsd/mytest-other.xsd'")
+    }
+
 
     scenario ("A WADL with an external link should have the link reported") {
 	   Given("a WADL with an external link")
