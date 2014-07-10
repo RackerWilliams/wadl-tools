@@ -3,6 +3,7 @@
     xmlns:xs="http://www.w3.org/2001/XMLSchema"
     xmlns:wadl="http://wadl.dev.java.net/2009/02"
     xmlns:svrl="http://purl.oclc.org/dsdl/svrl"
+    xmlns:rax="http://docs.rackspace.com/api"
     xmlns="http://docs.rackspace.com/api"
     exclude-result-prefixes="xs wadl"
     version="2.0">
@@ -53,7 +54,7 @@
             <xsl:apply-templates select="$doc/*"/>
         </svrl:active-pattern>
 
-        <xsl:apply-templates select="$doc" mode="M4"/>
+        <xsl:apply-templates select="$doc" mode="M6"/>
 
         <!-- Test next document -->
         <xsl:if test="count($newNextLinks)">
@@ -94,6 +95,16 @@
     </xsl:template>
 
     <xsl:template match="xs:*/@schemaLocation" mode="gatherLinks">
+        <xsl:param name="doc" as="node()" tunnel="yes"/>
+        <xsl:param name="excludes" as="xs:string*" tunnel="yes"/>
+        <xsl:call-template name="check_href">
+            <xsl:with-param name="doc" select="$doc"/>
+            <xsl:with-param name="href" select="."/>
+            <xsl:with-param name="excludes" select="$excludes"/>
+        </xsl:call-template>
+    </xsl:template>
+
+    <xsl:template match="xsl:import-schema/@schemaLocation | xsl:import/@href | xsl:include/@href | rax:preprocess/@href" mode="gatherLinks">
         <xsl:param name="doc" as="node()" tunnel="yes"/>
         <xsl:param name="excludes" as="xs:string*" tunnel="yes"/>
         <xsl:call-template name="check_href">

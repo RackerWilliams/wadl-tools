@@ -5,6 +5,8 @@
     <ns prefix="wadl" uri="http://wadl.dev.java.net/2009/02"/>
     <ns prefix="xsd" uri="http://www.w3.org/2001/XMLSchema"/>
     <ns prefix="xsdxt" uri="http://docs.rackspacecloud.com/xsd-ext/v1.0"/>
+    <ns prefix="rax" uri="http://docs.rackspace.com/api"/>
+    <ns prefix="xsl" uri="http://www.w3.org/1999/XSL/Transform"/>
     <pattern id="References">
         <rule id="CheckReference" abstract="true">
             <let name="doc" value="substring-before(.,'#')"/>
@@ -26,6 +28,16 @@
             </assert>
             <assert test="document($refURI)/xsd:schema">
                 The reference '<value-of select="."/>' does not appear to be a valid XSD schema.
+            </assert>
+        </rule>
+        <rule id="CheckTransformReference" abstract="true">
+            <let name="baseDocURI" value="string-join(tokenize(base-uri(..),'/')[position() ne last()], '/')"/>
+            <let name="refURI" value="resolve-uri(.,base-uri(..))"/>
+            <assert test="doc-available($refURI)">
+                The reference '<value-of select="."/>' does not seem to exist.
+            </assert>
+            <assert test="document($refURI)/xsl:*[1][local-name() = 'stylesheet' or local-name() = 'transform']">
+                The reference '<value-of select="."/>' does not appear to be a valid XSLT.
             </assert>
         </rule>
         <rule id="CheckIncludeReference" abstract="true">
@@ -104,8 +116,20 @@
         <rule context="xsd:schema/xsd:include/@schemaLocation">
             <extends rule="CheckSchemaReference"/>
         </rule>
+        <rule context="xsl:import-schema/@schemaLocation">
+            <extends rule="CheckSchemaReference"/>
+        </rule>
         <rule context="xsdxt:code/@href">
             <extends rule="CheckIncludeReference"/>
+        </rule>
+        <rule context="rax:preprocess/@href">
+            <extends rule="CheckTransformReference"/>
+        </rule>
+        <rule context="xsl:import/@href">
+            <extends rule="CheckTransformReference"/>
+        </rule>
+        <rule context="xsl:include/@href">
+            <extends rule="CheckTransformReference"/>
         </rule>
     </pattern>
 </schema>
