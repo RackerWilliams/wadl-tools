@@ -47,6 +47,7 @@
             <assert test="unparsed-text-available($refURI) or doc-available($refURI)">
                 The reference '<value-of select="."/>' does not seem to exist.
             </assert>
+            <report role="unparsedReference" test="unparsed-text-available($refURI)"><value-of select="$refURI"/></report>
         </rule>
         <rule id="CheckReferences" abstract="true">
             <let name="baseDocURI" value="string-join(tokenize(base-uri(..),'/')[position() ne last()], '/')"/>
