@@ -36,7 +36,8 @@
             <assert test="doc-available($refURI)">
                 The reference '<value-of select="."/>' does not seem to exist.
             </assert>
-            <assert test="document($refURI)/xsl:*[1][local-name() = 'stylesheet' or local-name() = 'transform']">
+            <assert test="document($refURI)/element()[1][(namespace-uri() = 'http://www.w3.org/1999/XSL/Transform' and
+                                                         (local-name() = 'stylesheet' or local-name() = 'transform')) or @xsl:version]">
                 The reference '<value-of select="."/>' does not appear to be a valid XSLT.
             </assert>
         </rule>
