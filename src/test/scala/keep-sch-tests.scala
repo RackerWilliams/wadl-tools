@@ -98,6 +98,37 @@ class WADLKeepReportSpec extends BaseWADLSpec with LazyLogging {
       assert(normWADL, "/wadl:application/svrl:schematron-output/svrl:active-pattern[@name='References']/@document = 'test://path/to/test/xsl/beginStart.xsl'")
     }
 
+    scenario ("A WADL with rax:preprocess link should reference the transform (simple transform)") {
+	   Given("a WADL with a rax:preprocess link")
+	   val inWADL = ("test://path/to/test/mywadl.wadl",
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                     xmlns:rax="http://docs.rackspace.com/api">
+             <resources base="https://test.api.openstack.com">
+                 <resource path="a/b">
+                     <resource path="c">
+                        <method name="POST">
+                            <request>
+                                <representation mediaType="application/xml">
+                                    <rax:preprocess href="xsl/foo.xsl"/>
+                                </representation>
+                            </request>
+                        </method>
+                     </resource>
+                 </resource>
+             </resources>
+        </application>)
+      register("test://path/to/test/xsl/foo.xsl",
+               <foo
+               xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+               xsl:version="1.0"/>)
+      When("the WADL is normalized")
+      val normWADL = wadl.normalize(inWADL, TREE, XSD11, true, KEEP, true)
+      Then("The normalized wadl should contain a report with the correct document referenced")
+      assert(normWADL, "/wadl:application/svrl:schematron-output/svrl:active-pattern[@name='References']/@document = 'test://path/to/test/mywadl.wadl'")
+      assert(normWADL, "/wadl:application/svrl:schematron-output/svrl:active-pattern[@name='References']/@document = 'test://path/to/test/xsl/foo.xsl'")
+    }
+
     scenario ("A WADL with rax:preprocess link which itself contains a reference to another transform (import)") {
 	   Given("a WADL with a rax:preprocess link")
 	   val inWADL = ("test://path/to/test/mywadl.wadl",
