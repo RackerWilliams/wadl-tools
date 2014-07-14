@@ -1,5 +1,7 @@
 package com.rackspace.cloud.api.wadl.test
 
+import java.io.File
+
 import scala.xml._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
@@ -24,6 +26,8 @@ class WADLKeepReportSpec extends BaseWADLSpec with LazyLogging {
   register ("wadl","http://wadl.dev.java.net/2009/02")
   register ("svrl","http://purl.oclc.org/dsdl/svrl")
   register ("rax","http://docs.rackspace.com/api")
+
+  val localWADLURI = (new File(System.getProperty("user.dir"),"mywadl.wadl")).toURI.toString
 
   feature ("The WADL normalizer should keep schematron report if it's told to do so") {
 
@@ -505,6 +509,30 @@ class WADLKeepReportSpec extends BaseWADLSpec with LazyLogging {
       assert(normWADL, "/wadl:application/svrl:schematron-output/svrl:active-pattern[@name='References']/@document = 'test://path/to/test/mywadl.wadl'")
       assert(normWADL, "/wadl:application/svrl:schematron-output/svrl:active-pattern[@name='References']/@document = 'test://path/to/test/other.wadl'")
       assert(normWADL, "/wadl:application/svrl:schematron-output/svrl:active-pattern[@name='References']/@document = 'test://path/to/test/xsd/mytest.xsd'")
+    }
+
+    scenario ("A WADL with an external JSONSchema should have its links reported") {
+	   Given("a WADL with an external JSON Schema")
+	   val inWADL = (localWADLURI,
+        <application xmlns="http://wadl.dev.java.net/2009/02"
+                     xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+             <grammars>
+                <include href="src/test/resources/test-schema.json"/>
+             </grammars>
+             <resources base="https://test.api.openstack.com">
+                 <resource path="a/b">
+                     <resource path="c" type="src/test/resources/resource_type.wadl.xml#foo"/>
+                 </resource>
+             </resources>
+        </application>)
+      When("the WADL is normalized")
+      val normWADL = wadl.normalize(inWADL, TREE, XSD11, true, KEEP, true)
+      Then("The normalized wadl should contain a report with the correct document referenced")
+      assert(normWADL, s"/wadl:application/svrl:schematron-output/svrl:active-pattern[@name='References']/@document = '$localWADLURI'")
+      assert(normWADL, """some $d in /wadl:application/svrl:schematron-output/svrl:active-pattern[@name='References']/@document
+                        satisfies contains($d,'src/test/resources/resource_type.wadl.xml')""")
+      assert(normWADL, """some $u in /wadl:application/svrl:schematron-output/svrl:successful-report[@role='unparsedReference']/svrl:text
+                        satisfies contains($u, 'src/test/resources/test-schema.json')""")
     }
 
     scenario ("A WADL with an external link and an multiple external XSD should have both links reported") {
