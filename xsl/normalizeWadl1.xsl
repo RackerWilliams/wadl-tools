@@ -58,7 +58,9 @@
 
         <xsl:if test="$flattenXsds != 'false'">
             <xsl:for-each-group select="$catalog-wadl-xsds//xsd" group-by="@location">
-            <xsl:apply-templates select="document(current-grouping-key())//xsd:import|document(current-grouping-key())//xsd:include" mode="catalog-imported-xsds"/>
+                <xsl:if test="doc-available(current-grouping-key())">
+                    <xsl:apply-templates select="document(current-grouping-key())//xsd:import|document(current-grouping-key())//xsd:include" mode="catalog-imported-xsds"/>
+                </xsl:if>
             </xsl:for-each-group>
         </xsl:if>
     </xsl:variable>
@@ -78,16 +80,18 @@
     -->
     <xsl:variable name="xsds">
        <xsl:for-each select="$catalog/xsd">
-           <rax:xsd xmlns:rax="http://docs.rackspace.com/api"
-               location="{@location}"
-               name="{@name}">
-                 <xsd:schema>
-                     <xsl:copy-of select="document(resolve-uri(@location))/xsd:schema/@*"/>
-                     <xsl:apply-templates select="document(resolve-uri(@location))" mode="flatten-xsd">
-                        <xsl:with-param name="stack" select="@location"/>
-                    </xsl:apply-templates>
-                </xsd:schema>
-           </rax:xsd>         
+           <xsl:if test="doc-available(resolve-uri(@location))">
+               <rax:xsd xmlns:rax="http://docs.rackspace.com/api"
+                        location="{@location}"
+                        name="{@name}">
+                   <xsd:schema>
+                       <xsl:copy-of select="document(resolve-uri(@location))/xsd:schema/@*"/>
+                       <xsl:apply-templates select="document(resolve-uri(@location))" mode="flatten-xsd">
+                           <xsl:with-param name="stack" select="@location"/>
+                       </xsl:apply-templates>
+                   </xsd:schema>
+               </rax:xsd>
+           </xsl:if>
        </xsl:for-each>
     </xsl:variable>
     
@@ -420,28 +424,32 @@
         </xsl:variable>
         <xsl:apply-templates select="*" mode="process-xsd-contents"/>
         <xsl:for-each-group select="$included-xsds/*" group-by="@location">
-            <xsl:apply-templates select="document(current-grouping-key())" mode="process-xsd-contents"/>
+            <xsl:if test="doc-available(current-grouping-key())">
+                <xsl:apply-templates select="document(current-grouping-key())" mode="process-xsd-contents"/>
+            </xsl:if>
         </xsl:for-each-group>
     </xsl:template>
 
     <xsl:template match="xsd:include" mode="included-xsds">
         <xsl:param name="stack"/>
         <xsl:variable name="schemaLocation" select="resolve-uri(@schemaLocation,document-uri(/))"/>
-        <xsd location="{$schemaLocation}"/>
-        <xsl:choose>
-            <xsl:when test="$flattenXsds != 'false'">
-        <xsl:if test="not(contains($stack, $schemaLocation))">
-            <xsl:apply-templates select="document($schemaLocation)//xsd:include" mode="included-xsds">
-                        <xsl:with-param name="stack" select="concat($stack,' ',$schemaLocation)"/>
-                    </xsl:apply-templates>
-                </xsl:if>
-            </xsl:when>
-            <xsl:otherwise>
-                <xsl:copy>
-                    <xsl:apply-templates select="@*|node()" mode="included-xsds"/>
-                </xsl:copy>
-            </xsl:otherwise>
-        </xsl:choose>
+        <xsl:if test="doc-available($schemaLocation)">
+            <xsd location="{$schemaLocation}"/>
+            <xsl:choose>
+                <xsl:when test="$flattenXsds != 'false'">
+                    <xsl:if test="not(contains($stack, $schemaLocation))">
+                        <xsl:apply-templates select="document($schemaLocation)//xsd:include" mode="included-xsds">
+                            <xsl:with-param name="stack" select="concat($stack,' ',$schemaLocation)"/>
+                        </xsl:apply-templates>
+                    </xsl:if>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:copy>
+                        <xsl:apply-templates select="@*|node()" mode="included-xsds"/>
+                    </xsl:copy>
+                </xsl:otherwise>
+            </xsl:choose>
+        </xsl:if>
     </xsl:template>
 
     <xsl:template match="text()|comment()|processing-instruction()" mode="included-xsds"/>
