@@ -9,6 +9,7 @@
     version="2.0">
 
     <xsl:import href="wadl.xsl"/>
+    <xsl:include href="wadl-additional-reports.xsl"/>
 
     <xsl:output method="xml" indent="yes"/>
 
@@ -55,6 +56,7 @@
         </svrl:active-pattern>
 
         <xsl:apply-templates select="$doc" mode="M6"/>
+        <xsl:apply-templates select="$doc" mode="additionalReports"/>
 
         <!-- Test next document -->
         <xsl:if test="count($newNextLinks)">
