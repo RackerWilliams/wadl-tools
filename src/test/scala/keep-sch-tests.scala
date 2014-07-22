@@ -1,6 +1,10 @@
 package com.rackspace.cloud.api.wadl.test
 
 import java.io.File
+import java.io.ByteArrayOutputStream
+
+import javax.xml.transform.stream.StreamSource
+import javax.xml.transform.stream.StreamResult
 
 import scala.xml._
 import org.junit.runner.RunWith
@@ -533,6 +537,86 @@ class WADLKeepReportSpec extends BaseWADLSpec with LazyLogging {
                         satisfies contains($d,'src/test/test-samples/resource_type.wadl.xml')""")
       assert(normWADL, """some $u in /wadl:application/svrl:schematron-output/svrl:successful-report[@role='unparsedReference']/svrl:text
                         satisfies contains($u, 'src/test/test-samples/test-schema.json')""")
+    }
+
+    scenario ("A WADL which refers to an external entity should have the entity reported") {
+      Given("a WADL with an external entity")
+      val wadlOutBytes = new ByteArrayOutputStream()
+      When("the WADL is normalized")
+      wadl.normalize(new StreamSource(new File("src/test/test-samples/entity.wadl.xml")), new StreamResult(wadlOutBytes), TREE, XSD11, true, KEEP, true)
+      val normWADL = XML.loadString (wadlOutBytes.toString())
+      Then ("The normalize wadl should contain a report with the correct documents referenced")
+      assert(normWADL, """some $d in /wadl:application/svrl:schematron-output/svrl:active-pattern[@name='References']/@document
+                          satisfies contains($d,'src/test/test-samples/entity.wadl.xml')""")
+      assert(normWADL, """some $e in /wadl:application/svrl:schematron-output/svrl:successful-report[@role='includeReference']/svrl:text
+                          satisfies contains($e,'src/test/test-samples/common.ent')""")
+    }
+
+    scenario ("A WADL which refers to an external entity and samples should have all of these dependecies reported") {
+      Given("a WADL with an external entity and entity samples")
+      val wadlOutBytes = new ByteArrayOutputStream()
+      When("the WADL is normalized")
+      wadl.normalize(new StreamSource(new File("src/test/test-samples/entity-withsamples.wadl.xml")), new StreamResult(wadlOutBytes), TREE, XSD11, true, KEEP, true)
+      val normWADL = XML.loadString (wadlOutBytes.toString())
+      Then ("The normalize wadl should contain a report with the correct documents referenced")
+      assert(normWADL, """some $d in /wadl:application/svrl:schematron-output/svrl:active-pattern[@name='References']/@document
+                          satisfies contains($d,'src/test/test-samples/entity-withsamples.wadl.xml')""")
+      assert(normWADL, """some $e in /wadl:application/svrl:schematron-output/svrl:successful-report[@role='includeReference']/svrl:text
+                          satisfies contains($e,'src/test/test-samples/common.ent')""")
+      assert(normWADL, """some $e in /wadl:application/svrl:schematron-output/svrl:successful-report[@role='includeReference']/svrl:text
+                          satisfies contains($e,'src/test/test-samples/samples/metadata_item.xml')""")
+      assert(normWADL, """some $e in /wadl:application/svrl:schematron-output/svrl:successful-report[@role='includeReference']/svrl:text
+                          satisfies contains($e,'src/test/test-samples/samples/metadata_item.json')""")
+    }
+
+    scenario("A WADL which refers to an external entity in another file should have both links reported") {
+      Given("a WADL with an external entity in a separate file")
+      val wadlFile = new File ("src/test/test-samples/entity2.wadl.xml")
+      val inWADL = (wadlFile.toURI.toString,
+                    XML.loadFile(wadlFile))
+      When ("the WADL is normalized")
+      val normWADL = wadl.normalize(inWADL, TREE, XSD11, true, KEEP, true)
+      Then ("The normalized wadl should contain a report with the correct documents referenced")
+      assert(normWADL, """some $d in /wadl:application/svrl:schematron-output/svrl:active-pattern[@name='References']/@document
+                          satisfies contains($d,'src/test/test-samples/entity2.wadl.xml')""")
+      assert(normWADL, """some $d in /wadl:application/svrl:schematron-output/svrl:active-pattern[@name='References']/@document
+                          satisfies contains($d,'src/test/test-samples/entity2-method.wadl.xml')""")
+      assert(normWADL, """some $e in /wadl:application/svrl:schematron-output/svrl:successful-report[@role='includeReference']/svrl:text
+                          satisfies contains($e,'src/test/test-samples/common.ent')""")
+    }
+
+    scenario("A WADL which refers to an external entity in an xincluded file should have both links reported") {
+      Given("a WADL with an external entity in a separate file")
+      val wadlFile = new File ("src/test/test-samples/xinclude-entity.wadl.xml")
+      val inWADL = (wadlFile.toURI.toString,
+                    XML.loadFile(wadlFile))
+      When ("the WADL is normalized")
+      val normWADL = wadl.normalize(inWADL, TREE, XSD11, true, KEEP, true)
+      Then ("The normalized wadl should contain a report with the correct documents referenced")
+      assert(normWADL, """some $d in /wadl:application/svrl:schematron-output/svrl:active-pattern[@name='References']/@document
+                          satisfies contains($d,'src/test/test-samples/xinclude-entity.wadl.xml')""")
+      assert(normWADL, """some $e in /wadl:application/svrl:schematron-output/svrl:successful-report[@role='includeReference']/svrl:text
+                          satisfies contains($e,'src/test/test-samples/common.ent')""")
+      assert(normWADL, """some $e in /wadl:application/svrl:schematron-output/svrl:successful-report[@role='includeReference']/svrl:text
+                          satisfies contains($e,'src/test/test-samples/xinclude-method.wadl.xml')""")
+    }
+
+    scenario("A WADL which refers to an external external WADL whch contains an entity in an xincluded file should have all links reported") {
+      Given("a WADL with an external entity in a separate file")
+      val wadlFile = new File ("src/test/test-samples/xinclude-entity2.wadl.xml")
+      val inWADL = (wadlFile.toURI.toString,
+                    XML.loadFile(wadlFile))
+      When ("the WADL is normalized")
+      val normWADL = wadl.normalize(inWADL, TREE, XSD11, true, KEEP, true)
+      Then ("The normalized wadl should contain a report with the correct documents referenced")
+      assert(normWADL, """some $d in /wadl:application/svrl:schematron-output/svrl:active-pattern[@name='References']/@document
+                          satisfies contains($d,'src/test/test-samples/xinclude-entity2.wadl.xml')""")
+      assert(normWADL, """some $d in /wadl:application/svrl:schematron-output/svrl:active-pattern[@name='References']/@document
+                          satisfies contains($d,'src/test/test-samples/xinclude-method2.wadl.xml')""")
+      assert(normWADL, """some $e in /wadl:application/svrl:schematron-output/svrl:successful-report[@role='includeReference']/svrl:text
+                          satisfies contains($e,'src/test/test-samples/common.ent')""")
+      assert(normWADL, """some $e in /wadl:application/svrl:schematron-output/svrl:successful-report[@role='includeReference']/svrl:text
+                          satisfies contains($e,'src/test/test-samples/xinclude-method.wadl.xml')""")
     }
 
     scenario ("A WADL with an external link and an multiple external XSD should have both links reported") {

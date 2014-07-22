@@ -14,6 +14,12 @@ import org.xml.sax.SAXParseException
 
 import com.typesafe.scalalogging.slf4j.LazyLogging
 
+import java.io.File
+import java.io.ByteArrayOutputStream
+
+import javax.xml.transform.stream.StreamSource
+import javax.xml.transform.stream.StreamResult
+
 @RunWith(classOf[JUnitRunner])
 class BadWADLSpec extends BaseWADLSpec with LazyLogging {
   //
@@ -2025,6 +2031,44 @@ class BadWADLSpec extends BaseWADLSpec with LazyLogging {
       assert(thrown.getMessage().contains("does not seem to exist"))
       And("The exception should point to the file in error")
         assert(thrown.getMessage().contains("test://app/xsd/simple.xsd"))
+    }
+
+    scenario ("A WADL which refers to a missing external entity should have an error reported") {
+      Given("a WADL with a missing external entity")
+      val wadlOutBytes = new ByteArrayOutputStream()
+      When("the WADL is normalized")
+      val thrown = intercept[Exception] {
+        wadl.normalize(new StreamSource(new File("src/test/bad-test-samples/missing-entity.wadl.xml")), new StreamResult(wadlOutBytes), TREE, XSD11, true, KEEP, true)
+      }
+      Then ("An exception should be thrown with the words 'missing-entity.wadl.xml' and 'missing.ent'")
+      assert (thrown.getMessage().contains("missing-entity.wadl.xml"))
+      assert (thrown.getMessage().contains("missing.ent"))
+    }
+
+    scenario ("A WADL which xincludes a missing file should fail with a correct error reported") {
+      Given("a WADL with a missing xinclude")
+      val wadlOutBytes = new ByteArrayOutputStream()
+      When("the WADL is normalized")
+      val thrown = intercept[Exception] {
+        wadl.normalize(new StreamSource(new File("src/test/bad-test-samples/missing-xinclude.wadl.xml")), new StreamResult(wadlOutBytes), TREE, XSD11, true, KEEP, true)
+      }
+      Then ("An exception should be thrown with the words 'missing-xinclude.wadl.xml',  'include', 'lineNumber: 16'")
+      assert (thrown.getMessage().contains("missing-xinclude.wadl.xml"))
+      assert (thrown.getMessage().contains("include"))
+      assert (thrown.getMessage().contains("lineNumber: 16"))
+    }
+
+    scenario ("A WADL which references a WADL wich xincludes a missing file should fail with a correct error reported") {
+      Given("a WADL wihch references a WADL with a missing xinclude")
+      val wadlOutBytes = new ByteArrayOutputStream()
+      When("the WADL is normalized")
+      val thrown = intercept[Exception] {
+        wadl.normalize(new StreamSource(new File("src/test/bad-test-samples/missing-xinclude2.wadl.xml")), new StreamResult(wadlOutBytes), TREE, XSD11, true, KEEP, true)
+      }
+      Then ("An exception should be thrown with the words 'missing-xinclude2.wadl.xml',  'include', 'lineNumber: 26'")
+      assert (thrown.getMessage().contains("missing-xinclude-method.wadl.xml"))
+      assert (thrown.getMessage().contains("include"))
+      assert (thrown.getMessage().contains("lineNumber: 26"))
     }
   }
 }

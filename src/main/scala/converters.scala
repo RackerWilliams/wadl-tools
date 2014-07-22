@@ -10,6 +10,9 @@ import java.io.ByteArrayInputStream
 import net.sf.saxon.Controller
 import net.sf.saxon.serialize.MessageWarner
 
+import org.w3c.dom.NodeList
+import org.w3c.dom.Node
+
 //
 //  Converters
 //
@@ -42,5 +45,17 @@ object Converters {
       c.asInstanceOf[Transformer].setErrorListener (new LogErrorListener)
       c.setMessageEmitter(new MessageWarner())
     }
+  }
+
+  implicit def toList(nl : NodeList) : List[Node] = {
+    def nodeList(nl : NodeList, curr : List[Node], i : Int) : List[Node] = {
+      if (i < nl.getLength()) {
+        nodeList(nl, curr ::: List(nl.item(i)), i+1)
+      } else {
+        curr
+      }
+    }
+
+    nodeList(nl, List[Node](), 0)
   }
 }
