@@ -198,8 +198,7 @@ class WADLNormalizer(private var transformerFactory : TransformerFactory) extend
     val result = svrlAdditionalCheckExpression.evaluate (doc, XPathConstants.NODESET).asInstanceOf[NodeList]
     if (!result.isEmpty) {
       val reader = XMLReader()
-      result.foreach(i => {
-        val inDoc = i.getTextContent().trim()
+      result.map(n => n.getTextContent().trim()).toSet.foreach((inDoc : String) => {
         try {
           reader.parse(inDoc)
           logger.warn (s"This is strange document $inDoc was reported for further checking, but looks good. Ignoring.")
