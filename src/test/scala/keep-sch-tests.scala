@@ -564,9 +564,9 @@ class WADLKeepReportSpec extends BaseWADLSpec with LazyLogging {
       assert(normWADL, """some $e in /wadl:application/svrl:schematron-output/svrl:successful-report[@role='includeReference']/svrl:text
                           satisfies contains($e,'src/test/test-samples/common.ent')""")
       assert(normWADL, """some $e in /wadl:application/svrl:schematron-output/svrl:successful-report[@role='includeReference']/svrl:text
-                          satisfies contains($e,'src/test/test-samples/samples/metadata_item.xml')""")
+                          satisfies contains($e,'src/test/test-samples/content-samples/metadata_item.xml')""")
       assert(normWADL, """some $e in /wadl:application/svrl:schematron-output/svrl:successful-report[@role='includeReference']/svrl:text
-                          satisfies contains($e,'src/test/test-samples/samples/metadata_item.json')""")
+                          satisfies contains($e,'src/test/test-samples/content-samples/metadata_item.json')""")
     }
 
     scenario("A WADL which refers to an external entity in another file should have both links reported") {

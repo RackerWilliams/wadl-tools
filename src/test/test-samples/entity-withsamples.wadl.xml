@@ -28,12 +28,12 @@
         <response status="200 203">
             <representation mediaType="application/xml" element="osapi:meta">
                 <doc xml:lang="EN">
-                    <xsdxt:code href="samples/metadata_item.xml" />
+                    <xsdxt:code href="content-samples/metadata_item.xml" />
                 </doc>
             </representation>
             <representation mediaType="application/json">
                 <doc xml:lang="EN">
-                    <xsdxt:code href="samples/metadata_item.json" />
+                    <xsdxt:code href="content-samples/metadata_item.json" />
                 </doc>
             </representation>
         </response>
