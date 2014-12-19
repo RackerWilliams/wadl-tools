@@ -67,7 +67,7 @@ class SchemaAsserter(xsdSource : URL, useSaxon : Boolean = false) {
 
 trait XPathAssertions extends NamespaceContext {
   private val nsMap : Map[String, String] = new HashMap[String, String]()
-  private val xpathFactory = XPathFactory.newInstance(NamespaceConstant.OBJECT_MODEL_SAXON, "net.sf.saxon.xpath.XPathFactoryImpl", null)
+  private val xpathFactory = XPathFactory.newInstance(NamespaceConstant.OBJECT_MODEL_SAXON, "net.sf.saxon.xpath.XPathFactoryImpl", this.getClass.getClassLoader)
 
 
   def register (prefix : String, uri : String) : Unit = {
@@ -101,7 +101,7 @@ trait XPathAssertions extends NamespaceContext {
 }
 
 trait TransformHandler {
-  val transformerFactory = TransformerFactory.newInstance("net.sf.saxon.TransformerFactoryImpl", null)
+  val transformerFactory = TransformerFactory.newInstance("net.sf.saxon.TransformerFactoryImpl", this.getClass.getClassLoader)
 
   private val defaultResolver = transformerFactory.getURIResolver
   private val sourceMap : Map[String, Source] = new HashMap[String, Source]()
