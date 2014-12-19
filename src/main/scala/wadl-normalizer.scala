@@ -63,7 +63,7 @@ import org.w3c.dom.NodeList
 class WADLNormalizer(private var transformerFactory : TransformerFactory) extends LazyLogging {
 
   if (transformerFactory == null) {
-    transformerFactory = TransformerFactory.newInstance("net.sf.saxon.TransformerFactoryImpl", null)
+    transformerFactory = TransformerFactory.newInstance("net.sf.saxon.TransformerFactoryImpl", this.getClass.getClassLoader)
   }
 
   try {
@@ -87,7 +87,7 @@ class WADLNormalizer(private var transformerFactory : TransformerFactory) extend
     throw new RuntimeException("Need a SAX-compatible TransformerFactory!")
   }
 
-  private val xpathFactory = XPathFactory.newInstance(NamespaceConstant.OBJECT_MODEL_SAXON, "net.sf.saxon.xpath.XPathFactoryImpl", null)
+  private val xpathFactory = XPathFactory.newInstance(NamespaceConstant.OBJECT_MODEL_SAXON, "net.sf.saxon.xpath.XPathFactoryImpl", this.getClass.getClassLoader)
   private val schemaFactory = SchemaFactory.newInstance("http://www.w3.org/2001/XMLSchema")
   private val wadlSchema = schemaFactory.newSchema(getClass().getClassLoader().getResource("wadl.xsd"))
 
@@ -228,7 +228,7 @@ class WADLNormalizer(private var transformerFactory : TransformerFactory) extend
     //  We purposly do the identity transform using xalan instead of
     //  Saxon, because of SaxonEE license issue.
     //
-    val idTransform = TransformerFactory.newInstance("org.apache.xalan.processor.TransformerFactoryImpl",null).newTransformer()
+    val idTransform = TransformerFactory.newInstance("org.apache.xalan.processor.TransformerFactoryImpl",this.getClass.getClassLoader).newTransformer()
     val entityCatcher = new EntityCatcher
 
     idTransform.setErrorListener (new LogErrorListener)
