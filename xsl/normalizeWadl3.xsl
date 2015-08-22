@@ -130,12 +130,23 @@ This XSLT flattens or expands the path in the path attributes of the resource el
         <xsl:param name="resources"/>
         <xsl:for-each-group select="$resources" group-by="wadl:tokens/wadl:token[$token-number]">
             <resource path="{current-grouping-key()}">
-                <xsl:copy-of select="self::wadl:resource/@*[not(local-name(.) = 'path') and not(local-name(.) = 'id')]"/>
+                <!-- Copy all attributes except for special cases: @path, @id, and extension attributes -->
+                <xsl:copy-of select="self::wadl:resource/@*[not(local-name(.) = 'path') and not(local-name(.) = 'id') and namespace-uri(.) = '']"/>
                 <xsl:choose>
                     <xsl:when test="@id and not($token-number = 1)"><xsl:attribute name="id" select="concat(@id,'-', $token-number )"/></xsl:when>
                     <xsl:when test="@id"><xsl:attribute name="id" select="@id"/></xsl:when>	
                     <xsl:when test="count(wadl:tokens/wadl:token) = $token-number"><xsl:attribute name="id" select="raxf:generate-resource-id(.)"/></xsl:when>
                 </xsl:choose>
+                <!--
+                    Only copy extension attributes if we're on the leaf of the tree of wadl:resource elements.
+                    Treat rax:roles as a special case because we want to join multiple rax:roles together.
+                -->
+                <xsl:if test="count(wadl:tokens/wadl:token) = $token-number">
+                    <xsl:if test="current-group()/@rax:roles">
+                        <xsl:attribute name="rax:roles" select="string-join(current-group()/@rax:roles,' ')"/>
+                    </xsl:if>
+                    <xsl:copy-of select="@*[namespace-uri(.) != '' and not(local-name(.)='roles' and namespace-uri(.)= 'http://docs.rackspace.com/api')]"/>
+                </xsl:if>
                 <xsl:apply-templates select="wadl:param[@style = 'template']" mode="tree-format">
                     <xsl:with-param name="path" select="current-grouping-key()"/>
                 </xsl:apply-templates>	      
@@ -152,9 +163,11 @@ This XSLT flattens or expands the path in the path attributes of the resource el
                     <xsl:with-param name="token-number" select="$token-number + 1"/>
                     <xsl:with-param name="resources" select="current-group()"/>
                 </xsl:call-template>
-                <xsl:apply-templates select="*[not(namespace-uri() = 'http://wadl.dev.java.net/2009/02')]" mode="tree-format">
-                    <xsl:with-param name="path" select="current-grouping-key()"/>
-                </xsl:apply-templates>	      
+                <xsl:if test="count(wadl:tokens/wadl:token) = $token-number">
+                    <xsl:apply-templates select="*[not(namespace-uri() = 'http://wadl.dev.java.net/2009/02')]" mode="tree-format">
+                        <xsl:with-param name="path" select="current-grouping-key()"/>
+                    </xsl:apply-templates>
+                </xsl:if>
             </resource>
         </xsl:for-each-group>
     </xsl:template>
