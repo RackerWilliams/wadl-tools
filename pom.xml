@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.rackspace.cloud.api</groupId>
     <artifactId>wadl-tools-aggregator</artifactId>
-    <version>1.0.30-SNAPSHOT</version>
+    <version>1.0.31-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>WADL Tools: Scala Aggregator</name>
     <description>
@@ -97,25 +97,6 @@
   </scm>
 
     <profiles>
-      <profile>
-        <id>sonatype-oss-release</id>
-        <build>
-          <plugins>
-            <plugin>
-                <groupId>net.alchim31.maven</groupId>
-                <artifactId>scala-maven-plugin</artifactId>
-                <version>3.2.2</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>doc-jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-          </plugins>
-        </build>
-      </profile>
         <profile>
             <id>oxygen-framework</id>
             <activation>
@@ -343,9 +324,6 @@
                     <artifactId>maven-release-plugin</artifactId>
                     <!-- override the version inherited from the parent -->
                     <version>2.5</version>
-                    <configuration>
-                        <arguments>-Psonatype-oss-release ${release.arguments}</arguments>
-                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>

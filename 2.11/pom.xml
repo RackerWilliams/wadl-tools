@@ -1,9 +1,8 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.rackspace.cloud.api</groupId>
     <artifactId>wadl-tools_2.11</artifactId>
-    <version>1.0.30-SNAPSHOT</version>
+    <version>1.0.31-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>WADL Tools (Scala 2.11)</name>
     <description>
@@ -33,7 +32,7 @@
         <groupId>com.rackspace.cloud.api</groupId>
         <artifactId>wadl-tools-aggregator</artifactId>
         <relativePath>../pom.xml</relativePath>
-        <version>1.0.30-SNAPSHOT</version>
+        <version>1.0.31-SNAPSHOT</version>
     </parent>
 
     <properties>
@@ -120,7 +119,7 @@
                 </includes>
             </resource>
             <resource>
-                <directory/>
+                <directory />
                 <includes>
                     <include>../wadl.framework</include>
                 </includes>
@@ -211,8 +210,7 @@
                                 </parameter>
                             </parameters>
                             <fileMappers>
-                                <fileMapper
-                                        implementation="org.codehaus.plexus.components.io.filemappers.FileExtensionMapper">
+                                <fileMapper implementation="org.codehaus.plexus.components.io.filemappers.FileExtensionMapper">
                                     <targetExtension>.xsl</targetExtension>
                                 </fileMapper>
                             </fileMappers>
