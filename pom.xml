@@ -344,7 +344,7 @@
                     <!-- override the version inherited from the parent -->
                     <version>2.5</version>
                     <configuration>
-                        <arguments>-Psonatype-oss-release ${release.arguments}</arguments>
+                        <arguments>-Psonatype-oss-release</arguments>
                     </configuration>
                 </plugin>
             </plugins>
