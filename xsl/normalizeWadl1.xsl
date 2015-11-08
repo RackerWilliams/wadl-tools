@@ -102,7 +102,6 @@
         </xsl:processing-instruction>
         <xsl:apply-templates mode="normalizeWadl2"/>
     </xsl:variable>
-
     <xsl:variable name="normalizeWadl3.xsl">
         <xsl:choose>
             <xsl:when test="$format = 'path-format'">
@@ -112,7 +111,10 @@
                 <xsl:variable name="tree-format">
                     <xsl:apply-templates select="$paths-tokenized/*" mode="tree-format"/>
                 </xsl:variable>
-                <xsl:apply-templates select="$tree-format" mode="prune-params"/>
+                <xsl:variable name="prune-params">
+                    <xsl:apply-templates select="$tree-format" mode="prune-params"/>
+                </xsl:variable>
+                <xsl:apply-templates select="$prune-params" mode="join-paths"/>
             </xsl:when>
             <xsl:otherwise>
                 <xsl:apply-templates select="$normalizeWadl2" mode="keep-format"/>
