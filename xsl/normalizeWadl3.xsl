@@ -254,7 +254,8 @@ This XSLT flattens or expands the path in the path attributes of the resource el
 		  <token>/</token>
 		</xsl:when>
 		<xsl:otherwise>
-		  <xsl:for-each select="tokenize(replace(replace(@path,'^(.+)/$','$1'),'^/(.+)$','$1'),'/')">
+		  <xsl:variable name="cleanPath" as="xsd:string" select="replace(@path,'/{2,}','/')"/>
+		  <xsl:for-each select="tokenize(replace(replace($cleanPath,'^(.+)/$','$1'),'^/(.+)$','$1'),'/')">
                     <token>
 		      <xsl:value-of select="."/>
                     </token>
