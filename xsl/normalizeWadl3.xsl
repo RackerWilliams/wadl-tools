@@ -44,6 +44,37 @@ This XSLT flattens or expands the path in the path attributes of the resource el
         <xsl:attribute name="path"><xsl:value-of select="replace(replace(.,'^(.+)/$','$1'),'^/(.+)$','$1')"/></xsl:attribute>
     </xsl:template>
 
+    <!-- handle-slash mode : handle the special case where methods are
+         assigned to / -->
+    <xsl:template match="@* | node()" mode="handle-slash">
+        <xsl:copy>
+            <xsl:apply-templates select="@* | node()" mode="handle-slash"/>
+        </xsl:copy>
+    </xsl:template>
+
+    <xsl:template match="wadl:resources" mode="handle-slash">
+        <xsl:variable name="rootResource" as="node()?" select="wadl:resource[raxf:clean-path(@path)='/']"/>
+        <xsl:copy>
+            <xsl:choose>
+                <xsl:when test="$rootResource">
+                    <xsl:apply-templates select="@* | wadl:doc" mode="handle-slash"/>
+                    <resource path="/">
+                      <xsl:apply-templates select="$rootResource/@* | $rootResource/node()"
+                                           mode="handle-slash"/>
+                      <xsl:apply-templates select="wadl:resource[raxf:clean-path(@path)!='/']"
+                                           mode="handle-slash"/>
+                    </resource>
+                    <xsl:apply-templates select="node()[not(self::wadl:*)]"
+                                         mode="handle-slash"/>
+                </xsl:when>
+                <xsl:otherwise>
+                  <xsl:apply-templates select="@* | node()"
+                                       mode="handle-slash"/>
+                </xsl:otherwise>
+            </xsl:choose>
+        </xsl:copy>
+    </xsl:template>
+
     <!-- join-paths mode : a final pass in tree-format where resources with the same paths are joined -->
     <xsl:template match="node() | @*" mode="join-paths">
         <xsl:copy>
@@ -250,12 +281,11 @@ This XSLT flattens or expands the path in the path attributes of the resource el
             <xsl:copy-of select="@*"/>
             <tokens>
 	      <xsl:choose>
-		<xsl:when test="@path = '/'">
+		<xsl:when test="raxf:clean-path(@path) = '/'">
 		  <token>/</token>
 		</xsl:when>
 		<xsl:otherwise>
-		  <xsl:variable name="cleanPath" as="xsd:string" select="replace(@path,'/{2,}','/')"/>
-		  <xsl:for-each select="tokenize(replace(replace($cleanPath,'^(.+)/$','$1'),'^/(.+)$','$1'),'/')">
+		  <xsl:for-each select="tokenize(replace(replace(raxf:clean-path(@path),'^(.+)/$','$1'),'^/(.+)$','$1'),'/')">
                     <token>
 		      <xsl:value-of select="."/>
                     </token>
@@ -336,6 +366,11 @@ This XSLT flattens or expands the path in the path attributes of the resource el
         <xsl:variable name="paths" select="for $path in $current-node/ancestor-or-self::wadl:resource/@path return concat($path,'-')"/>
         <xsl:variable name="id">rax-<xsl:for-each select="$paths"><xsl:value-of select="translate(.,'{}/','__-')"/></xsl:for-each><xsl:value-of select="count($current-node/preceding::wadl:resource)"/></xsl:variable>
         <xsl:value-of select="replace($id,'-+','-')"/>
-     </xsl:function>
+    </xsl:function>
+
+    <xsl:function name="raxf:clean-path" as="xs:string">
+      <xsl:param name="path" as="xs:string"/>
+      <xsl:value-of select="replace($path,'/{2,}','/')"/>
+    </xsl:function>
 
 </xsl:stylesheet>

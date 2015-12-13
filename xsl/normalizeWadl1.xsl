@@ -114,7 +114,10 @@
                 <xsl:variable name="prune-params">
                     <xsl:apply-templates select="$tree-format" mode="prune-params"/>
                 </xsl:variable>
-                <xsl:apply-templates select="$prune-params" mode="join-paths"/>
+                <xsl:variable name="handle-slash">
+                     <xsl:apply-templates select="$prune-params" mode="handle-slash"/>
+                </xsl:variable>
+                <xsl:apply-templates select="$handle-slash" mode="join-paths"/>
             </xsl:when>
             <xsl:otherwise>
                 <xsl:apply-templates select="$normalizeWadl2" mode="keep-format"/>
