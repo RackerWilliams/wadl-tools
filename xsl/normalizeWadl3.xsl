@@ -44,6 +44,22 @@ This XSLT flattens or expands the path in the path attributes of the resource el
         <xsl:attribute name="path"><xsl:value-of select="replace(replace(.,'^(.+)/$','$1'),'^/(.+)$','$1')"/></xsl:attribute>
     </xsl:template>
 
+    <!-- no-resource mode : handle the special case where there are
+         no resources in the WADL -->
+    <xsl:template match="@* | node()" mode="no-resource">
+      <xsl:copy>
+        <xsl:apply-templates select="@* | node()" mode="no-resource"/>
+      </xsl:copy>
+    </xsl:template>
+
+    <xsl:template match="wadl:resources[empty(wadl:resource)]" mode="no-resource">
+      <xsl:copy>
+        <xsl:apply-templates select="@*" mode="no-resource"/>
+        <resource />
+        <xsl:apply-templates select="node()" mode="no-resource"/>
+      </xsl:copy>
+    </xsl:template>
+
     <!-- handle-slash mode : handle the special case where methods are
          assigned to / -->
     <xsl:template match="@* | node()" mode="handle-slash">
@@ -368,9 +384,11 @@ This XSLT flattens or expands the path in the path attributes of the resource el
         <xsl:value-of select="replace($id,'-+','-')"/>
     </xsl:function>
 
-    <xsl:function name="raxf:clean-path" as="xs:string">
-      <xsl:param name="path" as="xs:string"/>
-      <xsl:value-of select="replace($path,'/{2,}','/')"/>
+    <xsl:function name="raxf:clean-path" as="xs:string?">
+      <xsl:param name="path" as="xs:string?"/>
+      <xsl:if test="$path">
+        <xsl:value-of select="replace($path,'/{2,}','/')"/>
+      </xsl:if>
     </xsl:function>
 
 </xsl:stylesheet>
