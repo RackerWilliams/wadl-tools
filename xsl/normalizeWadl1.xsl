@@ -105,7 +105,10 @@
     <xsl:variable name="normalizeWadl3.xsl">
         <xsl:choose>
             <xsl:when test="$format = 'path-format'">
+              <xsl:variable name="path-format">
                 <xsl:apply-templates select="$normalizeWadl2" mode="path-format"/>
+              </xsl:variable>
+              <xsl:apply-templates select="$path-format" mode="no-resource"/>
             </xsl:when>
             <xsl:when test="$format = 'tree-format'">
                 <xsl:variable name="tree-format">
@@ -117,7 +120,10 @@
                 <xsl:variable name="handle-slash">
                      <xsl:apply-templates select="$prune-params" mode="handle-slash"/>
                 </xsl:variable>
-                <xsl:apply-templates select="$handle-slash" mode="join-paths"/>
+                <xsl:variable name="join-paths">
+                  <xsl:apply-templates select="$handle-slash" mode="join-paths"/>
+                </xsl:variable>
+                <xsl:apply-templates select="$join-paths" mode="no-resource"/>
             </xsl:when>
             <xsl:otherwise>
                 <xsl:apply-templates select="$normalizeWadl2" mode="keep-format"/>

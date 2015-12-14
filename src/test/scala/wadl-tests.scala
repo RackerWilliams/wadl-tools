@@ -1378,6 +1378,42 @@ class NormalizeWADLSpec extends BaseWADLSpec {
       assert (normWADL, "//wadl:method[@rax:id = 'bar' and  contains(@rax:roles, 'role5')]")
     }
 
+    scenario ("The original WADL does not conatian any resources (TREE)") {
+      Given("a WADL dat does not contain any resources...")
+      val inWADL =
+        <application xmlns="http://wadl.dev.java.net/2009/02">
+           <grammars/>
+           <resources base="https://test.api.openstack.com">
+              <resource/>
+           </resources>
+        </application>
+      When ("the WADL is normalized")
+      val normWADL = wadl.normalize (inWADL, TREE)
+      Then("THe WADL should be normalized without error")
+      assert(normWADL,"/wadl:application/wadl:grammars")
+      assert(normWADL,"/wadl:application/wadl:resources")
+      assert(normWADL,"/wadl:application/wadl:resources/@base = 'https://test.api.openstack.com'")
+      assert(normWADL,"/wadl:application/wadl:resources/wadl:resource")
+    }
+
+    scenario ("The original WADL does not conatian any resources (PATH)") {
+      Given("a WADL dat does not contain any resources...")
+      val inWADL =
+        <application xmlns="http://wadl.dev.java.net/2009/02">
+           <grammars/>
+           <resources base="https://test.api.openstack.com">
+              <resource/>
+           </resources>
+        </application>
+      When ("the WADL is normalized")
+      val normWADL = wadl.normalize (inWADL, PATH)
+      Then("THe WADL should be normalized without error")
+      assert(normWADL,"/wadl:application/wadl:grammars")
+      assert(normWADL,"/wadl:application/wadl:resources")
+      assert(normWADL,"/wadl:application/wadl:resources/@base = 'https://test.api.openstack.com'")
+      assert(normWADL,"/wadl:application/wadl:resources/wadl:resource")
+    }
+
   }
 
 }
