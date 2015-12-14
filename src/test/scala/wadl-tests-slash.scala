@@ -83,6 +83,62 @@ class NormalizeWADLSlashSpec extends BaseWADLSpec {
           </resource>
         </resources>
        </application>, None),
+        ("No double slashes root split",
+         <application xmlns="http://wadl.dev.java.net/2009/02">
+        <resources base="https://test.api.openstack.com">
+          <resource path="/">
+             <method name="GET"/>
+          </resource>
+          <resource path="/a">
+              <method name="PUT"/>
+              <resource path="/b">
+                  <method name="POST"/>
+                  <method name="PUT"/>
+                  <method name="DELETE"/>
+              </resource>
+           </resource>
+          <resource path="/a/b/c/d">
+	    <method name="GET"/>
+	  </resource>
+	  <resource path="/foo">
+	      <method name="GET"/>
+	      <resource path="bar">
+		  <method name="POST"/>
+	      </resource>
+	  </resource>
+          <resource path="/">
+             <method name="POST"/>
+          </resource>
+        </resources>
+       </application>, None),
+        ("No double slashes root split (2)",
+         <application xmlns="http://wadl.dev.java.net/2009/02">
+        <resources base="https://test.api.openstack.com">
+          <resource path="/">
+             <method name="GET"/>
+          </resource>
+          <resource path="/a">
+              <method name="PUT"/>
+              <resource path="/b">
+                  <method name="POST"/>
+                  <method name="PUT"/>
+                  <method name="DELETE"/>
+              </resource>
+           </resource>
+          <resource path="/a/b/c/d">
+	    <method name="GET"/>
+	  </resource>
+          <resource path="/">
+             <method name="POST"/>
+	  <resource path="/foo">
+	      <method name="GET"/>
+	      <resource path="bar">
+		  <method name="POST"/>
+	      </resource>
+	  </resource>
+          </resource>
+        </resources>
+       </application>, None),
         ("Double slash in the root",
          <application xmlns="http://wadl.dev.java.net/2009/02">
         <resources base="https://test.api.openstack.com">
