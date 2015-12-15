@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.rackspace.cloud.api</groupId>
     <artifactId>wadl-tools-aggregator</artifactId>
-    <version>1.0.32</version>
+    <version>1.0.33-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>WADL Tools: Scala Aggregator</name>
     <description>
@@ -93,7 +93,7 @@
       <url>https://github.com/rackerlabs/wadl-tools/tree/master</url>
       <connection>scm:git:git://github.com/rackerlabs/wadl-tools.git</connection>
       <developerConnection>scm:git:git@github.com:rackerlabs/wadl-tools.git</developerConnection>
-      <tag>wadl-tools-aggregator-1.0.32</tag>
+      <tag>HEAD</tag>
   </scm>
 
     <profiles>
