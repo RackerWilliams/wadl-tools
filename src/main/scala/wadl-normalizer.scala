@@ -26,6 +26,7 @@ import Converters._
 
 import com.rackspace.cloud.api.wadl.util.EntityCatcher
 import com.rackspace.cloud.api.wadl.util.LogErrorListener
+import com.rackspace.cloud.api.wadl.util.XSLErrorDispatcher
 
 import scala.xml._
 
@@ -53,14 +54,14 @@ import org.xml.sax.SAXException
 
 import com.typesafe.scalalogging.slf4j.LazyLogging
 
-import net.sf.saxon.Controller
+import net.sf.saxon.jaxp.TransformerImpl
 import net.sf.saxon.lib.NamespaceConstant
 
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.w3c.dom.NodeList
 
-class WADLNormalizer(private var transformerFactory : TransformerFactory) extends LazyLogging {
+class WADLNormalizer(private var transformerFactory : TransformerFactory) extends LazyLogging with XSLErrorDispatcher {
 
   if (transformerFactory == null) {
     transformerFactory = TransformerFactory.newInstance("net.sf.saxon.TransformerFactoryImpl", this.getClass.getClassLoader)
@@ -104,9 +105,10 @@ class WADLNormalizer(private var transformerFactory : TransformerFactory) extend
   //
   //  Set input URL resolver
   //
-  transformerFactory.setURIResolver (new Object() with URIResolver {
+  private val transformURIResolver = new Object() with URIResolver {
     def resolve(href : String, base : String) = sourceMap getOrElse (href, defaultResolver.resolve(href,base))
-  })
+  }
+  transformerFactory.setURIResolver (transformURIResolver)
 
   val saxTransformerFactory : SAXTransformerFactory = transformerFactory.asInstanceOf[SAXTransformerFactory]
   val templates : Templates = saxTransformerFactory.newTemplates(sourceMap("normalizeWadl.xsl"))
@@ -121,7 +123,7 @@ class WADLNormalizer(private var transformerFactory : TransformerFactory) extend
 
   def newTransformer : Transformer = {
     val transformer = templates.newTransformer
-    transformer.asInstanceOf[Controller].addLogErrorListener
+    transformer.asInstanceOf[TransformerImpl].addLogErrorListener
     transformer
   }
 
@@ -255,45 +257,57 @@ class WADLNormalizer(private var transformerFactory : TransformerFactory) extend
     val svrlTransform = svrlHandlerTemplates.newTransformer
     val schEntityDoc = new DOMResult()
 
-    schTransform.asInstanceOf[Controller].addLogErrorListener
-    svrlTransform.asInstanceOf[Controller].addLogErrorListener
+    schTransform.asInstanceOf[TransformerImpl].addLogErrorListener
+    svrlTransform.asInstanceOf[TransformerImpl].addLogErrorListener
 
     //
     // Capture additional enitity references along the way.
     //
     schTransform.setURIResolver(new Object() with URIResolver {
-      val origSCHURIResolver = schTransform.getURIResolver
+      //
+      //  This is a hack to resolve a bug in Saxson 9.7
+      //
+      val origSCHURIResolver = {
+        val orig = schTransform.getURIResolver
+        if ( orig == null) {
+          transformURIResolver
+        } else {
+          orig
+        }
+      }
       def resolve(href : String, base : String) = {
         Source(origSCHURIResolver.resolve(href, base), Some(entityCatcher))
       }
     })
-    schTransform.transform (new DOMSource(wadl.getNode, in.getSystemId()), schReport)
-    checkAdditionalSVRLReports(schReport.getNode().asInstanceOf[Document])
-    svrlTransform.setParameter ("systemIds", entityCatcher.systemIds.toArray[String])
-    svrlTransform.transform (new DOMSource(schReport.getNode()), schEntityDoc)
+    handleXSLException({
+      schTransform.transform (new DOMSource(wadl.getNode, in.getSystemId()), schReport)
+      checkAdditionalSVRLReports(schReport.getNode().asInstanceOf[Document])
+      svrlTransform.setParameter ("systemIds", entityCatcher.systemIds.toArray[String])
+      svrlTransform.transform (new DOMSource(schReport.getNode()), schEntityDoc)
 
-    //
-    //  Secondary check, do XSD transformation, fill in default values
-    //
-    val validWadlResult = new DOMResult()
-    wadlSchema.newValidator().validate(new DOMSource(wadl.getNode, in.getSystemId()), validWadlResult)
-    val validWadl = validWadlResult.getNode()
+      //
+      //  Secondary check, do XSD transformation, fill in default values
+      //
+      val validWadlResult = new DOMResult()
+      wadlSchema.newValidator().validate(new DOMSource(wadl.getNode, in.getSystemId()), validWadlResult)
+      val validWadl = validWadlResult.getNode()
 
-    //
-    //  Perform the WADL normalization, on valid WADL
-    //
-    val transformer = newTransformer(format, xsdVersion, flattenXSDs, resource_types)
-    if (keepSCHReport) {
-      val normWADLResult = new DOMResult()
-      transformer.transform (new DOMSource(validWadl, in.getSystemId()), normWADLResult)
-      val wadlDocument = normWADLResult.getNode.asInstanceOf[Document]
-      val wadlRoot = wadlDocument.getDocumentElement()
-      val reportRoot = wadlDocument.importNode (schEntityDoc.getNode.asInstanceOf[Document].getDocumentElement, true)
-      wadlRoot.appendChild(reportRoot)
-      idTransform.transform(new DOMSource(wadlDocument), out)
-    } else {
-      transformer.transform (new DOMSource(validWadl, in.getSystemId()), out)
-    }
+      //
+      //  Perform the WADL normalization, on valid WADL
+      //
+      val transformer = newTransformer(format, xsdVersion, flattenXSDs, resource_types)
+      if (keepSCHReport) {
+        val normWADLResult = new DOMResult()
+        transformer.transform (new DOMSource(validWadl, in.getSystemId()), normWADLResult)
+        val wadlDocument = normWADLResult.getNode.asInstanceOf[Document]
+        val wadlRoot = wadlDocument.getDocumentElement()
+        val reportRoot = wadlDocument.importNode (schEntityDoc.getNode.asInstanceOf[Document].getDocumentElement, true)
+        wadlRoot.appendChild(reportRoot)
+        idTransform.transform(new DOMSource(wadlDocument), out)
+      } else {
+        transformer.transform (new DOMSource(validWadl, in.getSystemId()), out)
+      }
+    })
   }
 
   def normalize(in: Source, out: Result,

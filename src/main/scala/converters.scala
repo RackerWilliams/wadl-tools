@@ -7,8 +7,8 @@ import javax.xml.transform._
 import javax.xml.transform.stream._
 import java.io.ByteArrayInputStream
 
-import net.sf.saxon.Controller
 import net.sf.saxon.serialize.MessageWarner
+import net.sf.saxon.jaxp.TransformerImpl
 
 import org.w3c.dom.NodeList
 import org.w3c.dom.Node
@@ -40,10 +40,10 @@ object Converters {
   //
   //  Adds log error listener to a Saxon controller
   //
-  implicit def toLogController(c : Controller) = new {
+  implicit def toLogController(t : TransformerImpl) = new {
     def addLogErrorListener : Unit = {
-      c.asInstanceOf[Transformer].setErrorListener (new LogErrorListener)
-      c.setMessageEmitter(new MessageWarner())
+      t.setErrorListener (new LogErrorListener)
+      t.getUnderlyingController.setMessageEmitter(new MessageWarner())
     }
   }
 

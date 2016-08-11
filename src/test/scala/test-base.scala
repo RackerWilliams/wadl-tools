@@ -36,7 +36,7 @@ import com.rackspace.cloud.api.wadl.WADLNormalizer
 class SchemaAsserter(xsdSource : URL, useSaxon : Boolean = false) {
   private val factory = {
     if (useSaxon) {
-      val inst = Class.forName("com.saxonica.jaxp.SchemaFactoryImpl").newInstance.asInstanceOf[SchemaFactory]
+      val inst = Class.forName("com.saxonica.ee.jaxp.SchemaFactoryImpl").newInstance.asInstanceOf[SchemaFactory]
       inst.setProperty("http://saxon.sf.net/feature/xsd-version","1.1")
       inst
     } else {
@@ -151,6 +151,11 @@ trait TransformHandler {
     def close(result : Result) = {
       result.asInstanceOf[StreamResult].getOutputStream().close()
     }
+
+    //
+    //  Return a new instance
+    //
+    def newInstance = this
   })
 
   //
