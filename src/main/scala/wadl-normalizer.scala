@@ -105,10 +105,9 @@ class WADLNormalizer(private var transformerFactory : TransformerFactory) extend
   //
   //  Set input URL resolver
   //
-  private val transformURIResolver = new Object() with URIResolver {
+  transformerFactory.setURIResolver (new Object() with URIResolver {
     def resolve(href : String, base : String) = sourceMap getOrElse (href, defaultResolver.resolve(href,base))
-  }
-  transformerFactory.setURIResolver (transformURIResolver)
+  })
 
   val saxTransformerFactory : SAXTransformerFactory = transformerFactory.asInstanceOf[SAXTransformerFactory]
   val templates : Templates = saxTransformerFactory.newTemplates(sourceMap("normalizeWadl.xsl"))
@@ -264,17 +263,7 @@ class WADLNormalizer(private var transformerFactory : TransformerFactory) extend
     // Capture additional enitity references along the way.
     //
     schTransform.setURIResolver(new Object() with URIResolver {
-      //
-      //  This is a hack to resolve a bug in Saxson 9.7
-      //
-      val origSCHURIResolver = {
-        val orig = schTransform.getURIResolver
-        if ( orig == null) {
-          transformURIResolver
-        } else {
-          orig
-        }
-      }
+      val origSCHURIResolver = schTransform.getURIResolver
       def resolve(href : String, base : String) = {
         Source(origSCHURIResolver.resolve(href, base), Some(entityCatcher))
       }
