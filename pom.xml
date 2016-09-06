@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.rackspace.cloud.api</groupId>
     <artifactId>wadl-tools-aggregator</artifactId>
-    <version>1.0.33-SNAPSHOT</version>
+    <version>1.0.34-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>WADL Tools: Scala Aggregator</name>
     <description>
