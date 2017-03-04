@@ -116,7 +116,16 @@ This XSLT flattens or expands the path in the path attributes of the resource el
                                 <xsl:if test="current-group()/@rax:roles">
                                     <xsl:attribute name="rax:roles" select="string-join(current-group()/@rax:roles,' ')"/>
                                 </xsl:if>
-                                <xsl:apply-templates select="current-group()/@*[not(local-name(.)='roles' and namespace-uri(.)= 'http://docs.rackspace.com/api')]" mode="join-paths"/>
+                                <xsl:for-each-group select="current-group()/@*" group-by="QName(namespace-uri(.), local-name(.))">
+                                    <xsl:variable name="attr" select="current-group()[1]"/>
+                                    <xsl:choose>
+                                        <xsl:when test="local-name($attr)='roles' and namespace-uri($attr)='http://docs.rackspace.com/api'"/>
+                                        <xsl:when test="local-name($attr)='path' and namespace-uri($attr)=''"/>
+                                        <xsl:otherwise>
+                                            <xsl:apply-templates select="$attr" mode="join-paths"/>
+                                        </xsl:otherwise>
+                                    </xsl:choose>
+                                </xsl:for-each-group>
                                 <!--
                                 Gotta get the order right to ensure we produce a valid wadl:
                                 Doc before param before method before resource before extension

@@ -40,10 +40,25 @@ class NormalizeWADLEXTSpec extends BaseWADLSpec {
               </resource>
            </resource>
           <resource path="/c/d" rax:roles="a:anotherRole"/>
-	  <resource path="/c/d" rax:roles="b:anotherRole"/>
+	       <resource path="/c/d" rax:roles="b:anotherRole"/>
         </resources>
        </application>
-
+       val inWADLNoReferences2 = <application xmlns="http://wadl.dev.java.net/2009/02" xmlns:rax="http://docs.rackspace.com/api">
+        <resources base="https://test.api.openstack.com">
+          <resource path="/a" rax:roles="a:admin">
+              <method name="PUT" rax:roles="a:observer"/>
+              <resource path="/b" rax:roles="b:creator">
+                  <method name="POST"/>
+                  <method name="PUT" rax:roles="b:observer"/>
+                  <method name="DELETE" rax:roles="b:observer b:admin"/>
+              </resource>
+           </resource>
+          <resource path="/c/d" rax:roles="a:anotherRole" rax:foo="baz"/>
+	       <resource path="/c">
+             <resource path="d" rax:roles="b:anotherRole" rax:foo="bar"/>
+          </resource>
+        </resources>
+       </application>
        val inWADLWithReferences = <application xmlns="http://wadl.dev.java.net/2009/02" xmlns:rax="http://docs.rackspace.com/api">
             <resources base="https://test.api.openstack.com">
                <resource path="/a" rax:roles="a:admin">
@@ -65,6 +80,7 @@ class NormalizeWADLEXTSpec extends BaseWADLSpec {
 
       When ("When the WADLs are normalized in tree format")
       val normWADLNoRefs = wadl.normalize(inWADLNoReferences, TREE, XSD11, false, KEEP)
+      val normWADLNoRefs2 = wadl.normalize(inWADLNoReferences2, TREE, XSD11, false, KEEP)
       val normWADLRefs = wadl.normalize(inWADLWithReferences, TREE, XSD11, false, KEEP)
 
       Then("XPaths to method references should match")
@@ -74,6 +90,15 @@ class NormalizeWADLEXTSpec extends BaseWADLSpec {
       assert (normWADLNoRefs,"/wadl:application/wadl:resources/wadl:resource/wadl:resource/wadl:method[@name='DELETE']/@rax:roles = 'b:observer b:admin'")
       assert (normWADLNoRefs,"/wadl:application/wadl:resources/wadl:resource/wadl:resource[@path='d']/@rax:roles = 'a:anotherRole b:anotherRole'")
       assert (normWADLNoRefs,"/wadl:application/wadl:resources/wadl:resource[not(@rax:roles) and @path = 'c']") //Raxroles should not apply to previous resources
+
+      assert (normWADLNoRefs2,"/wadl:application/wadl:resources/wadl:resource/wadl:method/@rax:roles = 'a:observer'")
+      assert (normWADLNoRefs2,"not(exists(/wadl:application/wadl:resources/wadl:resource/wadl:resource/wadl:method[@name='POST']/@rax:roles))")
+      assert (normWADLNoRefs2,"/wadl:application/wadl:resources/wadl:resource/wadl:resource/wadl:method[@name='PUT']/@rax:roles = 'b:observer'")
+      assert (normWADLNoRefs2,"/wadl:application/wadl:resources/wadl:resource/wadl:resource/wadl:method[@name='DELETE']/@rax:roles = 'b:observer b:admin'")
+      assert (normWADLNoRefs2,"/wadl:application/wadl:resources/wadl:resource/wadl:resource[@path='d']/@rax:roles = 'b:anotherRole a:anotherRole'")
+      assert (normWADLNoRefs2,"/wadl:application/wadl:resources/wadl:resource[not(@rax:roles) and @path = 'c']") //Raxroles should not apply to previous resources
+
+
       assert (normWADLRefs,"/wadl:application/wadl:resources/wadl:resource/wadl:method/@rax:roles = 'a:observer'")
       assert (normWADLRefs,"not(exists(/wadl:application/wadl:resources/wadl:resource/wadl:resource/wadl:method[@name='POST']/@rax:roles))")
       assert (normWADLRefs,"/wadl:application/wadl:resources/wadl:resource/wadl:resource/wadl:method[@name='PUT']/@rax:roles = 'b:observer'")
