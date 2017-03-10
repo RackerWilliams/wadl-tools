@@ -189,6 +189,7 @@ This XSLT flattens or expands the path in the path attributes of the resource el
                 <xsl:with-param name="token-number" select="1"/>
                 <xsl:with-param name="resources" select="wadl:resource"/>
             </xsl:call-template>
+            <xsl:copy-of select="node()[not(self::wadl:*)]"/>
         </resources>
     </xsl:template>
 
