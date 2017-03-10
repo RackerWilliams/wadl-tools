@@ -160,7 +160,9 @@ class NormalizeWADLEXTSpec extends BaseWADLSpec {
             <method name="GET"/>
             <rax:yes/>
           </resource>
+         <rax:resourcesExt/>
         </resources>
+         <rax:appExt/>
       </application>
 
       val inWADLWithReferences = <application xmlns="http://wadl.dev.java.net/2009/02"
@@ -208,6 +210,7 @@ class NormalizeWADLEXTSpec extends BaseWADLSpec {
             <method href="#GETMethod"/>
             <rax:yes/>
           </resource>
+         <rax:resourcesExt/>
         </resources>
 	<method id="PUTMethodWithAObserver" name="PUT" rax:roles="a:observer">
 	      <rax:methodPUTEXT />
@@ -218,6 +221,7 @@ class NormalizeWADLEXTSpec extends BaseWADLSpec {
 	<method id="PUTMethodWithBObserver" name="PUT" rax:roles="b:observer"/>
 	<method id="DELETEWithBObserverBAdmin" name="DELETE" rax:roles="b:observer b:admin"/>
 	<method id="GETMethod" name="GET"/>
+      <rax:appExt/>
       </application>
 
       When ("When the WADLs are normalized in tree format")
@@ -246,6 +250,8 @@ class NormalizeWADLEXTSpec extends BaseWADLSpec {
 	assert(w, "/wadl:application/wadl:resources/wadl:resource[@path='a']/wadl:resource[@path='{yn}']/@rax:roles='a:admin'")
 	assert(w, "/wadl:application/wadl:resources/wadl:resource[@path='a']/wadl:resource[@path='{yn}']/wadl:method[@name='GET' and not(@rax:roles)]")
 	assert(w, "/wadl:application/wadl:resources/wadl:resource[@path='a']/wadl:resource[@path='{yn}']/rax:yes")
+   assert(w, "count(/wadl:application/rax:appExt) = 1")
+   assert(w, "count(/wadl:application/wadl:resources/rax:resourcesExt) = 1")
       })
     }
 
@@ -306,7 +312,9 @@ class NormalizeWADLEXTSpec extends BaseWADLSpec {
 	      <method name="DELETE"/>
 	    </resource>
 	  </resource>
+         <rax:resourcesExt/>
         </resources>
+         <rax:appExt/>
       </application>
 
       val inWADLNoReferences2 = <application xmlns="http://wadl.dev.java.net/2009/02"
@@ -366,7 +374,9 @@ class NormalizeWADLEXTSpec extends BaseWADLSpec {
             <param name="yn" style="template" type="tst:yesno"/>
             <method name="GET"/>
           </resource>
+         <rax:resourcesExt/>
         </resources>
+         <rax:appExt/>
       </application>
 
       val inWADLWithReferences = <application xmlns="http://wadl.dev.java.net/2009/02"
@@ -424,10 +434,12 @@ class NormalizeWADLEXTSpec extends BaseWADLSpec {
 	      <method name="DELETE"/>
 	    </resource>
 	  </resource>
+         <rax:resourcesExt/>
         </resources>
         <method id="PUTObserver" name="PUT" rax:roles="a:observer"/>
         <method id="GETObserver" name="GET" rax:roles="a:observer"/>
         <method id="POST" name="POST"/>
+         <rax:appExt/>
       </application>
 
       When ("When the WADLs are normalized in tree format")
@@ -461,6 +473,9 @@ class NormalizeWADLEXTSpec extends BaseWADLSpec {
 	assert (w,"/wadl:application/wadl:resources/wadl:resource[@path='a']/wadl:resource[@path='b']/wadl:resource[@path='c']/wadl:resource[@path='d' and not(@rax:roles) and not(wadl:method)]")
 	assert (w,"/wadl:application/wadl:resources/wadl:resource[@path='a']/wadl:resource[@path='b']/wadl:resource[@path='c']/wadl:resource[@path='d']/wadl:resource[@path='e']/@rax:roles='c:creator'")
 	assert (w,"/wadl:application/wadl:resources/wadl:resource[@path='a']/wadl:resource[@path='b']/wadl:resource[@path='c']/wadl:resource[@path='d']/wadl:resource[@path='e']/wadl:method[@name='POST' and not(@rax:roles)]")
+   assert(w, "count(/wadl:application/rax:appExt) = 1")
+   assert(w, "count(/wadl:application/wadl:resources/rax:resourcesExt) = 1")
+
       })
     }
   }
